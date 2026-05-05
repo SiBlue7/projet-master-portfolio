@@ -58,26 +58,87 @@
   line-height: 1.6;
 }
 
-.divider {
+.form {
+  display: grid;
+  gap: 18px;
+  margin-top: 28px;
+}
+
+.field {
+  display: grid;
+  gap: 8px;
+}
+
+.label {
+  color: var(--foreground);
+  font-size: 0.925rem;
+  font-weight: 700;
+}
+
+.input {
   width: 100%;
-  height: 1px;
-  margin: 28px 0;
-  background: var(--border);
+  min-height: 46px;
+  padding: 0 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--background);
+  color: var(--foreground);
+  outline: none;
 }
 
-.status {
-  display: flex;
-  align-items: center;
-  gap: 10px;
+.input::placeholder {
   color: var(--muted);
-  font-size: 0.95rem;
 }
 
-.statusDot {
-  width: 10px;
-  height: 10px;
-  border-radius: 999px;
+.input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(20, 110, 245, 0.16);
+}
+
+.passwordControl {
+  position: relative;
+}
+
+.passwordInput {
+  padding-right: 58px;
+}
+
+.togglePassword {
+  position: absolute;
+  top: 50%;
+  right: 8px;
+  display: inline-grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  padding: 0;
+  transform: translateY(-50%);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--foreground);
+  cursor: pointer;
+}
+
+.toggleIcon {
+  width: 18px;
+  height: 18px;
+}
+
+.togglePassword:focus-visible,
+.submitButton:focus-visible {
+  outline: 3px solid rgba(20, 110, 245, 0.28);
+  outline-offset: 2px;
+}
+
+.submitButton {
+  min-height: 46px;
+  border: 0;
+  border-radius: 8px;
   background: var(--accent);
+  color: var(--accent-foreground);
+  cursor: pointer;
+  font-weight: 700;
 }
 
 @media (max-width: 760px) {
