@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
+import { LoginForm } from "./login-form";
 import styles from "./page.module.css";
 
 export const metadata: Metadata = {
   title: "Connexion administrateur | Portfolio technique",
-  description: "Page d'authentification reservee a l'administration.",
+  description: "Page d'authentification réservée à l'administration.",
 };
 
 export default function AdminLoginPage() {
@@ -16,22 +17,17 @@ export default function AdminLoginPage() {
             Connexion administrateur
           </h1>
           <p className={styles.description}>
-            Espace reserve a la gestion du portfolio technique, des projets et
-            des donnees d&apos;exploitation.
+            Espace réservé à la gestion du portfolio technique, des projets et
+            des données d&apos;exploitation.
           </p>
         </div>
 
-        <aside className={styles.panel} aria-label="Acces administrateur">
-          <h2 className={styles.panelTitle}>Acces reserve</h2>
+        <aside className={styles.panel} aria-label="Accès administrateur">
+          <h2 className={styles.panelTitle}>Accès réservé</h2>
           <p className={styles.panelText}>
-            Cette page accueillera le parcours de connexion de
-            l&apos;administrateur.
+            Identifiez-vous pour accéder à l&apos;administration du portfolio.
           </p>
-          <div className={styles.divider} />
-          <div className={styles.status}>
-            <span className={styles.statusDot} aria-hidden="true" />
-            <span>Interface prete pour le prochain ticket</span>
-          </div>
+          <LoginForm />
         </aside>
       </section>
     </main>
