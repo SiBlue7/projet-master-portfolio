@@ -16,11 +16,13 @@
     "prisma:generate": "prisma generate",
     "prisma:validate": "prisma validate",
     "prisma:migrate": "prisma migrate dev",
+    "db:seed:admin": "node scripts/seed-admin.mjs",
     "db:studio": "prisma studio"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.8.0",
     "@prisma/client": "^7.8.0",
+    "@prisma/client-runtime-utils": "7.8.0",
     "bcryptjs": "^3.0.3",
     "dotenv": "^17.4.2",
     "next": "^16.2.4",

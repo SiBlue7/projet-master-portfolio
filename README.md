@@ -24,6 +24,7 @@ cp .env.example .env
 docker compose up -d postgres
 pnpm prisma:generate
 pnpm prisma:migrate
+pnpm db:seed:admin
 pnpm dev
 ```
 
@@ -39,6 +40,7 @@ pnpm typecheck
 pnpm test
 pnpm format:check
 pnpm prisma:validate
+pnpm db:seed:admin
 ```
 
 ## Notes de cadrage
