@@ -64,3 +64,7 @@ Il vérifie :
 - les tests Vitest ;
 - le build Next.js ;
 - le build de l'image Docker.
+
+Sur un push vers `dev`, si ces controles passent, le workflow `CD Preprod`
+s'execute sur le runner self-hosted `portfolio-preprod` et redeploie
+`preprod.justdoeat.org`.

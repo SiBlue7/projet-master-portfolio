@@ -1,0 +1,37 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: portfolio-preprod-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: portfolio_preprod
+      POSTGRES_USER: portfolio_preprod
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - portfolio_preprod_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test:
+        ["CMD-SHELL", "pg_isready -U portfolio_preprod -d portfolio_preprod"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build:
+      context: .
+      target: runner
+    container_name: portfolio-preprod-app
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgresql://portfolio_preprod:${POSTGRES_PASSWORD}@postgres:5432/portfolio_preprod?schema=public
+      NEXTAUTH_URL: https://preprod.justdoeat.org
+    ports:
+      - "127.0.0.1:3000:3000"
+
+volumes:
+  portfolio_preprod_postgres_data:
