@@ -28,6 +28,7 @@ services:
     env_file:
       - .env
     environment:
+      APP_ENV: preprod
       DATABASE_URL: postgresql://portfolio_preprod:${POSTGRES_PASSWORD}@postgres:5432/portfolio_preprod?schema=public
       NEXTAUTH_URL: https://preprod.justdoeat.org
     ports:
