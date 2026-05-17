@@ -9,6 +9,13 @@
   margin: 0 auto;
 }
 
+.header {
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
 .eyebrow {
   margin: 0 0 12px;
   color: var(--accent);
@@ -33,6 +40,32 @@
   line-height: 1.65;
 }
 
+.logoutButton {
+  min-height: 42px;
+  flex: 0 0 auto;
+  padding: 0 16px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--foreground);
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.logoutButton:hover {
+  border-color: var(--accent);
+}
+
+.logoutButton:disabled {
+  cursor: wait;
+  opacity: 0.7;
+}
+
+.logoutButton:focus-visible {
+  outline: 3px solid rgba(20, 110, 245, 0.28);
+  outline-offset: 2px;
+}
+
 .panel {
   margin-top: 36px;
   padding: 24px;
@@ -51,4 +84,10 @@
   margin: 12px 0 0;
   color: var(--muted);
   line-height: 1.6;
+}
+
+@media (max-width: 640px) {
+  .header {
+    flex-direction: column;
+  }
 }
