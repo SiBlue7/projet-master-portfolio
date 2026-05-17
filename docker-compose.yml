@@ -28,6 +28,7 @@ services:
     env_file:
       - .env
     environment:
+      APP_ENV: local
       DATABASE_URL: postgresql://portfolio:portfolio_password@postgres:5432/portfolio?schema=public
       NEXTAUTH_URL: http://localhost:3000
     ports:

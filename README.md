@@ -29,6 +29,7 @@ pnpm dev
 ```
 
 L'application sera disponible sur `http://localhost:3000`.
+Le healthcheck est disponible sur `http://localhost:3000/api/health`.
 
 ## Commandes utiles
 
