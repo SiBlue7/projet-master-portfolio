@@ -11,6 +11,18 @@ enum UserRole {
   ADMIN
 }
 
+enum ProjectStatus {
+  DRAFT
+  IN_PROGRESS
+  COMPLETED
+  ARCHIVED
+}
+
+enum ProjectVisibility {
+  PRIVATE
+  PUBLIC
+}
+
 model User {
   id           String   @id @default(cuid())
   email        String   @unique
@@ -22,4 +34,25 @@ model User {
   updatedAt    DateTime @updatedAt
 
   @@map("users")
+}
+
+model Project {
+  id               String            @id @default(cuid())
+  title            String
+  slug             String            @unique
+  shortDescription String
+  description      String
+  status           ProjectStatus     @default(DRAFT)
+  visibility       ProjectVisibility @default(PRIVATE)
+  repositoryUrl    String?
+  demoUrl          String?
+  startedAt        DateTime?
+  endedAt          DateTime?
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+
+  @@index([status])
+  @@index([visibility])
+  @@index([startedAt])
+  @@map("projects")
 }
