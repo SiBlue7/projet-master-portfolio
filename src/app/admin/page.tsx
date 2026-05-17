@@ -11,6 +11,8 @@ export default async function AdminPage() {
     redirect("/admin/login");
   }
 
+  const adminEmail = session.user.email ?? "Non renseigné";
+
   return (
     <main className={styles.page}>
       <section className={styles.main} aria-labelledby="admin-title">
@@ -28,11 +30,32 @@ export default async function AdminPage() {
           <LogoutButton />
         </div>
 
-        <div className={styles.panel}>
-          <h2 className={styles.panelTitle}>Espace administrateur</h2>
-          <p className={styles.panelText}>
-            Cette zone accueillera les prochains écrans de gestion du portfolio.
-          </p>
+        <div className={styles.panels}>
+          <div className={styles.panel}>
+            <h2 className={styles.panelTitle}>Compte administrateur</h2>
+            <dl className={styles.sessionList}>
+              <div className={styles.sessionItem}>
+                <dt>Pseudo</dt>
+                <dd>{session.user.pseudo}</dd>
+              </div>
+              <div className={styles.sessionItem}>
+                <dt>E-mail</dt>
+                <dd>{adminEmail}</dd>
+              </div>
+              <div className={styles.sessionItem}>
+                <dt>Rôle</dt>
+                <dd>{session.user.role}</dd>
+              </div>
+            </dl>
+          </div>
+
+          <div className={styles.panel}>
+            <h2 className={styles.panelTitle}>Espace administrateur</h2>
+            <p className={styles.panelText}>
+              Cette zone accueillera les prochains écrans de gestion du
+              portfolio.
+            </p>
+          </div>
         </div>
       </section>
     </main>
