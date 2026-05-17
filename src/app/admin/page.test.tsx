@@ -30,7 +30,9 @@ describe("AdminPage", () => {
   it("renders the admin page for authenticated users", async () => {
     mocks.getServerSession.mockResolvedValue({
       user: {
+        email: "admin@example.com",
         pseudo: "admin",
+        role: "ADMIN",
       },
     });
 
@@ -41,6 +43,11 @@ describe("AdminPage", () => {
     ).toBeInTheDocument();
     expect(screen.getByText("Connecté en tant que admin.")).toBeInTheDocument();
     expect(
+      screen.getByRole("heading", { name: "Compte administrateur" }),
+    ).toBeInTheDocument();
+    expect(screen.getByText("admin@example.com")).toBeInTheDocument();
+    expect(screen.getByText("ADMIN")).toBeInTheDocument();
+    expect(
       screen.getByRole("button", { name: "Se déconnecter" }),
     ).toBeInTheDocument();
   });
@@ -48,7 +55,9 @@ describe("AdminPage", () => {
   it("signs out authenticated users", async () => {
     mocks.getServerSession.mockResolvedValue({
       user: {
+        email: "admin@example.com",
         pseudo: "admin",
+        role: "ADMIN",
       },
     });
     mocks.signOut.mockResolvedValue(undefined);
