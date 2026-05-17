@@ -1,0 +1,38 @@
+name: CD Preprod
+
+on:
+  workflow_run:
+    workflows:
+      - CI
+    types:
+      - completed
+    branches:
+      - dev
+
+concurrency:
+  group: cd-preprod
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  deploy-preprod:
+    name: Deploy preprod
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on:
+      - self-hosted
+      - portfolio-preprod
+    timeout-minutes: 20
+    environment:
+      name: preprod
+      url: https://preprod.justdoeat.org
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: dev
+
+      - name: Deploy on preprod VM
+        run: bash scripts/deploy-preprod.sh
