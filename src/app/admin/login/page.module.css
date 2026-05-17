@@ -95,6 +95,11 @@
   box-shadow: 0 0 0 3px rgba(20, 110, 245, 0.16);
 }
 
+.input:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
 .passwordControl {
   position: relative;
 }
@@ -120,6 +125,11 @@
   cursor: pointer;
 }
 
+.togglePassword:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
 .toggleIcon {
   width: 18px;
   height: 18px;
@@ -139,6 +149,22 @@
   color: var(--accent-foreground);
   cursor: pointer;
   font-weight: 700;
+}
+
+.submitButton:disabled {
+  cursor: wait;
+  opacity: 0.78;
+}
+
+.errorMessage {
+  margin: 0;
+  padding: 12px 14px;
+  border: 1px solid #f2b8b5;
+  border-radius: 8px;
+  background: #fff1f0;
+  color: #8a1f17;
+  font-size: 0.925rem;
+  line-height: 1.4;
 }
 
 @media (max-width: 760px) {
