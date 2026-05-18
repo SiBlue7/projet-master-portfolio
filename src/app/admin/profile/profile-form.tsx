@@ -2,19 +2,20 @@
 
 import { useActionState } from "react";
 import type {
-  PublicProfileFormField,
   PublicProfileFormState,
+  PublicProfileTextField,
   PublicProfileFormValues,
 } from "@/lib/public-profile";
 import { savePublicProfile } from "./actions";
 import styles from "./page.module.css";
 
 type ProfileFormValues = {
-  [Field in PublicProfileFormField]: PublicProfileFormValues[Field] | "";
+  [Field in PublicProfileTextField]: PublicProfileFormValues[Field] | "";
 };
 
 type ProfileFormProps = {
   profile: ProfileFormValues | null;
+  avatarPreviewUrl: string | null;
 };
 
 const initialState: PublicProfileFormState = {
@@ -23,12 +24,12 @@ const initialState: PublicProfileFormState = {
 
 function getFieldError(
   state: PublicProfileFormState,
-  field: PublicProfileFormField,
+  field: PublicProfileTextField | "avatar",
 ) {
   return state.errors?.[field]?.[0];
 }
 
-export function ProfileForm({ profile }: ProfileFormProps) {
+export function ProfileForm({ avatarPreviewUrl, profile }: ProfileFormProps) {
   const [state, formAction, isPending] = useActionState(
     savePublicProfile,
     initialState,
@@ -40,9 +41,55 @@ export function ProfileForm({ profile }: ProfileFormProps) {
   const contactEmailError = getFieldError(state, "contactEmail");
   const githubUrlError = getFieldError(state, "githubUrl");
   const linkedinUrlError = getFieldError(state, "linkedinUrl");
+  const avatarError = getFieldError(state, "avatar");
 
   return (
-    <form className={styles.form} action={formAction}>
+    <form
+      className={styles.form}
+      action={formAction}
+      encType="multipart/form-data"
+    >
+      <div className={styles.avatarField}>
+        <div className={styles.avatarPreview} aria-hidden="true">
+          {avatarPreviewUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={avatarPreviewUrl} alt="" />
+          ) : (
+            <span>Avatar</span>
+          )}
+        </div>
+
+        <div className={styles.avatarControls}>
+          <label className={styles.label} htmlFor="avatar">
+            Avatar du profil
+          </label>
+          <input
+            className={styles.fileInput}
+            id="avatar"
+            name="avatar"
+            type="file"
+            accept="image/png,image/jpeg,image/webp"
+            aria-invalid={Boolean(avatarError)}
+            aria-describedby={avatarError ? "avatar-error" : "avatar-help"}
+            disabled={isPending}
+          />
+          <p className={styles.helpText} id="avatar-help">
+            Image JPG, PNG ou WebP. Taille maximale : 2 Mo.
+          </p>
+          {avatarPreviewUrl ? (
+            <label className={styles.checkboxLabel}>
+              <input type="checkbox" name="removeAvatar" disabled={isPending} />
+              Supprimer avatar actuel
+            </label>
+          ) : null}
+          {avatarError ? (
+            <p className={styles.fieldError} id="avatar-error">
+              {avatarError}
+            </p>
+          ) : null}
+        </div>
+      </div>
+
       <div className={styles.fieldGrid}>
         <div className={styles.field}>
           <label className={styles.label} htmlFor="displayName">

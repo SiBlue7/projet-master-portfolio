@@ -1,3 +1,4 @@
+import { Buffer } from "node:buffer";
 import Link from "next/link";
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
@@ -6,6 +7,19 @@ import { PUBLIC_PROFILE_ID } from "@/lib/public-profile";
 import { prisma } from "@/lib/prisma";
 import { ProfileForm } from "./profile-form";
 import styles from "./page.module.css";
+
+function createAvatarPreviewUrl(
+  avatarData: Uint8Array | null,
+  avatarMimeType: string | null,
+) {
+  if (!avatarData || !avatarMimeType) {
+    return null;
+  }
+
+  return `data:${avatarMimeType};base64,${Buffer.from(avatarData).toString(
+    "base64",
+  )}`;
+}
 
 export default async function AdminProfilePage() {
   const session = await getServerSession(authOptions);
@@ -25,8 +39,13 @@ export default async function AdminProfilePage() {
       contactEmail: true,
       githubUrl: true,
       linkedinUrl: true,
+      avatarData: true,
+      avatarMimeType: true,
     },
   });
+  const avatarPreviewUrl = profile
+    ? createAvatarPreviewUrl(profile.avatarData, profile.avatarMimeType)
+    : null;
 
   return (
     <main className={styles.page}>
@@ -45,7 +64,7 @@ export default async function AdminProfilePage() {
         </p>
 
         <div className={styles.panel}>
-          <ProfileForm profile={profile} />
+          <ProfileForm avatarPreviewUrl={avatarPreviewUrl} profile={profile} />
         </div>
       </section>
     </main>

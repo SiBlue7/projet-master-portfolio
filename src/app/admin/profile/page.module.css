@@ -59,6 +59,41 @@
   gap: 22px;
 }
 
+.avatarField {
+  display: grid;
+  grid-template-columns: 128px minmax(0, 1fr);
+  gap: 18px;
+  align-items: start;
+  padding-bottom: 22px;
+  border-bottom: 1px solid var(--border);
+}
+
+.avatarPreview {
+  display: grid;
+  width: 128px;
+  height: 128px;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #eef5ff;
+  color: var(--accent);
+  font-size: 0.875rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.avatarPreview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.avatarControls {
+  display: grid;
+  gap: 8px;
+}
+
 .fieldGrid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -112,6 +147,45 @@
   border-color: #c7362f;
 }
 
+.fileInput {
+  width: 100%;
+  min-height: 46px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--background);
+  color: var(--foreground);
+}
+
+.fileInput:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.fileInput[aria-invalid="true"] {
+  border-color: #c7362f;
+}
+
+.helpText {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
+
+.checkboxLabel {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  color: var(--foreground);
+  font-size: 0.925rem;
+}
+
+.checkboxLabel input {
+  width: 16px;
+  height: 16px;
+}
+
 .fieldError {
   margin: 0;
   color: #8a1f17;
@@ -162,6 +236,10 @@
 }
 
 @media (max-width: 760px) {
+  .avatarField {
+    grid-template-columns: 1fr;
+  }
+
   .fieldGrid {
     grid-template-columns: 1fr;
   }

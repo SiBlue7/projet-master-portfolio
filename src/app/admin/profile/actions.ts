@@ -5,8 +5,11 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import {
   PUBLIC_PROFILE_ID,
+  getPublicProfileAvatarFile,
   parsePublicProfileFormData,
+  shouldRemovePublicProfileAvatar,
   type PublicProfileFormState,
+  validateProfileAvatarFile,
 } from "@/lib/public-profile";
 import { prisma } from "@/lib/prisma";
 
@@ -24,6 +27,8 @@ export async function savePublicProfile(
   }
 
   const parsedProfile = parsePublicProfileFormData(formData);
+  const avatarFile = getPublicProfileAvatarFile(formData);
+  const avatarValidation = validateProfileAvatarFile(avatarFile);
 
   if (!parsedProfile.success) {
     return {
@@ -33,6 +38,31 @@ export async function savePublicProfile(
     };
   }
 
+  if (!avatarValidation.success) {
+    return {
+      status: "error",
+      message: "Certains champs doivent être corrigés.",
+      errors: {
+        avatar: [avatarValidation.error],
+      },
+    };
+  }
+
+  const shouldRemoveAvatar = shouldRemovePublicProfileAvatar(formData);
+  const avatarFileData = avatarValidation.data
+    ? Buffer.from(await avatarValidation.data.arrayBuffer())
+    : null;
+  const avatarUpdate =
+    shouldRemoveAvatar || avatarFileData
+      ? {
+          avatarData: shouldRemoveAvatar ? null : avatarFileData,
+          avatarMimeType: shouldRemoveAvatar
+            ? null
+            : (avatarValidation.data?.type ?? null),
+          avatarUpdatedAt: shouldRemoveAvatar ? null : new Date(),
+        }
+      : {};
+
   await prisma.publicProfile.upsert({
     where: {
       id: PUBLIC_PROFILE_ID,
@@ -40,8 +70,18 @@ export async function savePublicProfile(
     create: {
       id: PUBLIC_PROFILE_ID,
       ...parsedProfile.data,
+      ...(avatarFileData
+        ? {
+            avatarData: avatarFileData,
+            avatarMimeType: avatarValidation.data?.type ?? null,
+            avatarUpdatedAt: new Date(),
+          }
+        : {}),
     },
-    update: parsedProfile.data,
+    update: {
+      ...parsedProfile.data,
+      ...avatarUpdate,
+    },
   });
 
   revalidatePath("/");

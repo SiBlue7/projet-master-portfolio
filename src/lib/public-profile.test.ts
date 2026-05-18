@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { parsePublicProfileFormData } from "./public-profile";
+import {
+  getPublicProfileAvatarFile,
+  parsePublicProfileFormData,
+  shouldRemovePublicProfileAvatar,
+  validateProfileAvatarFile,
+} from "./public-profile";
 
 function createProfileFormData(overrides: Record<string, string> = {}) {
   const formData = new FormData();
@@ -60,5 +65,43 @@ describe("parsePublicProfileFormData", () => {
         "Le lien GitHub doit être une URL valide.",
       );
     }
+  });
+
+  it("validates avatar uploads", () => {
+    const avatar = new File(["avatar"], "avatar.png", {
+      type: "image/png",
+    });
+
+    const result = validateProfileAvatarFile(avatar);
+
+    expect(result).toEqual({
+      success: true,
+      data: avatar,
+    });
+  });
+
+  it("rejects invalid avatar mime types", () => {
+    const avatar = new File(["avatar"], "avatar.svg", {
+      type: "image/svg+xml",
+    });
+
+    const result = validateProfileAvatarFile(avatar);
+
+    expect(result).toEqual({
+      success: false,
+      error: "L'avatar doit être une image JPG, PNG ou WebP.",
+    });
+  });
+
+  it("extracts avatar controls from form data", () => {
+    const formData = createProfileFormData();
+    const avatar = new File(["avatar"], "avatar.webp", {
+      type: "image/webp",
+    });
+    formData.set("avatar", avatar);
+    formData.set("removeAvatar", "on");
+
+    expect(getPublicProfileAvatarFile(formData)).toBe(avatar);
+    expect(shouldRemovePublicProfileAvatar(formData)).toBe(true);
   });
 });
