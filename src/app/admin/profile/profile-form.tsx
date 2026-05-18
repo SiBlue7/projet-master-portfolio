@@ -44,11 +44,7 @@ export function ProfileForm({ avatarPreviewUrl, profile }: ProfileFormProps) {
   const avatarError = getFieldError(state, "avatar");
 
   return (
-    <form
-      className={styles.form}
-      action={formAction}
-      encType="multipart/form-data"
-    >
+    <form className={styles.form} action={formAction}>
       <div className={styles.avatarField}>
         <div className={styles.avatarPreview} aria-hidden="true">
           {avatarPreviewUrl ? (

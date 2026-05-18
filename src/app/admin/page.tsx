@@ -59,6 +59,9 @@ export default async function AdminPage() {
             <Link className={styles.panelLink} href="/admin/profile">
               Gérer le profil public
             </Link>
+            <Link className={styles.panelLink} href="/admin/profile/timeline">
+              Gérer le parcours
+            </Link>
           </div>
         </div>
       </section>

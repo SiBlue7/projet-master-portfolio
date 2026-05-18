@@ -1,0 +1,286 @@
+.page {
+  min-height: 100vh;
+  padding: 48px 24px;
+  background: var(--background);
+}
+
+.main {
+  width: min(100%, 1040px);
+  margin: 0 auto;
+}
+
+.navLinks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+.backLink {
+  display: inline-flex;
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.backLink:focus-visible,
+.submitButton:focus-visible,
+.dangerButton:focus-visible {
+  outline: 3px solid rgba(20, 110, 245, 0.28);
+  outline-offset: 2px;
+}
+
+.eyebrow {
+  margin: 0 0 12px;
+  color: var(--accent);
+  font-size: 0.875rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.title {
+  margin: 0;
+  color: var(--foreground);
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  line-height: 1;
+}
+
+.description {
+  max-width: 720px;
+  margin: 20px 0 0;
+  color: var(--muted);
+  font-size: 1rem;
+  line-height: 1.65;
+}
+
+.manager {
+  display: grid;
+  gap: 24px;
+  margin-top: 36px;
+}
+
+.panel {
+  padding: 24px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+}
+
+.panelTitle {
+  margin: 0 0 22px;
+  color: var(--foreground);
+  font-size: 1.25rem;
+}
+
+.form {
+  display: grid;
+  gap: 18px;
+}
+
+.fieldGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.fieldGrid:has(.field:nth-child(3)) {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.field {
+  display: grid;
+  gap: 8px;
+}
+
+.label {
+  color: var(--foreground);
+  font-size: 0.925rem;
+  font-weight: 700;
+}
+
+.input {
+  width: 100%;
+  min-height: 46px;
+  padding: 0 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--background);
+  color: var(--foreground);
+  outline: none;
+}
+
+.textarea {
+  min-height: 118px;
+  padding: 12px 14px;
+  resize: vertical;
+  line-height: 1.55;
+}
+
+.input::placeholder {
+  color: var(--muted);
+}
+
+.input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(20, 110, 245, 0.16);
+}
+
+.input:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.input[aria-invalid="true"] {
+  border-color: #c7362f;
+}
+
+.checkboxLabel {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  color: var(--foreground);
+  font-size: 0.925rem;
+}
+
+.checkboxLabel input {
+  width: 16px;
+  height: 16px;
+}
+
+.fieldError {
+  margin: 0;
+  color: #8a1f17;
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
+
+.successMessage,
+.errorMessage {
+  margin: 0;
+  padding: 12px 14px;
+  border-radius: 8px;
+  font-size: 0.925rem;
+  line-height: 1.4;
+}
+
+.successMessage {
+  border: 1px solid #98d6a7;
+  background: #effaf2;
+  color: #1f6b35;
+}
+
+.errorMessage {
+  border: 1px solid #f2b8b5;
+  background: #fff1f0;
+  color: #8a1f17;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.submitButton,
+.dangerButton {
+  min-height: 42px;
+  padding: 0 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.submitButton {
+  border: 0;
+  background: var(--accent);
+  color: var(--accent-foreground);
+}
+
+.dangerButton {
+  margin-top: 18px;
+  border: 1px solid #f2b8b5;
+  background: #fff1f0;
+  color: #8a1f17;
+}
+
+.submitButton:disabled,
+.dangerButton:disabled {
+  cursor: wait;
+  opacity: 0.78;
+}
+
+.timelineList {
+  display: grid;
+  gap: 18px;
+}
+
+.timelineItem {
+  padding: 20px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--background);
+}
+
+.timelineItemHeader {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.timelineType {
+  margin: 0;
+  color: var(--accent);
+  font-size: 0.8rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.timelineTitle {
+  margin: 8px 0 0;
+  color: var(--foreground);
+  font-size: 1.2rem;
+}
+
+.timelineMeta {
+  margin: 8px 0 0;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.timelineOrder {
+  flex: 0 0 auto;
+  color: var(--muted);
+  font-size: 0.875rem;
+  font-weight: 700;
+}
+
+.emptyState {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+@media (max-width: 760px) {
+  .page {
+    padding: 40px 20px;
+  }
+
+  .fieldGrid,
+  .fieldGrid:has(.field:nth-child(3)) {
+    grid-template-columns: 1fr;
+  }
+
+  .actions {
+    justify-content: stretch;
+  }
+
+  .submitButton,
+  .dangerButton {
+    width: 100%;
+  }
+
+  .timelineItemHeader {
+    flex-direction: column;
+  }
+}

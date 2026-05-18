@@ -99,9 +99,23 @@
   font-weight: 700;
 }
 
+.panelLink + .panelLink {
+  margin-left: 18px;
+}
+
 .panelLink:focus-visible {
   outline: 3px solid rgba(20, 110, 245, 0.28);
   outline-offset: 2px;
+}
+
+@media (max-width: 520px) {
+  .panelLink {
+    display: flex;
+  }
+
+  .panelLink + .panelLink {
+    margin-left: 0;
+  }
 }
 
 .sessionList {
