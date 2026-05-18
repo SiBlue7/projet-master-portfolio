@@ -92,6 +92,18 @@
   line-height: 1.6;
 }
 
+.panelLink {
+  display: inline-flex;
+  margin-top: 20px;
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.panelLink:focus-visible {
+  outline: 3px solid rgba(20, 110, 245, 0.28);
+  outline-offset: 2px;
+}
+
 .sessionList {
   display: grid;
   gap: 14px;

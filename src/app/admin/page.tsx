@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import { authOptions } from "@/lib/auth";
@@ -55,6 +56,9 @@ export default async function AdminPage() {
               Cette zone accueillera les prochains écrans de gestion du
               portfolio.
             </p>
+            <Link className={styles.panelLink} href="/admin/profile">
+              Gérer le profil public
+            </Link>
           </div>
         </div>
       </section>
