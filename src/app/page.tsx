@@ -1,3 +1,4 @@
+import { Buffer } from "node:buffer";
 import { PUBLIC_PROFILE_ID } from "@/lib/public-profile";
 import { prisma } from "@/lib/prisma";
 import styles from "./page.module.css";
@@ -11,6 +12,8 @@ const fallbackProfile = {
   contactEmail: "admin@example.com",
   githubUrl: null,
   linkedinUrl: null,
+  avatarData: null,
+  avatarMimeType: null,
 };
 
 const highlights = [
@@ -36,6 +39,19 @@ function getInitials(displayName: string) {
   return initials || "EC";
 }
 
+function createAvatarUrl(
+  avatarData: Uint8Array | null,
+  avatarMimeType: string | null,
+) {
+  if (!avatarData || !avatarMimeType) {
+    return null;
+  }
+
+  return `data:${avatarMimeType};base64,${Buffer.from(avatarData).toString(
+    "base64",
+  )}`;
+}
+
 export default async function Home() {
   const profile = await prisma.publicProfile.findUnique({
     where: {
@@ -48,10 +64,16 @@ export default async function Home() {
       contactEmail: true,
       githubUrl: true,
       linkedinUrl: true,
+      avatarData: true,
+      avatarMimeType: true,
     },
   });
   const publicProfile = profile ?? fallbackProfile;
   const initials = getInitials(publicProfile.displayName);
+  const avatarUrl = createAvatarUrl(
+    publicProfile.avatarData,
+    publicProfile.avatarMimeType,
+  );
 
   return (
     <main className={styles.page}>
@@ -95,9 +117,19 @@ export default async function Home() {
         </div>
 
         <aside className={styles.profileCard} aria-label="Résumé du profil">
-          <div className={styles.avatar} aria-hidden="true">
-            {initials}
-          </div>
+          {avatarUrl ? (
+            <div className={styles.avatar}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                alt={`Avatar de ${publicProfile.displayName}`}
+                src={avatarUrl}
+              />
+            </div>
+          ) : (
+            <div className={styles.avatar} aria-hidden="true">
+              {initials}
+            </div>
+          )}
           <div>
             <p className={styles.cardLabel}>Profil</p>
             <p className={styles.cardName}>{publicProfile.displayName}</p>

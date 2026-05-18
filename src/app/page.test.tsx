@@ -27,6 +27,8 @@ describe("Home", () => {
       contactEmail: "enzo@example.com",
       githubUrl: "https://github.com/SiBlue7",
       linkedinUrl: "https://www.linkedin.com/in/enzo-chevalier",
+      avatarData: new Uint8Array([1, 2, 3]),
+      avatarMimeType: "image/png",
     });
 
     render(await Home());
@@ -47,6 +49,9 @@ describe("Home", () => {
     expect(
       screen.getAllByRole("link", { name: "LinkedIn" })[0],
     ).toHaveAttribute("href", "https://www.linkedin.com/in/enzo-chevalier");
+    expect(
+      screen.getByRole("img", { name: "Avatar de Enzo Chevalier" }),
+    ).toHaveAttribute("src", "data:image/png;base64,AQID");
   });
 
   it("renders a polished fallback when no profile exists yet", async () => {
