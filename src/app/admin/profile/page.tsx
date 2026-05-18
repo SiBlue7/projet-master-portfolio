@@ -1,0 +1,53 @@
+import Link from "next/link";
+import { getServerSession } from "next-auth";
+import { redirect } from "next/navigation";
+import { authOptions } from "@/lib/auth";
+import { PUBLIC_PROFILE_ID } from "@/lib/public-profile";
+import { prisma } from "@/lib/prisma";
+import { ProfileForm } from "./profile-form";
+import styles from "./page.module.css";
+
+export default async function AdminProfilePage() {
+  const session = await getServerSession(authOptions);
+
+  if (!session) {
+    redirect("/admin/login");
+  }
+
+  const profile = await prisma.publicProfile.findUnique({
+    where: {
+      id: PUBLIC_PROFILE_ID,
+    },
+    select: {
+      displayName: true,
+      headline: true,
+      bio: true,
+      contactEmail: true,
+      githubUrl: true,
+      linkedinUrl: true,
+    },
+  });
+
+  return (
+    <main className={styles.page}>
+      <section className={styles.main} aria-labelledby="profile-title">
+        <Link className={styles.backLink} href="/admin">
+          Retour au tableau de bord admin
+        </Link>
+
+        <p className={styles.eyebrow}>Profil public</p>
+        <h1 id="profile-title" className={styles.title}>
+          Informations du profil
+        </h1>
+        <p className={styles.description}>
+          Ces informations serviront à alimenter la partie publique du
+          portfolio.
+        </p>
+
+        <div className={styles.panel}>
+          <ProfileForm profile={profile} />
+        </div>
+      </section>
+    </main>
+  );
+}

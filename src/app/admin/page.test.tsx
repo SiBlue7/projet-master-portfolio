@@ -50,6 +50,9 @@ describe("AdminPage", () => {
     expect(
       screen.getByRole("button", { name: "Se déconnecter" }),
     ).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: "Gérer le profil public" }),
+    ).toHaveAttribute("href", "/admin/profile");
   });
 
   it("signs out authenticated users", async () => {
