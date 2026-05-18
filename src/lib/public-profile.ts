@@ -1,6 +1,15 @@
 import { z } from "zod";
 
 export const PUBLIC_PROFILE_ID = "public-profile";
+export const AVATAR_MAX_SIZE_IN_BYTES = 2 * 1024 * 1024;
+export const ACCEPTED_AVATAR_MIME_TYPES = [
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+] as const;
+
+export type PublicProfileAvatarMimeType =
+  (typeof ACCEPTED_AVATAR_MIME_TYPES)[number];
 
 const requiredText = (label: string, maxLength: number) =>
   z
@@ -44,7 +53,9 @@ export const publicProfileSchema = z.object({
 
 export type PublicProfileFormValues = z.infer<typeof publicProfileSchema>;
 
-export type PublicProfileFormField = keyof PublicProfileFormValues;
+export type PublicProfileTextField = keyof PublicProfileFormValues;
+
+export type PublicProfileFormField = PublicProfileTextField | "avatar";
 
 export type PublicProfileFormErrors = Partial<
   Record<PublicProfileFormField, string[]>
@@ -65,4 +76,42 @@ export function parsePublicProfileFormData(formData: FormData) {
     githubUrl: formData.get("githubUrl"),
     linkedinUrl: formData.get("linkedinUrl"),
   });
+}
+
+export function validateProfileAvatarFile(file: File | null) {
+  if (!file || file.size === 0) {
+    return {
+      success: true as const,
+      data: null,
+    };
+  }
+
+  if (!ACCEPTED_AVATAR_MIME_TYPES.includes(file.type as never)) {
+    return {
+      success: false as const,
+      error: "L'avatar doit être une image JPG, PNG ou WebP.",
+    };
+  }
+
+  if (file.size > AVATAR_MAX_SIZE_IN_BYTES) {
+    return {
+      success: false as const,
+      error: "L'avatar doit peser 2 Mo maximum.",
+    };
+  }
+
+  return {
+    success: true as const,
+    data: file as File & { type: PublicProfileAvatarMimeType },
+  };
+}
+
+export function getPublicProfileAvatarFile(formData: FormData) {
+  const avatar = formData.get("avatar");
+
+  return avatar instanceof File ? avatar : null;
+}
+
+export function shouldRemovePublicProfileAvatar(formData: FormData) {
+  return formData.get("removeAvatar") === "on";
 }

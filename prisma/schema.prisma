@@ -58,15 +58,18 @@ model Project {
 }
 
 model PublicProfile {
-  id           String   @id @default("public-profile")
-  displayName  String
-  headline     String
-  bio          String
-  contactEmail String
-  githubUrl    String?
-  linkedinUrl  String?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id              String    @id @default("public-profile")
+  displayName     String
+  headline        String
+  bio             String
+  contactEmail    String
+  githubUrl       String?
+  linkedinUrl     String?
+  avatarData      Bytes?
+  avatarMimeType  String?
+  avatarUpdatedAt DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
 
   @@map("public_profiles")
 }

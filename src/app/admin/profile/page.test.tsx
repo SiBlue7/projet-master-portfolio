@@ -44,6 +44,8 @@ describe("AdminProfilePage", () => {
       contactEmail: "enzo@example.com",
       githubUrl: "https://github.com/SiBlue7",
       linkedinUrl: "https://www.linkedin.com/in/enzo-chevalier",
+      avatarData: new Uint8Array([1, 2, 3]),
+      avatarMimeType: "image/png",
     });
 
     render(await AdminProfilePage());
@@ -53,6 +55,10 @@ describe("AdminProfilePage", () => {
     ).toBeInTheDocument();
     expect(screen.getByDisplayValue("Enzo Chevalier")).toBeInTheDocument();
     expect(screen.getByDisplayValue("enzo@example.com")).toBeInTheDocument();
+    expect(screen.getByLabelText("Avatar du profil")).toBeInTheDocument();
+    expect(
+      screen.getByLabelText("Supprimer avatar actuel"),
+    ).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: "Enregistrer le profil" }),
     ).toBeInTheDocument();
