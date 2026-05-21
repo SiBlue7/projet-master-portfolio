@@ -1,7 +1,13 @@
 import { Buffer } from "node:buffer";
+import {
+  PROFILE_TIMELINE_ITEM_TYPE_LABELS,
+  PROFILE_TIMELINE_ITEM_TYPES,
+  type ProfileTimelineItemType,
+} from "@/lib/profile-timeline";
 import { PUBLIC_PROFILE_ID } from "@/lib/public-profile";
 import { prisma } from "@/lib/prisma";
 import styles from "./page.module.css";
+import { PublicTimelineGroup } from "./public-timeline-group";
 
 export const dynamic = "force-dynamic";
 
@@ -28,6 +34,24 @@ const foundations = [
   { label: "Sécurité", value: "NextAuth" },
 ];
 
+const monthYearFormatter = new Intl.DateTimeFormat("fr-FR", {
+  month: "long",
+  timeZone: "UTC",
+  year: "numeric",
+});
+
+type PublicTimelineItem = {
+  id: string;
+  type: ProfileTimelineItemType;
+  title: string;
+  organization: string;
+  location: string | null;
+  description: string | null;
+  startDate: Date | null;
+  endDate: Date | null;
+  isCurrent: boolean;
+};
+
 function getInitials(displayName: string) {
   const initials = displayName
     .split(" ")
@@ -52,22 +76,94 @@ function createAvatarUrl(
   )}`;
 }
 
+function formatTimelineDate(date: Date | null) {
+  if (!date) {
+    return null;
+  }
+
+  const formattedDate = monthYearFormatter.format(date);
+
+  return formattedDate.charAt(0).toUpperCase() + formattedDate.slice(1);
+}
+
+function formatPublicTimelinePeriod(item: PublicTimelineItem) {
+  const startDate = formatTimelineDate(item.startDate);
+  const endDate = item.isCurrent
+    ? "Aujourd'hui"
+    : formatTimelineDate(item.endDate);
+
+  if (startDate && endDate) {
+    return `${startDate} - ${endDate}`;
+  }
+
+  if (startDate) {
+    return `Depuis ${startDate}`;
+  }
+
+  if (endDate) {
+    return endDate;
+  }
+
+  return "Période à préciser";
+}
+
 export default async function Home() {
-  const profile = await prisma.publicProfile.findUnique({
-    where: {
-      id: PUBLIC_PROFILE_ID,
-    },
-    select: {
-      displayName: true,
-      headline: true,
-      bio: true,
-      contactEmail: true,
-      githubUrl: true,
-      linkedinUrl: true,
-      avatarData: true,
-      avatarMimeType: true,
-    },
-  });
+  const [profile, timelineItems] = await Promise.all([
+    prisma.publicProfile.findUnique({
+      where: {
+        id: PUBLIC_PROFILE_ID,
+      },
+      select: {
+        displayName: true,
+        headline: true,
+        bio: true,
+        contactEmail: true,
+        githubUrl: true,
+        linkedinUrl: true,
+        avatarData: true,
+        avatarMimeType: true,
+      },
+    }),
+    prisma.profileTimelineItem.findMany({
+      orderBy: [
+        {
+          sortOrder: "asc",
+        },
+        {
+          startDate: "desc",
+        },
+        {
+          createdAt: "desc",
+        },
+      ],
+      select: {
+        id: true,
+        type: true,
+        title: true,
+        organization: true,
+        location: true,
+        description: true,
+        startDate: true,
+        endDate: true,
+        isCurrent: true,
+      },
+    }),
+  ]);
+  const timelineGroups = PROFILE_TIMELINE_ITEM_TYPES.map((type) => ({
+    type,
+    items: timelineItems
+      .filter((item) => item.type === type)
+      .map((item) => ({
+        id: item.id,
+        title: item.title,
+        organization: item.organization,
+        location: item.location,
+        description: item.description,
+        period: formatPublicTimelinePeriod(item),
+      })),
+    label: PROFILE_TIMELINE_ITEM_TYPE_LABELS[type],
+  })).filter((group) => group.items.length > 0);
+  const hasTimelineItems = timelineGroups.length > 0;
   const publicProfile = profile ?? fallbackProfile;
   const initials = getInitials(publicProfile.displayName);
   const avatarUrl = createAvatarUrl(
@@ -184,6 +280,39 @@ export default async function Home() {
           </div>
         ))}
       </section>
+
+      {hasTimelineItems ? (
+        <section
+          className={styles.timelineSection}
+          aria-labelledby="timeline-title"
+        >
+          <div className={styles.timelineSectionHeader}>
+            <p className={styles.sectionEyebrow}>Parcours</p>
+            <div>
+              <h2 id="timeline-title" className={styles.timelineSectionTitle}>
+                Un profil construit par l&apos;expérience, la formation et la
+                pratique
+              </h2>
+              <p className={styles.timelineSectionIntro}>
+                Les étapes clés sont organisées par type pour retrouver
+                rapidement le cursus, les expériences et les validations
+                techniques.
+              </p>
+            </div>
+          </div>
+
+          <div className={styles.timelineGroups}>
+            {timelineGroups.map((group) => (
+              <PublicTimelineGroup
+                items={group.items}
+                key={group.type}
+                label={group.label}
+                type={group.type}
+              />
+            ))}
+          </div>
+        </section>
+      ) : null}
 
       <section
         className={styles.foundationSection}

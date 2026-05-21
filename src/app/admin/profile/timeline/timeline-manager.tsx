@@ -367,56 +367,64 @@ function TimelineItemEditor({ item }: { item: TimelineItemViewModel }) {
   });
 
   return (
-    <article className={styles.timelineItem}>
-      <header className={styles.timelineItemHeader}>
-        <div>
-          <p className={styles.timelineType}>
-            {PROFILE_TIMELINE_ITEM_TYPE_LABELS[item.type]}
-          </p>
-          <h3 className={styles.timelineTitle}>{item.title}</h3>
-          <p className={styles.timelineMeta}>
+    <details className={styles.timelineItem}>
+      <summary className={styles.timelineSummary}>
+        <div className={styles.timelineSummaryMain}>
+          <span className={styles.timelineTitle}>{item.title}</span>
+          <span className={styles.timelineMeta}>
             {item.organization} · {period}
-          </p>
+            {item.location ? ` · ${item.location}` : ""}
+          </span>
         </div>
-        <span className={styles.timelineOrder}>#{item.sortOrder}</span>
-      </header>
+        <span className={styles.timelineSummaryAside}>
+          <span className={styles.timelineOrder}>#{item.sortOrder}</span>
+          <span className={styles.timelineEditHint}>Modifier</span>
+        </span>
+      </summary>
 
-      <form className={styles.form} action={updateAction}>
-        <TimelineFormFields
-          idPrefix={`timeline-item-${item.id}`}
-          isPending={isUpdating}
-          item={item}
-          state={updateState}
-        />
-        <StateMessage state={updateState} />
-        <div className={styles.actions}>
+      <div className={styles.timelineDetails}>
+        <form className={styles.form} action={updateAction}>
+          <TimelineFormFields
+            idPrefix={`timeline-item-${item.id}`}
+            isPending={isUpdating}
+            item={item}
+            state={updateState}
+          />
+          <StateMessage state={updateState} />
+          <div className={styles.actions}>
+            <button
+              className={styles.submitButton}
+              type="submit"
+              disabled={isUpdating}
+            >
+              {isUpdating ? "Enregistrement..." : "Enregistrer"}
+            </button>
+          </div>
+        </form>
+
+        <form action={deleteAction}>
+          <StateMessage state={deleteState} />
           <button
-            className={styles.submitButton}
+            className={styles.dangerButton}
             type="submit"
-            disabled={isUpdating}
+            disabled={isDeleting}
           >
-            {isUpdating ? "Enregistrement..." : "Enregistrer"}
+            {isDeleting ? "Suppression..." : "Supprimer"}
           </button>
-        </div>
-      </form>
-
-      <form action={deleteAction}>
-        <StateMessage state={deleteState} />
-        <button
-          className={styles.dangerButton}
-          type="submit"
-          disabled={isDeleting}
-        >
-          {isDeleting ? "Suppression..." : "Supprimer"}
-        </button>
-      </form>
-    </article>
+        </form>
+      </div>
+    </details>
   );
 }
 
 export function TimelineManager({ items }: TimelineManagerProps) {
   const nextSortOrder =
     items.length > 0 ? Math.max(...items.map((item) => item.sortOrder)) + 1 : 0;
+  const groupedItems = PROFILE_TIMELINE_ITEM_TYPES.map((type) => ({
+    type,
+    items: items.filter((item) => item.type === type),
+    label: PROFILE_TIMELINE_ITEM_TYPE_LABELS[type],
+  }));
 
   return (
     <div className={styles.manager}>
@@ -432,9 +440,35 @@ export function TimelineManager({ items }: TimelineManagerProps) {
           Parcours existant
         </h2>
         {items.length > 0 ? (
-          <div className={styles.timelineList}>
-            {items.map((item) => (
-              <TimelineItemEditor item={item} key={item.id} />
+          <div className={styles.timelineGroups}>
+            {groupedItems.map((group) => (
+              <section
+                className={styles.timelineGroup}
+                data-type={group.type}
+                key={group.type}
+                aria-labelledby={`timeline-admin-group-${group.type}`}
+              >
+                <header className={styles.timelineGroupHeader}>
+                  <h3
+                    className={styles.timelineGroupTitle}
+                    id={`timeline-admin-group-${group.type}`}
+                  >
+                    {group.label}
+                  </h3>
+                </header>
+
+                {group.items.length > 0 ? (
+                  <div className={styles.timelineList}>
+                    {group.items.map((item) => (
+                      <TimelineItemEditor item={item} key={item.id} />
+                    ))}
+                  </div>
+                ) : (
+                  <p className={styles.emptyState}>
+                    Aucun élément pour cette catégorie.
+                  </p>
+                )}
+              </section>
             ))}
           </div>
         ) : (
