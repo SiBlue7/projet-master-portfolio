@@ -1,4 +1,5 @@
 import { Buffer } from "node:buffer";
+import { PROJECT_STATUS_LABELS, type ProjectStatus } from "@/lib/projects";
 import {
   PROFILE_TIMELINE_ITEM_TYPE_LABELS,
   PROFILE_TIMELINE_ITEM_TYPES,
@@ -7,6 +8,10 @@ import {
 import { PUBLIC_PROFILE_ID } from "@/lib/public-profile";
 import { prisma } from "@/lib/prisma";
 import styles from "./page.module.css";
+import {
+  PublicProjectShowcase,
+  type PublicProjectCardViewModel,
+} from "./public-project-showcase";
 import { PublicTimelineGroup } from "./public-timeline-group";
 
 export const dynamic = "force-dynamic";
@@ -50,6 +55,18 @@ type PublicTimelineItem = {
   startDate: Date | null;
   endDate: Date | null;
   isCurrent: boolean;
+};
+
+type PublicProject = {
+  id: string;
+  title: string;
+  slug: string;
+  shortDescription: string;
+  status: ProjectStatus;
+  repositoryUrl: string | null;
+  demoUrl: string | null;
+  startedAt: Date | null;
+  endedAt: Date | null;
 };
 
 function getInitials(displayName: string) {
@@ -107,8 +124,27 @@ function formatPublicTimelinePeriod(item: PublicTimelineItem) {
   return "Période à préciser";
 }
 
+function formatPublicProjectPeriod(project: PublicProject) {
+  const startedAt = formatTimelineDate(project.startedAt);
+  const endedAt = formatTimelineDate(project.endedAt);
+
+  if (startedAt && endedAt) {
+    return `${startedAt} - ${endedAt}`;
+  }
+
+  if (startedAt) {
+    return `Depuis ${startedAt}`;
+  }
+
+  if (endedAt) {
+    return `Jusqu'à ${endedAt}`;
+  }
+
+  return "Dates à préciser";
+}
+
 export default async function Home() {
-  const [profile, timelineItems] = await Promise.all([
+  const [profile, timelineItems, projects] = await Promise.all([
     prisma.publicProfile.findUnique({
       where: {
         id: PUBLIC_PROFILE_ID,
@@ -148,6 +184,30 @@ export default async function Home() {
         isCurrent: true,
       },
     }),
+    prisma.project.findMany({
+      where: {
+        visibility: "PUBLIC",
+      },
+      orderBy: [
+        {
+          startedAt: "desc",
+        },
+        {
+          createdAt: "desc",
+        },
+      ],
+      select: {
+        id: true,
+        title: true,
+        slug: true,
+        shortDescription: true,
+        status: true,
+        repositoryUrl: true,
+        demoUrl: true,
+        startedAt: true,
+        endedAt: true,
+      },
+    }),
   ]);
   const timelineGroups = PROFILE_TIMELINE_ITEM_TYPES.map((type) => ({
     type,
@@ -169,6 +229,18 @@ export default async function Home() {
   const avatarUrl = createAvatarUrl(
     publicProfile.avatarData,
     publicProfile.avatarMimeType,
+  );
+  const publicProjects: PublicProjectCardViewModel[] = projects.map(
+    (project) => ({
+      id: project.id,
+      title: project.title,
+      slug: project.slug,
+      shortDescription: project.shortDescription,
+      statusLabel: PROJECT_STATUS_LABELS[project.status],
+      period: formatPublicProjectPeriod(project),
+      repositoryUrl: project.repositoryUrl,
+      demoUrl: project.demoUrl,
+    }),
   );
 
   return (
@@ -280,6 +352,10 @@ export default async function Home() {
           </div>
         ))}
       </section>
+
+      {publicProjects.length > 0 ? (
+        <PublicProjectShowcase projects={publicProjects} />
+      ) : null}
 
       {hasTimelineItems ? (
         <section
