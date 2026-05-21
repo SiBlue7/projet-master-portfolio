@@ -3,11 +3,15 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import Home from "./page";
 
 const mocks = vi.hoisted(() => ({
+  findMany: vi.fn(),
   findUnique: vi.fn(),
 }));
 
 vi.mock("@/lib/prisma", () => ({
   prisma: {
+    profileTimelineItem: {
+      findMany: mocks.findMany,
+    },
     publicProfile: {
       findUnique: mocks.findUnique,
     },
@@ -17,6 +21,7 @@ vi.mock("@/lib/prisma", () => ({
 describe("Home", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mocks.findMany.mockResolvedValue([]);
   });
 
   it("renders the public profile", async () => {
@@ -54,6 +59,107 @@ describe("Home", () => {
     ).toHaveAttribute("src", "data:image/png;base64,AQID");
   });
 
+  it("renders public timeline items grouped by type", async () => {
+    mocks.findUnique.mockResolvedValue(null);
+    mocks.findMany.mockResolvedValue([
+      {
+        id: "formation-id",
+        type: "FORMATION",
+        title: "Master 2 Cybersécurité",
+        organization: "Ynov Campus",
+        location: "Lyon",
+        description: "Formation orientée sécurité applicative et cloud.",
+        startDate: new Date(Date.UTC(2025, 8, 1)),
+        endDate: null,
+        isCurrent: true,
+      },
+      {
+        id: "formation-id-2",
+        type: "FORMATION",
+        title: "Bachelor informatique",
+        organization: "Université",
+        location: "Lille",
+        description: null,
+        startDate: new Date(Date.UTC(2022, 8, 1)),
+        endDate: new Date(Date.UTC(2025, 5, 1)),
+        isCurrent: false,
+      },
+      {
+        id: "formation-id-3",
+        type: "FORMATION",
+        title: "DUT informatique",
+        organization: "IUT",
+        location: null,
+        description: null,
+        startDate: new Date(Date.UTC(2020, 8, 1)),
+        endDate: new Date(Date.UTC(2022, 5, 1)),
+        isCurrent: false,
+      },
+      {
+        id: "formation-id-4",
+        type: "FORMATION",
+        title: "Baccalauréat",
+        organization: "Lycée",
+        location: null,
+        description: null,
+        startDate: new Date(Date.UTC(2019, 8, 1)),
+        endDate: new Date(Date.UTC(2020, 5, 1)),
+        isCurrent: false,
+      },
+      {
+        id: "experience-id",
+        type: "EXPERIENCE",
+        title: "Alternant cybersécurité",
+        organization: "Entreprise",
+        location: null,
+        description: null,
+        startDate: new Date(Date.UTC(2024, 8, 1)),
+        endDate: new Date(Date.UTC(2025, 7, 1)),
+        isCurrent: false,
+      },
+      {
+        id: "certification-id",
+        type: "CERTIFICATION",
+        title: "Certification sécurité",
+        organization: "Organisme",
+        location: null,
+        description: "Validation de compétences techniques.",
+        startDate: null,
+        endDate: null,
+        isCurrent: false,
+      },
+    ]);
+
+    render(await Home());
+
+    expect(
+      screen.getByRole("heading", { name: "Formation" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "Expérience" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "Certification" }),
+    ).toBeInTheDocument();
+    expect(screen.getByText("Master 2 Cybersécurité")).toBeInTheDocument();
+    expect(screen.getByText("Ynov Campus · Lyon")).toBeInTheDocument();
+    expect(
+      screen.getByText("Septembre 2025 - Aujourd'hui"),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", {
+        name: "Voir les éléments précédents de Formation",
+      }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", {
+        name: "Voir les éléments suivants de Formation",
+      }),
+    ).toBeInTheDocument();
+    expect(screen.getByText("Alternant cybersécurité")).toBeInTheDocument();
+    expect(screen.getByText("Certification sécurité")).toBeInTheDocument();
+  });
+
   it("renders a polished fallback when no profile exists yet", async () => {
     mocks.findUnique.mockResolvedValue(null);
 
@@ -63,5 +169,8 @@ describe("Home", () => {
       screen.getByRole("heading", { name: "Portfolio technique" }),
     ).toBeInTheDocument();
     expect(screen.getByText("PostgreSQL + Prisma")).toBeInTheDocument();
+    expect(
+      screen.queryByRole("heading", { name: "Parcours" }),
+    ).not.toBeInTheDocument();
   });
 });

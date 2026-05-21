@@ -208,51 +208,110 @@
   opacity: 0.78;
 }
 
-.timelineList {
+.timelineGroups {
   display: grid;
   gap: 18px;
 }
 
-.timelineItem {
-  padding: 20px;
+.timelineGroup {
+  display: grid;
+  gap: 12px;
+  padding: 16px;
   border: 1px solid var(--border);
   border-radius: 8px;
   background: var(--background);
 }
 
-.timelineItemHeader {
-  display: flex;
-  gap: 16px;
-  align-items: flex-start;
-  justify-content: space-between;
-  margin-bottom: 20px;
+.timelineGroupTitle {
+  margin: 0;
+  color: var(--foreground);
+  font-size: 1rem;
 }
 
-.timelineType {
-  margin: 0;
-  color: var(--accent);
-  font-size: 0.8rem;
-  font-weight: 800;
-  text-transform: uppercase;
+.timelineList {
+  display: grid;
+  gap: 10px;
+}
+
+.timelineItem {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+}
+
+.timelineSummary {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 16px;
+  align-items: center;
+  padding: 14px 16px;
+  cursor: pointer;
+  list-style: none;
+}
+
+.timelineSummary::-webkit-details-marker {
+  display: none;
+}
+
+.timelineSummary:focus-visible {
+  outline: 3px solid rgba(20, 110, 245, 0.28);
+  outline-offset: 2px;
+}
+
+.timelineSummaryMain {
+  display: grid;
+  min-width: 0;
+  gap: 4px;
 }
 
 .timelineTitle {
-  margin: 8px 0 0;
+  overflow: hidden;
   color: var(--foreground);
-  font-size: 1.2rem;
+  font-size: 1rem;
+  font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .timelineMeta {
-  margin: 8px 0 0;
+  overflow: hidden;
   color: var(--muted);
-  line-height: 1.5;
+  font-size: 0.925rem;
+  line-height: 1.45;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.timelineSummaryAside {
+  display: inline-flex;
+  gap: 10px;
+  align-items: center;
 }
 
 .timelineOrder {
-  flex: 0 0 auto;
   color: var(--muted);
   font-size: 0.875rem;
-  font-weight: 700;
+  font-weight: 800;
+}
+
+.timelineEditHint {
+  display: inline-flex;
+  min-height: 32px;
+  align-items: center;
+  padding: 0 10px;
+  border: 1px solid rgba(20, 110, 245, 0.2);
+  border-radius: 8px;
+  background: #eef5ff;
+  color: var(--accent);
+  font-size: 0.875rem;
+  font-weight: 800;
+}
+
+.timelineDetails {
+  display: grid;
+  gap: 18px;
+  padding: 18px 16px 16px;
+  border-top: 1px solid var(--border);
 }
 
 .emptyState {
@@ -280,7 +339,11 @@
     width: 100%;
   }
 
-  .timelineItemHeader {
-    flex-direction: column;
+  .timelineSummary {
+    grid-template-columns: 1fr;
+  }
+
+  .timelineSummaryAside {
+    justify-content: space-between;
   }
 }

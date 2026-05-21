@@ -63,10 +63,20 @@ describe("AdminProfileTimelinePage", () => {
     expect(
       screen.getByRole("heading", { name: "Parcours existant" }),
     ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "Formation" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "Expérience" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "Certification" }),
+    ).toBeInTheDocument();
     expect(screen.getByText("Master 2 Cybersécurité")).toBeInTheDocument();
     expect(
-      screen.getByText("Université · 2025-09 - Aujourd'hui"),
+      screen.getByText("Université · 2025-09 - Aujourd'hui · Lyon"),
     ).toBeInTheDocument();
+    expect(screen.getByText("Modifier")).toBeInTheDocument();
   });
 
   it("redirects anonymous users to login", async () => {
