@@ -1,0 +1,244 @@
+.page {
+  min-height: 100vh;
+  padding: 48px 24px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(247, 248, 250, 1)),
+    var(--background);
+}
+
+.hero,
+.details {
+  width: min(100%, 1120px);
+  margin: 0 auto;
+}
+
+.hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 0.78fr);
+  gap: 54px;
+  align-items: center;
+  padding: 10px 0 64px;
+}
+
+.content {
+  min-width: 0;
+}
+
+.backLink {
+  display: inline-flex;
+  margin-bottom: 30px;
+  color: var(--accent);
+  font-weight: 800;
+}
+
+.eyebrow {
+  margin: 0 0 14px;
+  color: var(--accent);
+  font-size: 0.875rem;
+  font-weight: 800;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.title {
+  max-width: 760px;
+  margin: 0;
+  color: var(--foreground);
+  font-size: clamp(2.75rem, 7vw, 6rem);
+  line-height: 0.95;
+}
+
+.shortDescription {
+  max-width: 720px;
+  margin: 24px 0 0;
+  color: var(--muted);
+  font-size: clamp(1.15rem, 2.4vw, 1.55rem);
+  line-height: 1.55;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 34px;
+}
+
+.primaryAction,
+.secondaryAction {
+  display: inline-flex;
+  min-height: 46px;
+  align-items: center;
+  justify-content: center;
+  padding: 0 18px;
+  border-radius: 8px;
+  font-weight: 800;
+}
+
+.primaryAction {
+  border: 1px solid var(--accent);
+  background: var(--accent);
+  color: var(--accent-foreground);
+}
+
+.secondaryAction {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--foreground);
+}
+
+.backLink:focus-visible,
+.primaryAction:focus-visible,
+.secondaryAction:focus-visible {
+  outline: 3px solid rgba(20, 110, 245, 0.28);
+  outline-offset: 3px;
+}
+
+.preview {
+  display: grid;
+  min-height: 360px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background:
+    linear-gradient(135deg, rgba(20, 110, 245, 0.14), transparent 42%),
+    linear-gradient(315deg, rgba(15, 118, 110, 0.14), transparent 40%), #f8fbff;
+}
+
+.previewTopbar {
+  display: flex;
+  gap: 8px;
+  align-self: start;
+  padding: 16px;
+  border-bottom: 1px solid rgba(216, 222, 232, 0.72);
+  background: rgba(255, 255, 255, 0.76);
+}
+
+.previewTopbar span {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(101, 112, 128, 0.55);
+}
+
+.previewBody {
+  display: grid;
+  gap: 14px;
+  align-content: center;
+  justify-items: center;
+  padding: 30px;
+}
+
+.previewMark {
+  display: grid;
+  width: 92px;
+  height: 92px;
+  place-items: center;
+  border: 1px solid rgba(20, 110, 245, 0.2);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--accent);
+  font-size: 2.7rem;
+  font-weight: 900;
+}
+
+.previewLine {
+  width: min(100%, 280px);
+  height: 13px;
+  border-radius: 999px;
+  background: rgba(101, 112, 128, 0.14);
+}
+
+.previewLine:last-child {
+  width: min(72%, 210px);
+}
+
+.details {
+  display: grid;
+  gap: 24px;
+  padding: 0 0 24px;
+}
+
+.metaGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.metaItem,
+.descriptionPanel {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+}
+
+.metaItem {
+  min-height: 118px;
+  padding: 20px;
+}
+
+.metaLabel {
+  display: block;
+  color: var(--muted);
+  font-size: 0.875rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.metaValue {
+  display: block;
+  margin-top: 14px;
+  color: var(--foreground);
+  font-size: 1.2rem;
+  font-weight: 800;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+.descriptionPanel {
+  padding: 28px;
+}
+
+.sectionTitle {
+  margin: 0;
+  color: var(--foreground);
+  font-size: clamp(1.6rem, 3vw, 2.35rem);
+  line-height: 1;
+}
+
+.fullDescription {
+  margin: 22px 0 0;
+  color: var(--muted);
+  font-size: 1.05rem;
+  line-height: 1.75;
+  white-space: pre-wrap;
+}
+
+@media (max-width: 900px) {
+  .hero,
+  .metaGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .preview {
+    min-height: 300px;
+  }
+}
+
+@media (max-width: 640px) {
+  .page {
+    padding: 34px 18px;
+  }
+
+  .actions {
+    flex-direction: column;
+  }
+
+  .primaryAction,
+  .secondaryAction {
+    width: 100%;
+  }
+
+  .descriptionPanel {
+    padding: 22px;
+  }
+}

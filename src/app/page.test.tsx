@@ -3,14 +3,18 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import Home from "./page";
 
 const mocks = vi.hoisted(() => ({
-  findMany: vi.fn(),
+  findProfileTimelineItems: vi.fn(),
+  findProjects: vi.fn(),
   findUnique: vi.fn(),
 }));
 
 vi.mock("@/lib/prisma", () => ({
   prisma: {
+    project: {
+      findMany: mocks.findProjects,
+    },
     profileTimelineItem: {
-      findMany: mocks.findMany,
+      findMany: mocks.findProfileTimelineItems,
     },
     publicProfile: {
       findUnique: mocks.findUnique,
@@ -21,7 +25,8 @@ vi.mock("@/lib/prisma", () => ({
 describe("Home", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mocks.findMany.mockResolvedValue([]);
+    mocks.findProfileTimelineItems.mockResolvedValue([]);
+    mocks.findProjects.mockResolvedValue([]);
   });
 
   it("renders the public profile", async () => {
@@ -61,7 +66,7 @@ describe("Home", () => {
 
   it("renders public timeline items grouped by type", async () => {
     mocks.findUnique.mockResolvedValue(null);
-    mocks.findMany.mockResolvedValue([
+    mocks.findProfileTimelineItems.mockResolvedValue([
       {
         id: "formation-id",
         type: "FORMATION",
@@ -172,5 +177,71 @@ describe("Home", () => {
     expect(
       screen.queryByRole("heading", { name: "Parcours" }),
     ).not.toBeInTheDocument();
+  });
+
+  it("renders public projects with detail links", async () => {
+    mocks.findUnique.mockResolvedValue(null);
+    mocks.findProjects.mockResolvedValue([
+      {
+        id: "project-id",
+        title: "Portfolio master",
+        slug: "portfolio-master",
+        shortDescription: "Portfolio administrable.",
+        status: "IN_PROGRESS",
+        repositoryUrl: "https://github.com/SiBlue7/projet-master-portfolio",
+        demoUrl: "https://portfolio.justdoeat.org",
+        startedAt: new Date(Date.UTC(2026, 0, 1)),
+        endedAt: null,
+      },
+      {
+        id: "project-id-2",
+        title: "API sécurité",
+        slug: "api-securite",
+        shortDescription: "API orientée authentification et audit.",
+        status: "COMPLETED",
+        repositoryUrl: null,
+        demoUrl: null,
+        startedAt: new Date(Date.UTC(2025, 8, 1)),
+        endedAt: new Date(Date.UTC(2026, 1, 1)),
+      },
+      {
+        id: "project-id-3",
+        title: "Dashboard SOC",
+        slug: "dashboard-soc",
+        shortDescription: "Visualisation de signaux de sécurité.",
+        status: "DRAFT",
+        repositoryUrl: null,
+        demoUrl: null,
+        startedAt: null,
+        endedAt: null,
+      },
+    ]);
+
+    render(await Home());
+
+    expect(
+      screen.getByRole("heading", {
+        name: "Des réalisations pensées comme des produits complets",
+      }),
+    ).toBeInTheDocument();
+    expect(screen.getByText("Portfolio master")).toBeInTheDocument();
+    expect(screen.getByText("API sécurité")).toBeInTheDocument();
+    expect(screen.getByText("Dashboard SOC")).toBeInTheDocument();
+    expect(
+      screen.getAllByRole("link", { name: "Voir les détails" })[0],
+    ).toHaveAttribute("href", "/projects/portfolio-master");
+    expect(
+      screen.getByRole("button", { name: "Voir les projets précédents" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Voir les projets suivants" }),
+    ).toBeInTheDocument();
+    expect(mocks.findProjects).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: {
+          visibility: "PUBLIC",
+        },
+      }),
+    );
   });
 });
