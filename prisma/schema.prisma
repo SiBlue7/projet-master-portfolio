@@ -56,11 +56,36 @@ model Project {
   endedAt          DateTime?
   createdAt        DateTime          @default(now())
   updatedAt        DateTime          @updatedAt
+  tags             ProjectTagOnProject[]
 
   @@index([status])
   @@index([visibility])
   @@index([startedAt])
   @@map("projects")
+}
+
+model ProjectTag {
+  id        String                @id @default(cuid())
+  label     String
+  slug      String                @unique
+  createdAt DateTime              @default(now())
+  updatedAt DateTime              @updatedAt
+  projects  ProjectTagOnProject[]
+
+  @@index([label])
+  @@map("project_tags")
+}
+
+model ProjectTagOnProject {
+  projectId  String
+  tagId      String
+  assignedAt DateTime   @default(now())
+  project    Project    @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  tag        ProjectTag @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([projectId, tagId])
+  @@index([tagId])
+  @@map("project_tags_on_projects")
 }
 
 model PublicProfile {

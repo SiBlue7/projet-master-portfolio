@@ -42,6 +42,7 @@ function createProjectFormData(overrides: Record<string, string> = {}) {
     demoUrl: "https://portfolio.justdoeat.org",
     startedAt: "2026-01-10",
     endedAt: "2026-05-20",
+    tags: "en-cours",
     ...overrides,
   };
 
@@ -86,6 +87,19 @@ describe("project actions", () => {
         demoUrl: "https://portfolio.justdoeat.org",
         startedAt: expect.any(Date),
         endedAt: expect.any(Date),
+        tags: {
+          create: [
+            expect.objectContaining({
+              tag: expect.objectContaining({
+                connectOrCreate: expect.objectContaining({
+                  where: {
+                    slug: "en-cours",
+                  },
+                }),
+              }),
+            }),
+          ],
+        },
       }),
     });
     expect(revalidatePath).toHaveBeenCalledWith("/");
@@ -113,6 +127,10 @@ describe("project actions", () => {
       data: expect.objectContaining({
         title: "Portfolio master v2",
         slug: "portfolio-master-v2",
+        tags: expect.objectContaining({
+          deleteMany: {},
+          create: expect.any(Array),
+        }),
       }),
     });
     expect(revalidatePath).toHaveBeenCalledWith("/");

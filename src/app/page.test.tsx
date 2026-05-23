@@ -192,6 +192,14 @@ describe("Home", () => {
         demoUrl: "https://portfolio.justdoeat.org",
         startedAt: new Date(Date.UTC(2026, 0, 1)),
         endedAt: null,
+        tags: [
+          {
+            tag: {
+              label: "En cours",
+              slug: "en-cours",
+            },
+          },
+        ],
       },
       {
         id: "project-id-2",
@@ -203,6 +211,14 @@ describe("Home", () => {
         demoUrl: null,
         startedAt: new Date(Date.UTC(2025, 8, 1)),
         endedAt: new Date(Date.UTC(2026, 1, 1)),
+        tags: [
+          {
+            tag: {
+              label: "Terminé",
+              slug: "termine",
+            },
+          },
+        ],
       },
       {
         id: "project-id-3",
@@ -214,6 +230,14 @@ describe("Home", () => {
         demoUrl: null,
         startedAt: null,
         endedAt: null,
+        tags: [
+          {
+            tag: {
+              label: "Archivé",
+              slug: "archive",
+            },
+          },
+        ],
       },
     ]);
 
@@ -236,6 +260,12 @@ describe("Home", () => {
     expect(
       screen.getByRole("button", { name: "Voir les projets suivants" }),
     ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Tous les projets" }),
+    ).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getAllByText("En cours").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Terminé").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Archivé").length).toBeGreaterThan(0);
     expect(mocks.findProjects).toHaveBeenCalledWith(
       expect.objectContaining({
         where: {

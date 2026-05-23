@@ -97,6 +97,7 @@
 .contactList a:focus-visible,
 .projectPrimaryLink:focus-visible,
 .projectSecondaryLink:focus-visible,
+.projectFilterButton:focus-visible,
 .projectsArrow:focus-visible {
   outline: 3px solid rgba(20, 110, 245, 0.28);
   outline-offset: 3px;
@@ -247,6 +248,57 @@
   line-height: 1.7;
 }
 
+.projectFilters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 0 0 24px;
+}
+
+.projectFilterButton {
+  display: inline-flex;
+  min-height: 42px;
+  align-items: center;
+  justify-content: center;
+  padding: 0 18px;
+  border: 1px solid rgba(216, 222, 232, 0.82);
+  border-radius: 999px;
+  background: var(--surface);
+  color: #41475b;
+  cursor: pointer;
+  font-weight: 750;
+}
+
+.projectFilterButton:nth-child(6n + 2) {
+  background: #fbf7c8;
+}
+
+.projectFilterButton:nth-child(6n + 3) {
+  background: #f3ddec;
+}
+
+.projectFilterButton:nth-child(6n + 4) {
+  background: #ddecf3;
+}
+
+.projectFilterButton:nth-child(6n + 5) {
+  background: #dcf0ef;
+}
+
+.projectFilterButton:nth-child(6n + 6) {
+  background: #f2e4da;
+}
+
+.projectFilterButton:nth-child(6n + 7) {
+  background: #e1e0f8;
+}
+
+.projectFilterButton[data-selected="true"] {
+  border-color: rgba(20, 110, 245, 0.34);
+  background: var(--accent);
+  color: var(--accent-foreground);
+}
+
 .projectsCarousel {
   position: relative;
 }
@@ -379,6 +431,25 @@
   margin: 0;
   color: var(--muted);
   line-height: 1.65;
+}
+
+.projectTagList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 2px;
+}
+
+.projectTag {
+  display: inline-flex;
+  min-height: 26px;
+  align-items: center;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: rgba(20, 110, 245, 0.08);
+  color: var(--accent);
+  font-size: 0.78rem;
+  font-weight: 800;
 }
 
 .projectActions {

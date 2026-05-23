@@ -37,6 +37,14 @@ describe("ProjectDetailsPage", () => {
       demoUrl: "https://portfolio.justdoeat.org",
       startedAt: new Date(Date.UTC(2026, 0, 1)),
       endedAt: null,
+      tags: [
+        {
+          tag: {
+            label: "En cours",
+            slug: "en-cours",
+          },
+        },
+      ],
     });
 
     render(
@@ -54,7 +62,7 @@ describe("ProjectDetailsPage", () => {
     expect(
       screen.getByText("Projet de portfolio avec administration."),
     ).toBeInTheDocument();
-    expect(screen.getByText("En cours")).toBeInTheDocument();
+    expect(screen.getAllByText("En cours").length).toBeGreaterThan(0);
     expect(screen.getByText("Depuis Janvier 2026")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Voir la démo" })).toHaveAttribute(
       "href",

@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { normalizeProjectSlug, parseProjectFormData } from "./projects";
+import {
+  normalizeProjectSlug,
+  parseProjectFormData,
+  parseProjectTagsInput,
+} from "./projects";
 
 function createProjectFormData(overrides: Record<string, string> = {}) {
   const formData = new FormData();
@@ -14,6 +18,7 @@ function createProjectFormData(overrides: Record<string, string> = {}) {
     demoUrl: "https://portfolio.justdoeat.org",
     startedAt: "2026-01-10",
     endedAt: "2026-05-20",
+    tags: "en-cours",
     ...overrides,
   };
 
@@ -32,6 +37,15 @@ describe("project helpers", () => {
     expect(normalizeProjectSlug("Démo  API!!")).toBe("demo-api");
   });
 
+  it("parses a defined project tag", () => {
+    expect(parseProjectTagsInput("Terminé")).toEqual([
+      {
+        label: "Terminé",
+        slug: "termine",
+      },
+    ]);
+  });
+
   it("parses a project form payload", () => {
     const result = parseProjectFormData(createProjectFormData());
 
@@ -48,6 +62,12 @@ describe("project helpers", () => {
         visibility: "PUBLIC",
         repositoryUrl: "https://github.com/SiBlue7/projet-master-portfolio",
         demoUrl: "https://portfolio.justdoeat.org",
+        tags: [
+          {
+            label: "En cours",
+            slug: "en-cours",
+          },
+        ],
       });
       expect(result.data.startedAt?.toISOString()).toBe(
         "2026-01-10T00:00:00.000Z",
