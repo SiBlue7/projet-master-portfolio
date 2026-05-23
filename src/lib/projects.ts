@@ -156,14 +156,11 @@ export const projectSchema = z
     endedAt: optionalDate("La date de fin"),
     tags: z
       .string()
-      .refine(
-        (tag) => {
-          const slug = normalizeProjectSlug(tag);
+      .refine((tag) => {
+        const slug = normalizeProjectSlug(tag);
 
-          return !slug || projectTagsBySlug.has(slug as ProjectTagSlug);
-        },
-        "Choisissez un tag parmi la liste définie.",
-      )
+        return !slug || projectTagsBySlug.has(slug as ProjectTagSlug);
+      }, "Choisissez un tag parmi la liste définie.")
       .transform(parseProjectTagsInput),
   })
   .refine(
