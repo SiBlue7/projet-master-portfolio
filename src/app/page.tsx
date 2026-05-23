@@ -1,5 +1,9 @@
 import { Buffer } from "node:buffer";
-import { PROJECT_STATUS_LABELS, type ProjectStatus } from "@/lib/projects";
+import {
+  isDefinedProjectTag,
+  PROJECT_STATUS_LABELS,
+  type ProjectStatus,
+} from "@/lib/projects";
 import {
   PROFILE_TIMELINE_ITEM_TYPE_LABELS,
   PROFILE_TIMELINE_ITEM_TYPES,
@@ -67,6 +71,12 @@ type PublicProject = {
   demoUrl: string | null;
   startedAt: Date | null;
   endedAt: Date | null;
+  tags: {
+    tag: {
+      label: string;
+      slug: string;
+    };
+  }[];
 };
 
 function getInitials(displayName: string) {
@@ -206,6 +216,21 @@ export default async function Home() {
         demoUrl: true,
         startedAt: true,
         endedAt: true,
+        tags: {
+          orderBy: {
+            tag: {
+              label: "asc",
+            },
+          },
+          select: {
+            tag: {
+              select: {
+                label: true,
+                slug: true,
+              },
+            },
+          },
+        },
       },
     }),
   ]);
@@ -240,6 +265,7 @@ export default async function Home() {
       period: formatPublicProjectPeriod(project),
       repositoryUrl: project.repositoryUrl,
       demoUrl: project.demoUrl,
+      tags: project.tags.map(({ tag }) => tag).filter(isDefinedProjectTag),
     }),
   );
 

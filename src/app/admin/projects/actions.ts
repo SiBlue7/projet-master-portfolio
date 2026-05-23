@@ -4,7 +4,11 @@ import { revalidatePath } from "next/cache";
 import { getServerSession } from "next-auth";
 import { Prisma } from "@/generated/prisma/client";
 import { authOptions } from "@/lib/auth";
-import { parseProjectFormData, type ProjectFormState } from "@/lib/projects";
+import {
+  parseProjectFormData,
+  type ProjectFormState,
+  type ProjectTagInput,
+} from "@/lib/projects";
 import { prisma } from "@/lib/prisma";
 
 function duplicateSlugError(): ProjectFormState {
@@ -35,6 +39,22 @@ function revalidateProjectPages() {
   revalidatePath("/admin/projects");
 }
 
+function buildProjectTagCreates(tags: ProjectTagInput[]) {
+  return tags.map((tag) => ({
+    tag: {
+      connectOrCreate: {
+        where: {
+          slug: tag.slug,
+        },
+        create: {
+          label: tag.label,
+          slug: tag.slug,
+        },
+      },
+    },
+  }));
+}
+
 export async function createProject(
   _previousState: ProjectFormState,
   formData: FormData,
@@ -55,9 +75,16 @@ export async function createProject(
     };
   }
 
+  const { tags, ...projectData } = parsedProject.data;
+
   try {
     await prisma.project.create({
-      data: parsedProject.data,
+      data: {
+        ...projectData,
+        tags: {
+          create: buildProjectTagCreates(tags),
+        },
+      },
     });
   } catch (error) {
     if (
@@ -99,12 +126,20 @@ export async function updateProject(
     };
   }
 
+  const { tags, ...projectData } = parsedProject.data;
+
   try {
     await prisma.project.update({
       where: {
         id: projectId,
       },
-      data: parsedProject.data,
+      data: {
+        ...projectData,
+        tags: {
+          deleteMany: {},
+          create: buildProjectTagCreates(tags),
+        },
+      },
     });
   } catch (error) {
     if (

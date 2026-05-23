@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import styles from "./page.module.css";
 
 export type PublicProjectCardViewModel = {
@@ -13,6 +13,10 @@ export type PublicProjectCardViewModel = {
   period: string;
   repositoryUrl: string | null;
   demoUrl: string | null;
+  tags: {
+    label: string;
+    slug: string;
+  }[];
 };
 
 type PublicProjectShowcaseProps = {
@@ -23,7 +27,31 @@ export function PublicProjectShowcase({
   projects,
 }: PublicProjectShowcaseProps) {
   const listRef = useRef<HTMLDivElement>(null);
-  const hasOverflowControls = projects.length > 2;
+  const [selectedTag, setSelectedTag] = useState("all");
+  const projectTags = Array.from(
+    projects
+      .flatMap((project) => project.tags)
+      .reduce(
+        (tagsBySlug, tag) => tagsBySlug.set(tag.slug, tag),
+        new Map<string, PublicProjectCardViewModel["tags"][number]>(),
+      )
+      .values(),
+  );
+  const filteredProjects =
+    selectedTag === "all"
+      ? projects
+      : projects.filter((project) =>
+          project.tags.some((tag) => tag.slug === selectedTag),
+        );
+  const hasOverflowControls = filteredProjects.length > 2;
+
+  function selectTag(tagSlug: string) {
+    setSelectedTag(tagSlug);
+    listRef.current?.scrollTo({
+      behavior: "smooth",
+      left: 0,
+    });
+  }
 
   function scrollProjects(direction: "previous" | "next") {
     const list = listRef.current;
@@ -61,6 +89,32 @@ export function PublicProjectShowcase({
         </div>
       </div>
 
+      {projectTags.length > 0 ? (
+        <div className={styles.projectFilters} aria-label="Filtrer les projets">
+          <button
+            className={styles.projectFilterButton}
+            type="button"
+            data-selected={selectedTag === "all"}
+            aria-pressed={selectedTag === "all"}
+            onClick={() => selectTag("all")}
+          >
+            Tous les projets
+          </button>
+          {projectTags.map((tag) => (
+            <button
+              className={styles.projectFilterButton}
+              type="button"
+              data-selected={selectedTag === tag.slug}
+              aria-pressed={selectedTag === tag.slug}
+              key={tag.slug}
+              onClick={() => selectTag(tag.slug)}
+            >
+              {tag.label}
+            </button>
+          ))}
+        </div>
+      ) : null}
+
       <div className={styles.projectsCarousel}>
         {hasOverflowControls ? (
           <button
@@ -79,7 +133,7 @@ export function PublicProjectShowcase({
           ref={listRef}
           tabIndex={hasOverflowControls ? 0 : undefined}
         >
-          {projects.map((project) => (
+          {filteredProjects.map((project) => (
             <article className={styles.projectCard} key={project.id}>
               <div className={styles.projectPreview} aria-hidden="true">
                 <div className={styles.projectPreviewTopbar}>
@@ -107,6 +161,18 @@ export function PublicProjectShowcase({
                 <p className={styles.projectDescription}>
                   {project.shortDescription}
                 </p>
+                {project.tags.length > 0 ? (
+                  <div
+                    className={styles.projectTagList}
+                    aria-label={`Tags du projet ${project.title}`}
+                  >
+                    {project.tags.map((tag) => (
+                      <span className={styles.projectTag} key={tag.slug}>
+                        {tag.label}
+                      </span>
+                    ))}
+                  </div>
+                ) : null}
               </div>
 
               <div className={styles.projectActions}>

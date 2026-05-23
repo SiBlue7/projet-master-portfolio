@@ -2,6 +2,7 @@ import Link from "next/link";
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import { authOptions } from "@/lib/auth";
+import { isDefinedProjectTag } from "@/lib/projects";
 import { prisma } from "@/lib/prisma";
 import { ProjectManager, type ProjectViewModel } from "./project-form";
 import styles from "./page.module.css";
@@ -42,22 +43,43 @@ export default async function AdminProjectsPage() {
       demoUrl: true,
       startedAt: true,
       endedAt: true,
+      tags: {
+        orderBy: {
+          tag: {
+            label: "asc",
+          },
+        },
+        select: {
+          tag: {
+            select: {
+              label: true,
+              slug: true,
+            },
+          },
+        },
+      },
     },
   });
 
-  const projectViewModels: ProjectViewModel[] = projects.map((project) => ({
-    id: project.id,
-    title: project.title,
-    slug: project.slug,
-    shortDescription: project.shortDescription,
-    description: project.description,
-    status: project.status,
-    visibility: project.visibility,
-    repositoryUrl: project.repositoryUrl ?? "",
-    demoUrl: project.demoUrl ?? "",
-    startedAt: dateToDateInputValue(project.startedAt),
-    endedAt: dateToDateInputValue(project.endedAt),
-  }));
+  const projectViewModels: ProjectViewModel[] = projects.map((project) => {
+    const tags = project.tags.map(({ tag }) => tag).filter(isDefinedProjectTag);
+
+    return {
+      id: project.id,
+      title: project.title,
+      slug: project.slug,
+      shortDescription: project.shortDescription,
+      description: project.description,
+      tagSlug: tags[0]?.slug ?? "",
+      tagList: tags,
+      status: project.status,
+      visibility: project.visibility,
+      repositoryUrl: project.repositoryUrl ?? "",
+      demoUrl: project.demoUrl ?? "",
+      startedAt: dateToDateInputValue(project.startedAt),
+      endedAt: dateToDateInputValue(project.endedAt),
+    };
+  });
 
   return (
     <main className={styles.page}>

@@ -14,6 +14,21 @@ export const PROJECT_STATUS_LABELS = {
   IN_PROGRESS: "En cours",
 } as const;
 
+export const PROJECT_TAGS = [
+  {
+    label: "En cours",
+    slug: "en-cours",
+  },
+  {
+    label: "Terminé",
+    slug: "termine",
+  },
+  {
+    label: "Archivé",
+    slug: "archive",
+  },
+] as const;
+
 export const PROJECT_VISIBILITIES = ["PRIVATE", "PUBLIC"] as const;
 
 export const PROJECT_VISIBILITY_LABELS = {
@@ -22,6 +37,7 @@ export const PROJECT_VISIBILITY_LABELS = {
 } as const;
 
 export type ProjectStatus = (typeof PROJECT_STATUSES)[number];
+export type ProjectTagSlug = (typeof PROJECT_TAGS)[number]["slug"];
 export type ProjectVisibility = (typeof PROJECT_VISIBILITIES)[number];
 
 const slugPattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
@@ -87,6 +103,31 @@ export function normalizeProjectSlug(slug: string) {
     .replace(/-{2,}/g, "-");
 }
 
+export type ProjectTagInput = {
+  label: string;
+  slug: string;
+};
+
+const projectTagsBySlug = new Map<ProjectTagSlug, ProjectTagInput>(
+  PROJECT_TAGS.map((tag) => [tag.slug, tag]),
+);
+
+export function isDefinedProjectTag(tag: ProjectTagInput) {
+  return projectTagsBySlug.has(tag.slug as ProjectTagSlug);
+}
+
+export function parseProjectTagsInput(tagsValue: string): ProjectTagInput[] {
+  const slug = normalizeProjectSlug(tagsValue);
+
+  if (!slug) {
+    return [];
+  }
+
+  const tag = projectTagsBySlug.get(slug as ProjectTagSlug);
+
+  return tag ? [{ ...tag }] : [];
+}
+
 export const projectSchema = z
   .object({
     title: requiredText("Le titre", 140),
@@ -113,6 +154,14 @@ export const projectSchema = z
     demoUrl: optionalUrl("Le lien démo"),
     startedAt: optionalDate("La date de début"),
     endedAt: optionalDate("La date de fin"),
+    tags: z
+      .string()
+      .refine((tag) => {
+        const slug = normalizeProjectSlug(tag);
+
+        return !slug || projectTagsBySlug.has(slug as ProjectTagSlug);
+      }, "Choisissez un tag parmi la liste définie.")
+      .transform(parseProjectTagsInput),
   })
   .refine(
     ({ endedAt, startedAt }) => {
@@ -155,5 +204,6 @@ export function parseProjectFormData(formData: FormData) {
     demoUrl: formData.get("demoUrl"),
     startedAt: formData.get("startedAt"),
     endedAt: formData.get("endedAt"),
+    tags: formData.get("tags") ?? "",
   });
 }

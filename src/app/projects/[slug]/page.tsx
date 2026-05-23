@@ -1,6 +1,10 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { PROJECT_STATUS_LABELS, type ProjectStatus } from "@/lib/projects";
+import {
+  isDefinedProjectTag,
+  PROJECT_STATUS_LABELS,
+  type ProjectStatus,
+} from "@/lib/projects";
 import { prisma } from "@/lib/prisma";
 import styles from "./page.module.css";
 
@@ -70,12 +74,31 @@ export default async function ProjectDetailsPage({
       demoUrl: true,
       startedAt: true,
       endedAt: true,
+      tags: {
+        orderBy: {
+          tag: {
+            label: "asc",
+          },
+        },
+        select: {
+          tag: {
+            select: {
+              label: true,
+              slug: true,
+            },
+          },
+        },
+      },
     },
   });
 
   if (!project) {
     notFound();
   }
+
+  const projectTags = project.tags
+    .map(({ tag }) => tag)
+    .filter(isDefinedProjectTag);
 
   return (
     <main className={styles.page}>
@@ -89,6 +112,18 @@ export default async function ProjectDetailsPage({
             {project.title}
           </h1>
           <p className={styles.shortDescription}>{project.shortDescription}</p>
+          {projectTags.length > 0 ? (
+            <div
+              className={styles.tagList}
+              aria-label={`Tags du projet ${project.title}`}
+            >
+              {projectTags.map((tag) => (
+                <span className={styles.tag} key={tag.slug}>
+                  {tag.label}
+                </span>
+              ))}
+            </div>
+          ) : null}
 
           <div className={styles.actions}>
             {project.demoUrl ? (

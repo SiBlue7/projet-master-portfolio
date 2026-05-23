@@ -4,6 +4,7 @@ import { useActionState } from "react";
 import {
   PROJECT_STATUS_LABELS,
   PROJECT_STATUSES,
+  PROJECT_TAGS,
   PROJECT_VISIBILITIES,
   PROJECT_VISIBILITY_LABELS,
   type ProjectFormField,
@@ -20,6 +21,11 @@ export type ProjectViewModel = {
   slug: string;
   shortDescription: string;
   description: string;
+  tagSlug: string;
+  tagList: {
+    label: string;
+    slug: string;
+  }[];
   status: ProjectStatus;
   visibility: ProjectVisibility;
   repositoryUrl: string;
@@ -42,6 +48,8 @@ const emptyProject: ProjectViewModel = {
   slug: "",
   shortDescription: "",
   description: "",
+  tagSlug: "",
+  tagList: [],
   status: "DRAFT",
   visibility: "PRIVATE",
   repositoryUrl: "",
@@ -92,6 +100,7 @@ function ProjectFormFields({
   const demoUrlError = getFieldError(state, "demoUrl");
   const startedAtError = getFieldError(state, "startedAt");
   const endedAtError = getFieldError(state, "endedAt");
+  const tagsError = getFieldError(state, "tags");
 
   return (
     <>
@@ -204,6 +213,39 @@ function ProjectFormFields({
         {descriptionError ? (
           <p className={styles.fieldError} id={`${idPrefix}-description-error`}>
             {descriptionError}
+          </p>
+        ) : null}
+      </div>
+
+      <div className={styles.field}>
+        <label className={styles.label} htmlFor={`${idPrefix}-tags`}>
+          Tag de tri
+        </label>
+        <select
+          className={styles.input}
+          id={`${idPrefix}-tags`}
+          name="tags"
+          defaultValue={project.tagSlug}
+          aria-invalid={Boolean(tagsError)}
+          aria-describedby={
+            tagsError ? `${idPrefix}-tags-error` : `${idPrefix}-tags-help`
+          }
+          disabled={isPending}
+        >
+          <option value="">Aucun tag de tri</option>
+          {PROJECT_TAGS.map((tag) => (
+            <option key={tag.slug} value={tag.slug}>
+              {tag.label}
+            </option>
+          ))}
+        </select>
+        <p className={styles.helpText} id={`${idPrefix}-tags-help`}>
+          Choisissez un tag de tri parmi la liste définie. Il servira au tri sur
+          la page d&apos;accueil.
+        </p>
+        {tagsError ? (
+          <p className={styles.fieldError} id={`${idPrefix}-tags-error`}>
+            {tagsError}
           </p>
         ) : null}
       </div>
@@ -422,6 +464,15 @@ function ProjectEditor({ project }: { project: ProjectViewModel }) {
           <span className={styles.projectDescription}>
             {project.shortDescription}
           </span>
+          {project.tagList.length > 0 ? (
+            <span className={styles.tagList}>
+              {project.tagList.map((tag) => (
+                <span className={styles.tagBadge} key={tag.slug}>
+                  {tag.label}
+                </span>
+              ))}
+            </span>
+          ) : null}
         </div>
         <span className={styles.projectSummaryAside}>
           <span className={styles.badge}>

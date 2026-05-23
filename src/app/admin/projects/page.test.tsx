@@ -50,6 +50,14 @@ describe("AdminProjectsPage", () => {
         demoUrl: "https://portfolio.justdoeat.org",
         startedAt: new Date(Date.UTC(2026, 0, 10)),
         endedAt: null,
+        tags: [
+          {
+            tag: {
+              label: "En cours",
+              slug: "en-cours",
+            },
+          },
+        ],
       },
     ]);
 
@@ -72,6 +80,7 @@ describe("AdminProjectsPage", () => {
     expect(
       screen.getAllByLabelText("Description complète").length,
     ).toBeGreaterThan(0);
+    expect(screen.getAllByLabelText("Tag de tri").length).toBeGreaterThan(0);
     expect(screen.getAllByLabelText("Statut").length).toBeGreaterThan(0);
     expect(screen.getAllByLabelText("Visibilité").length).toBeGreaterThan(0);
     expect(screen.getAllByLabelText("Lien GitHub").length).toBeGreaterThan(0);
