@@ -43,19 +43,20 @@ model User {
 }
 
 model Project {
-  id               String            @id @default(cuid())
+  id               String                  @id @default(cuid())
   title            String
-  slug             String            @unique
+  slug             String                  @unique
   shortDescription String
   description      String
-  status           ProjectStatus     @default(DRAFT)
-  visibility       ProjectVisibility @default(PRIVATE)
+  status           ProjectStatus           @default(DRAFT)
+  visibility       ProjectVisibility       @default(PRIVATE)
   repositoryUrl    String?
   demoUrl          String?
   startedAt        DateTime?
   endedAt          DateTime?
-  createdAt        DateTime          @default(now())
-  updatedAt        DateTime          @updatedAt
+  createdAt        DateTime                @default(now())
+  updatedAt        DateTime                @updatedAt
+  stacks           ProjectStackOnProject[]
   tags             ProjectTagOnProject[]
 
   @@index([status])
@@ -86,6 +87,30 @@ model ProjectTagOnProject {
   @@id([projectId, tagId])
   @@index([tagId])
   @@map("project_tags_on_projects")
+}
+
+model ProjectStack {
+  id        String                  @id @default(cuid())
+  label     String
+  slug      String                  @unique
+  createdAt DateTime                @default(now())
+  updatedAt DateTime                @updatedAt
+  projects  ProjectStackOnProject[]
+
+  @@index([label])
+  @@map("project_stacks")
+}
+
+model ProjectStackOnProject {
+  projectId  String
+  stackId    String
+  assignedAt DateTime     @default(now())
+  project    Project      @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  stack      ProjectStack @relation(fields: [stackId], references: [id], onDelete: Cascade)
+
+  @@id([projectId, stackId])
+  @@index([stackId])
+  @@map("project_stacks_on_projects")
 }
 
 model PublicProfile {

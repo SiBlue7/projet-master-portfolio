@@ -37,6 +37,20 @@ describe("ProjectDetailsPage", () => {
       demoUrl: "https://portfolio.justdoeat.org",
       startedAt: new Date(Date.UTC(2026, 0, 1)),
       endedAt: null,
+      stacks: [
+        {
+          stack: {
+            label: "Next.js",
+            slug: "next-js",
+          },
+        },
+        {
+          stack: {
+            label: "Prisma",
+            slug: "prisma",
+          },
+        },
+      ],
       tags: [
         {
           tag: {
@@ -63,6 +77,11 @@ describe("ProjectDetailsPage", () => {
       screen.getByText("Projet de portfolio avec administration."),
     ).toBeInTheDocument();
     expect(screen.getAllByText("En cours").length).toBeGreaterThan(0);
+    expect(
+      screen.getByRole("heading", { name: "Technologies utilisées" }),
+    ).toBeInTheDocument();
+    expect(screen.getByText("Next.js")).toBeInTheDocument();
+    expect(screen.getByText("Prisma")).toBeInTheDocument();
     expect(screen.getByText("Depuis Janvier 2026")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Voir la démo" })).toHaveAttribute(
       "href",

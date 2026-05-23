@@ -192,6 +192,20 @@ describe("Home", () => {
         demoUrl: "https://portfolio.justdoeat.org",
         startedAt: new Date(Date.UTC(2026, 0, 1)),
         endedAt: null,
+        stacks: [
+          {
+            stack: {
+              label: "Next.js",
+              slug: "next-js",
+            },
+          },
+          {
+            stack: {
+              label: "Prisma",
+              slug: "prisma",
+            },
+          },
+        ],
         tags: [
           {
             tag: {
@@ -211,6 +225,14 @@ describe("Home", () => {
         demoUrl: null,
         startedAt: new Date(Date.UTC(2025, 8, 1)),
         endedAt: new Date(Date.UTC(2026, 1, 1)),
+        stacks: [
+          {
+            stack: {
+              label: "Node.js",
+              slug: "node-js",
+            },
+          },
+        ],
         tags: [
           {
             tag: {
@@ -230,6 +252,14 @@ describe("Home", () => {
         demoUrl: null,
         startedAt: null,
         endedAt: null,
+        stacks: [
+          {
+            stack: {
+              label: "React",
+              slug: "react",
+            },
+          },
+        ],
         tags: [
           {
             tag: {
@@ -264,6 +294,8 @@ describe("Home", () => {
       screen.getByRole("button", { name: "Tous les projets" }),
     ).toHaveAttribute("aria-pressed", "true");
     expect(screen.getAllByText("En cours").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Next.js").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Prisma").length).toBeGreaterThan(0);
     expect(screen.getAllByText("Terminé").length).toBeGreaterThan(0);
     expect(screen.getAllByText("Archivé").length).toBeGreaterThan(0);
     expect(mocks.findProjects).toHaveBeenCalledWith(

@@ -50,6 +50,20 @@ describe("AdminProjectsPage", () => {
         demoUrl: "https://portfolio.justdoeat.org",
         startedAt: new Date(Date.UTC(2026, 0, 10)),
         endedAt: null,
+        stacks: [
+          {
+            stack: {
+              label: "Next.js",
+              slug: "next-js",
+            },
+          },
+          {
+            stack: {
+              label: "Prisma",
+              slug: "prisma",
+            },
+          },
+        ],
         tags: [
           {
             tag: {
@@ -81,6 +95,9 @@ describe("AdminProjectsPage", () => {
       screen.getAllByLabelText("Description complète").length,
     ).toBeGreaterThan(0);
     expect(screen.getAllByLabelText("Tag de tri").length).toBeGreaterThan(0);
+    expect(
+      screen.getAllByLabelText("Technologies utilisées").length,
+    ).toBeGreaterThan(0);
     expect(screen.getAllByLabelText("Statut").length).toBeGreaterThan(0);
     expect(screen.getAllByLabelText("Visibilité").length).toBeGreaterThan(0);
     expect(screen.getAllByLabelText("Lien GitHub").length).toBeGreaterThan(0);
@@ -90,6 +107,8 @@ describe("AdminProjectsPage", () => {
     expect(screen.getByText("Portfolio master")).toBeInTheDocument();
     expect(screen.getByText("portfolio-master")).toBeInTheDocument();
     expect(screen.getByText("Portfolio administrable.")).toBeInTheDocument();
+    expect(screen.getAllByText("Next.js").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Prisma").length).toBeGreaterThan(0);
     expect(screen.getAllByText("En cours").length).toBeGreaterThan(0);
     expect(screen.getAllByText("Public").length).toBeGreaterThan(0);
     expect(screen.getByText("Modifier")).toBeInTheDocument();

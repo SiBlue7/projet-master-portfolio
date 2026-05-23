@@ -276,6 +276,19 @@
   font-weight: 800;
 }
 
+.stackBadge {
+  display: inline-flex;
+  min-height: 24px;
+  align-items: center;
+  padding: 0 9px;
+  border: 1px solid rgba(18, 140, 95, 0.16);
+  border-radius: 999px;
+  background: rgba(18, 140, 95, 0.08);
+  color: #0f6b49;
+  font-size: 0.75rem;
+  font-weight: 800;
+}
+
 .badge {
   display: inline-flex;
   min-height: 28px;

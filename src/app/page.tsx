@@ -71,6 +71,12 @@ type PublicProject = {
   demoUrl: string | null;
   startedAt: Date | null;
   endedAt: Date | null;
+  stacks: {
+    stack: {
+      label: string;
+      slug: string;
+    };
+  }[];
   tags: {
     tag: {
       label: string;
@@ -216,6 +222,21 @@ export default async function Home() {
         demoUrl: true,
         startedAt: true,
         endedAt: true,
+        stacks: {
+          orderBy: {
+            stack: {
+              label: "asc",
+            },
+          },
+          select: {
+            stack: {
+              select: {
+                label: true,
+                slug: true,
+              },
+            },
+          },
+        },
         tags: {
           orderBy: {
             tag: {
@@ -265,6 +286,7 @@ export default async function Home() {
       period: formatPublicProjectPeriod(project),
       repositoryUrl: project.repositoryUrl,
       demoUrl: project.demoUrl,
+      stacks: project.stacks.map(({ stack }) => stack),
       tags: project.tags.map(({ tag }) => tag).filter(isDefinedProjectTag),
     }),
   );

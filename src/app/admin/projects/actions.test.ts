@@ -42,6 +42,7 @@ function createProjectFormData(overrides: Record<string, string> = {}) {
     demoUrl: "https://portfolio.justdoeat.org",
     startedAt: "2026-01-10",
     endedAt: "2026-05-20",
+    stacks: "Next.js, Prisma",
     tags: "en-cours",
     ...overrides,
   };
@@ -87,6 +88,28 @@ describe("project actions", () => {
         demoUrl: "https://portfolio.justdoeat.org",
         startedAt: expect.any(Date),
         endedAt: expect.any(Date),
+        stacks: {
+          create: [
+            expect.objectContaining({
+              stack: expect.objectContaining({
+                connectOrCreate: expect.objectContaining({
+                  where: {
+                    slug: "next-js",
+                  },
+                }),
+              }),
+            }),
+            expect.objectContaining({
+              stack: expect.objectContaining({
+                connectOrCreate: expect.objectContaining({
+                  where: {
+                    slug: "prisma",
+                  },
+                }),
+              }),
+            }),
+          ],
+        },
         tags: {
           create: [
             expect.objectContaining({
@@ -128,6 +151,10 @@ describe("project actions", () => {
         title: "Portfolio master v2",
         slug: "portfolio-master-v2",
         tags: expect.objectContaining({
+          deleteMany: {},
+          create: expect.any(Array),
+        }),
+        stacks: expect.objectContaining({
           deleteMany: {},
           create: expect.any(Array),
         }),

@@ -43,6 +43,21 @@ export default async function AdminProjectsPage() {
       demoUrl: true,
       startedAt: true,
       endedAt: true,
+      stacks: {
+        orderBy: {
+          stack: {
+            label: "asc",
+          },
+        },
+        select: {
+          stack: {
+            select: {
+              label: true,
+              slug: true,
+            },
+          },
+        },
+      },
       tags: {
         orderBy: {
           tag: {
@@ -62,6 +77,7 @@ export default async function AdminProjectsPage() {
   });
 
   const projectViewModels: ProjectViewModel[] = projects.map((project) => {
+    const stacks = project.stacks.map(({ stack }) => stack);
     const tags = project.tags.map(({ tag }) => tag).filter(isDefinedProjectTag);
 
     return {
@@ -70,6 +86,8 @@ export default async function AdminProjectsPage() {
       slug: project.slug,
       shortDescription: project.shortDescription,
       description: project.description,
+      stacks: stacks.map((stack) => stack.label).join(", "),
+      stackList: stacks,
       tagSlug: tags[0]?.slug ?? "",
       tagList: tags,
       status: project.status,
