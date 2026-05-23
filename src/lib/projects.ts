@@ -188,7 +188,7 @@ export const projectSchema = z
     endedAt: optionalDate("La date de fin"),
     stacks: z
       .string()
-      .max(600, "Les technologies doivent contenir 600 caractÃ¨res maximum.")
+      .max(600, "Les technologies doivent contenir 600 caractères maximum.")
       .transform(parseProjectStacksInput)
       .refine(
         (stacks) => stacks.length <= maxProjectStacks,
@@ -196,7 +196,7 @@ export const projectSchema = z
       )
       .refine(
         (stacks) => stacks.every((stack) => stack.label.length <= 40),
-        "Chaque technologie doit contenir 40 caractÃ¨res maximum.",
+        "Chaque technologie doit contenir 40 caractères maximum.",
       ),
     tags: z
       .string()

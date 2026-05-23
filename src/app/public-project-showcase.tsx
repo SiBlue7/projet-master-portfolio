@@ -1,8 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import styles from "./page.module.css";
+
+const projectMediaAutoplayDelay = 5000;
 
 export type PublicProjectCardViewModel = {
   id: string;
@@ -13,6 +15,11 @@ export type PublicProjectCardViewModel = {
   period: string;
   repositoryUrl: string | null;
   demoUrl: string | null;
+  media: {
+    id: string;
+    altText: string;
+    src: string;
+  }[];
   stacks: {
     label: string;
     slug: string;
@@ -26,6 +33,112 @@ export type PublicProjectCardViewModel = {
 type PublicProjectShowcaseProps = {
   projects: PublicProjectCardViewModel[];
 };
+
+function ProjectCardMediaPreview({
+  project,
+}: {
+  project: PublicProjectCardViewModel;
+}) {
+  const [activeIndex, setActiveIndex] = useState(0);
+  const hasMedia = project.media.length > 0;
+  const hasMultipleMedia = project.media.length > 1;
+
+  useEffect(() => {
+    if (!hasMultipleMedia) {
+      return;
+    }
+
+    const intervalId = window.setInterval(() => {
+      setActiveIndex((currentIndex) =>
+        currentIndex === project.media.length - 1 ? 0 : currentIndex + 1,
+      );
+    }, projectMediaAutoplayDelay);
+
+    return () => window.clearInterval(intervalId);
+  }, [hasMultipleMedia, project.media.length]);
+
+  function showPreviousMedia() {
+    setActiveIndex((currentIndex) =>
+      currentIndex === 0 ? project.media.length - 1 : currentIndex - 1,
+    );
+  }
+
+  function showNextMedia() {
+    setActiveIndex((currentIndex) =>
+      currentIndex === project.media.length - 1 ? 0 : currentIndex + 1,
+    );
+  }
+
+  if (!hasMedia) {
+    return (
+      <div className={styles.projectPreview} aria-hidden="true">
+        <div className={styles.projectPreviewTopbar}>
+          <span />
+          <span />
+          <span />
+        </div>
+        <div className={styles.projectPreviewBody}>
+          <span className={styles.projectPreviewMark}>
+            {project.title.at(0)}
+          </span>
+          <span className={styles.projectPreviewLine} />
+          <span className={styles.projectPreviewLine} />
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className={styles.projectPreview}
+      aria-label={`Captures du projet ${project.title}`}
+    >
+      <div
+        className={styles.projectMediaTrack}
+        style={{
+          transform: `translateX(-${activeIndex * 100}%)`,
+        }}
+      >
+        {project.media.map((media, index) => (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            className={styles.projectPreviewImage}
+            src={media.src}
+            alt={index === activeIndex ? media.altText : ""}
+            aria-hidden={index !== activeIndex}
+            key={media.id}
+          />
+        ))}
+      </div>
+
+      {hasMultipleMedia ? (
+        <div className={styles.projectMediaControls}>
+          <button
+            className={styles.projectMediaButton}
+            type="button"
+            aria-label={`Capture précédente du projet ${project.title}`}
+            onClick={showPreviousMedia}
+          >
+            &lt;
+          </button>
+
+          <span className={styles.projectMediaStatus}>
+            {activeIndex + 1}/{project.media.length}
+          </span>
+
+          <button
+            className={styles.projectMediaButton}
+            type="button"
+            aria-label={`Capture suivante du projet ${project.title}`}
+            onClick={showNextMedia}
+          >
+            &gt;
+          </button>
+        </div>
+      ) : null}
+    </div>
+  );
+}
 
 export function PublicProjectShowcase({
   projects,
@@ -139,20 +252,7 @@ export function PublicProjectShowcase({
         >
           {filteredProjects.map((project) => (
             <article className={styles.projectCard} key={project.id}>
-              <div className={styles.projectPreview} aria-hidden="true">
-                <div className={styles.projectPreviewTopbar}>
-                  <span />
-                  <span />
-                  <span />
-                </div>
-                <div className={styles.projectPreviewBody}>
-                  <span className={styles.projectPreviewMark}>
-                    {project.title.at(0)}
-                  </span>
-                  <span className={styles.projectPreviewLine} />
-                  <span className={styles.projectPreviewLine} />
-                </div>
-              </div>
+              <ProjectCardMediaPreview project={project} />
 
               <div className={styles.projectCardBody}>
                 <div className={styles.projectCardHeader}>

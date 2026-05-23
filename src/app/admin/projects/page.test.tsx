@@ -50,6 +50,16 @@ describe("AdminProjectsPage", () => {
         demoUrl: "https://portfolio.justdoeat.org",
         startedAt: new Date(Date.UTC(2026, 0, 10)),
         endedAt: null,
+        media: [
+          {
+            id: "media-id",
+            altText: "Capture admin",
+            fileName: "capture.png",
+            imageData: new Uint8Array([1, 2, 3]),
+            mimeType: "image/png",
+            sortOrder: 0,
+          },
+        ],
         stacks: [
           {
             stack: {
@@ -110,6 +120,11 @@ describe("AdminProjectsPage", () => {
     expect(screen.getAllByText("Next.js").length).toBeGreaterThan(0);
     expect(screen.getAllByText("Prisma").length).toBeGreaterThan(0);
     expect(screen.getAllByText("En cours").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("1 capture").length).toBeGreaterThan(0);
+    expect(screen.getByRole("img", { name: "Capture admin" })).toHaveAttribute(
+      "src",
+      "data:image/png;base64,AQID",
+    );
     expect(screen.getAllByText("Public").length).toBeGreaterThan(0);
     expect(screen.getByText("Modifier")).toBeInTheDocument();
   });

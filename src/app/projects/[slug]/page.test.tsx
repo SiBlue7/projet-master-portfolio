@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { notFound } from "next/navigation";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import ProjectDetailsPage from "./page";
@@ -37,6 +37,20 @@ describe("ProjectDetailsPage", () => {
       demoUrl: "https://portfolio.justdoeat.org",
       startedAt: new Date(Date.UTC(2026, 0, 1)),
       endedAt: null,
+      media: [
+        {
+          id: "media-id",
+          altText: "Capture publique",
+          imageData: new Uint8Array([1, 2, 3]),
+          mimeType: "image/png",
+        },
+        {
+          id: "media-id-2",
+          altText: "Capture du tableau de bord",
+          imageData: new Uint8Array([4, 5, 6]),
+          mimeType: "image/png",
+        },
+      ],
       stacks: [
         {
           stack: {
@@ -83,6 +97,17 @@ describe("ProjectDetailsPage", () => {
     expect(screen.getByText("Next.js")).toBeInTheDocument();
     expect(screen.getByText("Prisma")).toBeInTheDocument();
     expect(screen.getByText("Depuis Janvier 2026")).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "Captures du projet" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getAllByRole("img", { name: "Capture publique" })[0],
+    ).toHaveAttribute("src", "data:image/png;base64,AQID");
+    expect(screen.getByText("Capture 1 sur 2")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Capture suivante" }));
+    expect(screen.getByText("Capture 2 sur 2")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Capture précédente" }));
+    expect(screen.getByText("Capture 1 sur 2")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Voir la démo" })).toHaveAttribute(
       "href",
       "https://portfolio.justdoeat.org",

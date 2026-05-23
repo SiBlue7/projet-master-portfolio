@@ -56,6 +56,7 @@ model Project {
   endedAt          DateTime?
   createdAt        DateTime                @default(now())
   updatedAt        DateTime                @updatedAt
+  media            ProjectMedia[]
   stacks           ProjectStackOnProject[]
   tags             ProjectTagOnProject[]
 
@@ -111,6 +112,23 @@ model ProjectStackOnProject {
   @@id([projectId, stackId])
   @@index([stackId])
   @@map("project_stacks_on_projects")
+}
+
+model ProjectMedia {
+  id        String   @id @default(cuid())
+  projectId String
+  fileName  String
+  mimeType  String
+  imageData Bytes
+  altText   String?
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+  @@index([sortOrder])
+  @@map("project_media")
 }
 
 model PublicProfile {
