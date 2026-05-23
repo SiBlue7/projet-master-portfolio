@@ -1,5 +1,6 @@
 "use server";
 
+import { Buffer } from "node:buffer";
 import { revalidatePath } from "next/cache";
 import { getServerSession } from "next-auth";
 import { Prisma } from "@/generated/prisma/client";
@@ -12,6 +13,27 @@ import {
 } from "@/lib/projects";
 import { prisma } from "@/lib/prisma";
 
+export type ProjectMediaFormField = "altText" | "image" | "sortOrder";
+
+export type ProjectMediaFormState = {
+  status: "idle" | "success" | "error";
+  message?: string;
+  errors?: Partial<Record<ProjectMediaFormField, string[]>>;
+};
+
+type SessionErrorState = {
+  status: "error";
+  message: string;
+};
+
+const allowedProjectMediaMimeTypes = new Set([
+  "image/gif",
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+]);
+const maxProjectMediaSize = 5 * 1024 * 1024;
+
 function duplicateSlugError(): ProjectFormState {
   return {
     status: "error",
@@ -22,7 +44,7 @@ function duplicateSlugError(): ProjectFormState {
   };
 }
 
-async function ensureAdminSession(): Promise<ProjectFormState | null> {
+async function ensureAdminSession(): Promise<SessionErrorState | null> {
   const session = await getServerSession(authOptions);
 
   if (session) {
@@ -38,6 +60,15 @@ async function ensureAdminSession(): Promise<ProjectFormState | null> {
 function revalidateProjectPages() {
   revalidatePath("/");
   revalidatePath("/admin/projects");
+  revalidatePath("/projects/[slug]", "page");
+}
+
+function revalidateProjectDetails(projectSlug: string | null) {
+  revalidateProjectPages();
+
+  if (projectSlug) {
+    revalidatePath(`/projects/${projectSlug}`);
+  }
 }
 
 function buildProjectTagCreates(tags: ProjectTagInput[]) {
@@ -70,6 +101,69 @@ function buildProjectStackCreates(stacks: ProjectStackInput[]) {
       },
     },
   }));
+}
+
+function mediaFieldError(
+  field: ProjectMediaFormField,
+  message: string,
+): ProjectMediaFormState {
+  return {
+    status: "error",
+    message: "La capture ne peut pas être enregistrée.",
+    errors: {
+      [field]: [message],
+    },
+  };
+}
+
+function getOptionalMediaTextValue(formData: FormData, field: string) {
+  const value = formData.get(field);
+
+  return typeof value === "string" ? value.trim() : "";
+}
+
+function parseProjectMediaFormData(formData: FormData) {
+  const image = formData.get("image");
+
+  if (!(image instanceof File) || image.size === 0) {
+    return mediaFieldError("image", "Ajoutez une image à importer.");
+  }
+
+  if (!allowedProjectMediaMimeTypes.has(image.type)) {
+    return mediaFieldError(
+      "image",
+      "Le fichier doit être une image PNG, JPG, WebP ou GIF.",
+    );
+  }
+
+  if (image.size > maxProjectMediaSize) {
+    return mediaFieldError("image", "L'image doit peser 5 Mo maximum.");
+  }
+
+  const altText = getOptionalMediaTextValue(formData, "altText");
+
+  if (altText.length > 160) {
+    return mediaFieldError(
+      "altText",
+      "Le texte alternatif doit contenir 160 caractères maximum.",
+    );
+  }
+
+  const sortOrderValue = getOptionalMediaTextValue(formData, "sortOrder");
+  const sortOrder = sortOrderValue ? Number(sortOrderValue) : 0;
+
+  if (!Number.isInteger(sortOrder) || sortOrder < 0 || sortOrder > 999) {
+    return mediaFieldError(
+      "sortOrder",
+      "L'ordre doit être un nombre entier entre 0 et 999.",
+    );
+  }
+
+  return {
+    image,
+    altText: altText || null,
+    sortOrder,
+  };
 }
 
 export async function createProject(
@@ -209,5 +303,105 @@ export async function deleteProject(
   return {
     status: "success",
     message: "Projet supprimé.",
+  };
+}
+
+export async function addProjectMedia(
+  projectId: string,
+  _previousState: ProjectMediaFormState,
+  formData: FormData,
+): Promise<ProjectMediaFormState> {
+  const sessionError = await ensureAdminSession();
+
+  if (sessionError) {
+    return sessionError;
+  }
+
+  const parsedMedia = parseProjectMediaFormData(formData);
+
+  if ("status" in parsedMedia) {
+    return parsedMedia;
+  }
+
+  const project = await prisma.project.findUnique({
+    where: {
+      id: projectId,
+    },
+    select: {
+      slug: true,
+    },
+  });
+
+  if (!project) {
+    return {
+      status: "error",
+      message: "Projet introuvable.",
+    };
+  }
+
+  await prisma.projectMedia.create({
+    data: {
+      projectId,
+      altText: parsedMedia.altText,
+      fileName: parsedMedia.image.name || "capture-projet",
+      imageData: Buffer.from(await parsedMedia.image.arrayBuffer()),
+      mimeType: parsedMedia.image.type,
+      sortOrder: parsedMedia.sortOrder,
+    },
+  });
+
+  revalidateProjectDetails(project.slug);
+
+  return {
+    status: "success",
+    message: "Capture ajoutée.",
+  };
+}
+
+export async function deleteProjectMedia(
+  mediaId: string,
+  _previousState: ProjectMediaFormState,
+  _formData: FormData,
+): Promise<ProjectMediaFormState> {
+  void _previousState;
+  void _formData;
+
+  const sessionError = await ensureAdminSession();
+
+  if (sessionError) {
+    return sessionError;
+  }
+
+  const media = await prisma.projectMedia.findUnique({
+    where: {
+      id: mediaId,
+    },
+    select: {
+      project: {
+        select: {
+          slug: true,
+        },
+      },
+    },
+  });
+
+  if (!media) {
+    return {
+      status: "error",
+      message: "Capture introuvable.",
+    };
+  }
+
+  await prisma.projectMedia.delete({
+    where: {
+      id: mediaId,
+    },
+  });
+
+  revalidateProjectDetails(media.project.slug);
+
+  return {
+    status: "success",
+    message: "Capture supprimée.",
   };
 }

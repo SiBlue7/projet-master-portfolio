@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import Home from "./page";
 
@@ -192,6 +192,20 @@ describe("Home", () => {
         demoUrl: "https://portfolio.justdoeat.org",
         startedAt: new Date(Date.UTC(2026, 0, 1)),
         endedAt: null,
+        media: [
+          {
+            id: "project-media-id",
+            altText: "Capture portfolio",
+            imageData: new Uint8Array([1, 2, 3]),
+            mimeType: "image/png",
+          },
+          {
+            id: "project-media-id-2",
+            altText: "Capture admin",
+            imageData: new Uint8Array([4, 5, 6]),
+            mimeType: "image/png",
+          },
+        ],
         stacks: [
           {
             stack: {
@@ -225,6 +239,7 @@ describe("Home", () => {
         demoUrl: null,
         startedAt: new Date(Date.UTC(2025, 8, 1)),
         endedAt: new Date(Date.UTC(2026, 1, 1)),
+        media: [],
         stacks: [
           {
             stack: {
@@ -252,6 +267,7 @@ describe("Home", () => {
         demoUrl: null,
         startedAt: null,
         endedAt: null,
+        media: [],
         stacks: [
           {
             stack: {
@@ -281,6 +297,18 @@ describe("Home", () => {
     expect(screen.getByText("Portfolio master")).toBeInTheDocument();
     expect(screen.getByText("API sécurité")).toBeInTheDocument();
     expect(screen.getByText("Dashboard SOC")).toBeInTheDocument();
+    expect(
+      screen.getByRole("img", { name: "Capture portfolio" }),
+    ).toHaveAttribute("src", "data:image/png;base64,AQID");
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: "Capture suivante du projet Portfolio master",
+      }),
+    );
+    expect(screen.getByRole("img", { name: "Capture admin" })).toHaveAttribute(
+      "src",
+      "data:image/png;base64,BAUG",
+    );
     expect(
       screen.getAllByRole("link", { name: "Voir les détails" })[0],
     ).toHaveAttribute("href", "/projects/portfolio-master");

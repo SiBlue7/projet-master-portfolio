@@ -1,11 +1,21 @@
 import { revalidatePath } from "next/cache";
 import { getServerSession } from "next-auth";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { createProject, deleteProject, updateProject } from "./actions";
+import {
+  addProjectMedia,
+  createProject,
+  deleteProject,
+  deleteProjectMedia,
+  updateProject,
+} from "./actions";
 
 const mocks = vi.hoisted(() => ({
   create: vi.fn(),
+  createMedia: vi.fn(),
   delete: vi.fn(),
+  deleteMedia: vi.fn(),
+  findMedia: vi.fn(),
+  findProject: vi.fn(),
   getServerSession: vi.fn(),
   revalidatePath: vi.fn(),
   update: vi.fn(),
@@ -24,7 +34,13 @@ vi.mock("@/lib/prisma", () => ({
     project: {
       create: mocks.create,
       delete: mocks.delete,
+      findUnique: mocks.findProject,
       update: mocks.update,
+    },
+    projectMedia: {
+      create: mocks.createMedia,
+      delete: mocks.deleteMedia,
+      findUnique: mocks.findMedia,
     },
   },
 }));
@@ -65,6 +81,16 @@ describe("project actions", () => {
     mocks.create.mockResolvedValue({});
     mocks.update.mockResolvedValue({});
     mocks.delete.mockResolvedValue({});
+    mocks.createMedia.mockResolvedValue({});
+    mocks.deleteMedia.mockResolvedValue({});
+    mocks.findMedia.mockResolvedValue({
+      project: {
+        slug: "portfolio-master",
+      },
+    });
+    mocks.findProject.mockResolvedValue({
+      slug: "portfolio-master",
+    });
   });
 
   it("creates a project", async () => {
@@ -182,6 +208,93 @@ describe("project actions", () => {
     });
     expect(revalidatePath).toHaveBeenCalledWith("/");
     expect(revalidatePath).toHaveBeenCalledWith("/admin/projects");
+  });
+
+  it("adds a project media", async () => {
+    const formData = new FormData();
+    formData.set(
+      "image",
+      new File([new Uint8Array([1, 2, 3])], "accueil.png", {
+        type: "image/png",
+      }),
+    );
+    formData.set("altText", "Capture de la page d'accueil");
+    formData.set("sortOrder", "2");
+
+    const result = await addProjectMedia(
+      "project-id",
+      { status: "idle" },
+      formData,
+    );
+
+    expect(result).toEqual({
+      status: "success",
+      message: "Capture ajoutée.",
+    });
+    expect(mocks.findProject).toHaveBeenCalledWith({
+      where: {
+        id: "project-id",
+      },
+      select: {
+        slug: true,
+      },
+    });
+    expect(mocks.createMedia).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        projectId: "project-id",
+        altText: "Capture de la page d'accueil",
+        fileName: "accueil.png",
+        mimeType: "image/png",
+        sortOrder: 2,
+      }),
+    });
+    expect(
+      Buffer.isBuffer(mocks.createMedia.mock.calls[0][0].data.imageData),
+    ).toBe(true);
+    expect(revalidatePath).toHaveBeenCalledWith("/projects/portfolio-master");
+  });
+
+  it("deletes a project media", async () => {
+    const result = await deleteProjectMedia(
+      "media-id",
+      { status: "idle" },
+      new FormData(),
+    );
+
+    expect(result).toEqual({
+      status: "success",
+      message: "Capture supprimée.",
+    });
+    expect(mocks.findMedia).toHaveBeenCalledWith({
+      where: {
+        id: "media-id",
+      },
+      select: {
+        project: {
+          select: {
+            slug: true,
+          },
+        },
+      },
+    });
+    expect(mocks.deleteMedia).toHaveBeenCalledWith({
+      where: {
+        id: "media-id",
+      },
+    });
+    expect(revalidatePath).toHaveBeenCalledWith("/projects/portfolio-master");
+  });
+
+  it("rejects project media without image", async () => {
+    const result = await addProjectMedia(
+      "project-id",
+      { status: "idle" },
+      new FormData(),
+    );
+
+    expect(result.status).toBe("error");
+    expect(result.errors?.image?.[0]).toBe("Ajoutez une image à importer.");
+    expect(mocks.createMedia).not.toHaveBeenCalled();
   });
 
   it("rejects invalid payloads", async () => {

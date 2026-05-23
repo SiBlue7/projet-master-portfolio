@@ -1,3 +1,4 @@
+import { Buffer } from "node:buffer";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
@@ -6,6 +7,7 @@ import {
   type ProjectStatus,
 } from "@/lib/projects";
 import { prisma } from "@/lib/prisma";
+import { ProjectMediaCarousel } from "./project-media-carousel";
 import styles from "./page.module.css";
 
 type ProjectDetailsPageProps = {
@@ -55,6 +57,10 @@ function formatProjectPeriod({
   return "Dates à préciser";
 }
 
+function createProjectMediaUrl(imageData: Uint8Array, mimeType: string) {
+  return `data:${mimeType};base64,${Buffer.from(imageData).toString("base64")}`;
+}
+
 export default async function ProjectDetailsPage({
   params,
 }: ProjectDetailsPageProps) {
@@ -74,6 +80,22 @@ export default async function ProjectDetailsPage({
       demoUrl: true,
       startedAt: true,
       endedAt: true,
+      media: {
+        orderBy: [
+          {
+            sortOrder: "asc",
+          },
+          {
+            createdAt: "asc",
+          },
+        ],
+        select: {
+          id: true,
+          altText: true,
+          imageData: true,
+          mimeType: true,
+        },
+      },
       stacks: {
         orderBy: {
           stack: {
@@ -115,6 +137,12 @@ export default async function ProjectDetailsPage({
     .map(({ tag }) => tag)
     .filter(isDefinedProjectTag);
   const projectStacks = project.stacks.map(({ stack }) => stack);
+  const projectMedia = project.media.map((media) => ({
+    id: media.id,
+    altText: media.altText || `Capture du projet ${project.title}`,
+    src: createProjectMediaUrl(media.imageData, media.mimeType),
+  }));
+  const coverMedia = projectMedia[0] ?? null;
 
   return (
     <main className={styles.page}>
@@ -165,18 +193,29 @@ export default async function ProjectDetailsPage({
           </div>
         </div>
 
-        <aside className={styles.preview} aria-hidden="true">
-          <div className={styles.previewTopbar}>
-            <span />
-            <span />
-            <span />
-          </div>
-          <div className={styles.previewBody}>
-            <span className={styles.previewMark}>{project.title.at(0)}</span>
-            <span className={styles.previewLine} />
-            <span className={styles.previewLine} />
-          </div>
-        </aside>
+        {coverMedia ? (
+          <aside className={styles.preview}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              className={styles.previewImage}
+              src={coverMedia.src}
+              alt={coverMedia.altText}
+            />
+          </aside>
+        ) : (
+          <aside className={styles.preview} aria-hidden="true">
+            <div className={styles.previewTopbar}>
+              <span />
+              <span />
+              <span />
+            </div>
+            <div className={styles.previewBody}>
+              <span className={styles.previewMark}>{project.title.at(0)}</span>
+              <span className={styles.previewLine} />
+              <span className={styles.previewLine} />
+            </div>
+          </aside>
+        )}
       </section>
 
       <section className={styles.details} aria-label="Détails du projet">
@@ -217,6 +256,16 @@ export default async function ProjectDetailsPage({
                 </span>
               ))}
             </div>
+          </article>
+        ) : null}
+
+        {projectMedia.length > 0 ? (
+          <article className={styles.descriptionPanel}>
+            <h2 className={styles.sectionTitle}>Captures du projet</h2>
+            <ProjectMediaCarousel
+              items={projectMedia}
+              projectTitle={project.title}
+            />
           </article>
         ) : null}
       </section>

@@ -12,7 +12,15 @@ import {
   type ProjectStatus,
   type ProjectVisibility,
 } from "@/lib/projects";
-import { createProject, deleteProject, updateProject } from "./actions";
+import {
+  addProjectMedia,
+  createProject,
+  deleteProject,
+  deleteProjectMedia,
+  updateProject,
+  type ProjectMediaFormField,
+  type ProjectMediaFormState,
+} from "./actions";
 import styles from "./page.module.css";
 
 export type ProjectViewModel = {
@@ -37,6 +45,13 @@ export type ProjectViewModel = {
   demoUrl: string;
   startedAt: string;
   endedAt: string;
+  media: {
+    id: string;
+    altText: string;
+    fileName: string;
+    sortOrder: number;
+    src: string;
+  }[];
 };
 
 type ProjectManagerProps = {
@@ -44,6 +59,10 @@ type ProjectManagerProps = {
 };
 
 const initialState: ProjectFormState = {
+  status: "idle",
+};
+
+const initialMediaState: ProjectMediaFormState = {
   status: "idle",
 };
 
@@ -63,13 +82,25 @@ const emptyProject: ProjectViewModel = {
   demoUrl: "",
   startedAt: "",
   endedAt: "",
+  media: [],
 };
 
 function getFieldError(state: ProjectFormState, field: ProjectFormField) {
   return state.errors?.[field]?.[0];
 }
 
-function StateMessage({ state }: { state: ProjectFormState }) {
+function getMediaFieldError(
+  state: ProjectMediaFormState,
+  field: ProjectMediaFormField,
+) {
+  return state.errors?.[field]?.[0];
+}
+
+function StateMessage({
+  state,
+}: {
+  state: { status: "idle" | "success" | "error"; message?: string };
+}) {
   if (!state.message) {
     return null;
   }
@@ -481,6 +512,199 @@ function CreateProjectForm() {
   );
 }
 
+function DeleteProjectMediaForm({ mediaId }: { mediaId: string }) {
+  const [state, formAction, isPending] = useActionState(
+    deleteProjectMedia.bind(null, mediaId),
+    initialMediaState,
+  );
+
+  return (
+    <form action={formAction}>
+      <button
+        className={styles.mediaDeleteButton}
+        type="submit"
+        disabled={isPending}
+      >
+        {isPending ? "Suppression..." : "Supprimer"}
+      </button>
+      <StateMessage state={state} />
+    </form>
+  );
+}
+
+function ProjectMediaManager({ project }: { project: ProjectViewModel }) {
+  const [state, formAction, isPending] = useActionState(
+    addProjectMedia.bind(null, project.id),
+    initialMediaState,
+  );
+  const imageError = getMediaFieldError(state, "image");
+  const altTextError = getMediaFieldError(state, "altText");
+  const sortOrderError = getMediaFieldError(state, "sortOrder");
+
+  return (
+    <section
+      className={styles.mediaSection}
+      aria-labelledby={`media-${project.id}`}
+    >
+      <div className={styles.mediaHeader}>
+        <div>
+          <h3 id={`media-${project.id}`} className={styles.mediaTitle}>
+            Captures du projet
+          </h3>
+          <p className={styles.mediaDescription}>
+            Ajoutez des screenshots ou photos qui seront affichés sur le
+            portfolio public.
+          </p>
+        </div>
+        <span className={styles.mediaCount}>
+          {project.media.length} capture{project.media.length > 1 ? "s" : ""}
+        </span>
+      </div>
+
+      <form className={styles.mediaForm} action={formAction}>
+        <div className={styles.mediaFieldGrid}>
+          <div className={styles.field}>
+            <label
+              className={styles.label}
+              htmlFor={`project-${project.id}-image`}
+            >
+              Image
+            </label>
+            <input
+              className={styles.input}
+              id={`project-${project.id}-image`}
+              name="image"
+              type="file"
+              accept="image/png,image/jpeg,image/webp,image/gif"
+              aria-invalid={Boolean(imageError)}
+              aria-describedby={
+                imageError
+                  ? `project-${project.id}-image-error`
+                  : `project-${project.id}-image-help`
+              }
+              disabled={isPending}
+              required
+            />
+            <p
+              className={styles.helpText}
+              id={`project-${project.id}-image-help`}
+            >
+              PNG, JPG, WebP ou GIF. Taille maximale : 5 Mo.
+            </p>
+            {imageError ? (
+              <p
+                className={styles.fieldError}
+                id={`project-${project.id}-image-error`}
+              >
+                {imageError}
+              </p>
+            ) : null}
+          </div>
+
+          <div className={styles.field}>
+            <label
+              className={styles.label}
+              htmlFor={`project-${project.id}-altText`}
+            >
+              Texte alternatif
+            </label>
+            <input
+              className={styles.input}
+              id={`project-${project.id}-altText`}
+              name="altText"
+              type="text"
+              placeholder="Capture de la page d'accueil"
+              aria-invalid={Boolean(altTextError)}
+              aria-describedby={
+                altTextError ? `project-${project.id}-altText-error` : undefined
+              }
+              disabled={isPending}
+            />
+            {altTextError ? (
+              <p
+                className={styles.fieldError}
+                id={`project-${project.id}-altText-error`}
+              >
+                {altTextError}
+              </p>
+            ) : null}
+          </div>
+
+          <div className={styles.field}>
+            <label
+              className={styles.label}
+              htmlFor={`project-${project.id}-sortOrder`}
+            >
+              Ordre
+            </label>
+            <input
+              className={styles.input}
+              id={`project-${project.id}-sortOrder`}
+              name="sortOrder"
+              type="number"
+              min="0"
+              max="999"
+              defaultValue="0"
+              aria-invalid={Boolean(sortOrderError)}
+              aria-describedby={
+                sortOrderError
+                  ? `project-${project.id}-sortOrder-error`
+                  : undefined
+              }
+              disabled={isPending}
+            />
+            {sortOrderError ? (
+              <p
+                className={styles.fieldError}
+                id={`project-${project.id}-sortOrder-error`}
+              >
+                {sortOrderError}
+              </p>
+            ) : null}
+          </div>
+        </div>
+
+        <StateMessage state={state} />
+        <div className={styles.actions}>
+          <button
+            className={styles.submitButton}
+            type="submit"
+            disabled={isPending}
+          >
+            {isPending ? "Import..." : "Ajouter la capture"}
+          </button>
+        </div>
+      </form>
+
+      {project.media.length > 0 ? (
+        <div className={styles.mediaGrid}>
+          {project.media.map((media) => (
+            <article className={styles.mediaItem} key={media.id}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                className={styles.mediaPreview}
+                src={media.src}
+                alt={media.altText || `Capture du projet ${project.title}`}
+              />
+              <div className={styles.mediaMeta}>
+                <span className={styles.mediaFileName}>{media.fileName}</span>
+                <span className={styles.mediaOrder}>
+                  Ordre #{media.sortOrder}
+                </span>
+              </div>
+              <DeleteProjectMediaForm mediaId={media.id} />
+            </article>
+          ))}
+        </div>
+      ) : (
+        <p className={styles.emptyState}>
+          Aucune capture ajoutée pour ce projet.
+        </p>
+      )}
+    </section>
+  );
+}
+
 function ProjectEditor({ project }: { project: ProjectViewModel }) {
   const [updateState, updateAction, isUpdating] = useActionState(
     updateProject.bind(null, project.id),
@@ -518,6 +742,12 @@ function ProjectEditor({ project }: { project: ProjectViewModel }) {
               ))}
             </span>
           ) : null}
+          {project.media.length > 0 ? (
+            <span className={styles.mediaSummary}>
+              {project.media.length} capture
+              {project.media.length > 1 ? "s" : ""}
+            </span>
+          ) : null}
         </div>
         <span className={styles.projectSummaryAside}>
           <span className={styles.badge}>
@@ -549,6 +779,8 @@ function ProjectEditor({ project }: { project: ProjectViewModel }) {
             </button>
           </div>
         </form>
+
+        <ProjectMediaManager project={project} />
 
         <form action={deleteAction}>
           <StateMessage state={deleteState} />

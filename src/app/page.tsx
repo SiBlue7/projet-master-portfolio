@@ -71,6 +71,12 @@ type PublicProject = {
   demoUrl: string | null;
   startedAt: Date | null;
   endedAt: Date | null;
+  media: {
+    id: string;
+    altText: string | null;
+    imageData: Uint8Array;
+    mimeType: string;
+  }[];
   stacks: {
     stack: {
       label: string;
@@ -107,6 +113,10 @@ function createAvatarUrl(
   return `data:${avatarMimeType};base64,${Buffer.from(avatarData).toString(
     "base64",
   )}`;
+}
+
+function createProjectMediaUrl(imageData: Uint8Array, mimeType: string) {
+  return `data:${mimeType};base64,${Buffer.from(imageData).toString("base64")}`;
 }
 
 function formatTimelineDate(date: Date | null) {
@@ -222,6 +232,22 @@ export default async function Home() {
         demoUrl: true,
         startedAt: true,
         endedAt: true,
+        media: {
+          orderBy: [
+            {
+              sortOrder: "asc",
+            },
+            {
+              createdAt: "asc",
+            },
+          ],
+          select: {
+            id: true,
+            altText: true,
+            imageData: true,
+            mimeType: true,
+          },
+        },
         stacks: {
           orderBy: {
             stack: {
@@ -277,18 +303,25 @@ export default async function Home() {
     publicProfile.avatarMimeType,
   );
   const publicProjects: PublicProjectCardViewModel[] = projects.map(
-    (project) => ({
-      id: project.id,
-      title: project.title,
-      slug: project.slug,
-      shortDescription: project.shortDescription,
-      statusLabel: PROJECT_STATUS_LABELS[project.status],
-      period: formatPublicProjectPeriod(project),
-      repositoryUrl: project.repositoryUrl,
-      demoUrl: project.demoUrl,
-      stacks: project.stacks.map(({ stack }) => stack),
-      tags: project.tags.map(({ tag }) => tag).filter(isDefinedProjectTag),
-    }),
+    (project) => {
+      return {
+        id: project.id,
+        title: project.title,
+        slug: project.slug,
+        shortDescription: project.shortDescription,
+        statusLabel: PROJECT_STATUS_LABELS[project.status],
+        period: formatPublicProjectPeriod(project),
+        repositoryUrl: project.repositoryUrl,
+        demoUrl: project.demoUrl,
+        media: project.media.map((media) => ({
+          id: media.id,
+          altText: media.altText || `Capture du projet ${project.title}`,
+          src: createProjectMediaUrl(media.imageData, media.mimeType),
+        })),
+        stacks: project.stacks.map(({ stack }) => stack),
+        tags: project.tags.map(({ tag }) => tag).filter(isDefinedProjectTag),
+      };
+    },
   );
 
   return (

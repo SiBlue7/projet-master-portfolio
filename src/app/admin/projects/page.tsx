@@ -1,3 +1,4 @@
+import { Buffer } from "node:buffer";
 import Link from "next/link";
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
@@ -13,6 +14,10 @@ function dateToDateInputValue(date: Date | null) {
   }
 
   return date.toISOString().slice(0, 10);
+}
+
+function createProjectMediaUrl(imageData: Uint8Array, mimeType: string) {
+  return `data:${mimeType};base64,${Buffer.from(imageData).toString("base64")}`;
 }
 
 export default async function AdminProjectsPage() {
@@ -43,6 +48,24 @@ export default async function AdminProjectsPage() {
       demoUrl: true,
       startedAt: true,
       endedAt: true,
+      media: {
+        orderBy: [
+          {
+            sortOrder: "asc",
+          },
+          {
+            createdAt: "asc",
+          },
+        ],
+        select: {
+          id: true,
+          altText: true,
+          fileName: true,
+          imageData: true,
+          mimeType: true,
+          sortOrder: true,
+        },
+      },
       stacks: {
         orderBy: {
           stack: {
@@ -96,6 +119,13 @@ export default async function AdminProjectsPage() {
       demoUrl: project.demoUrl ?? "",
       startedAt: dateToDateInputValue(project.startedAt),
       endedAt: dateToDateInputValue(project.endedAt),
+      media: project.media.map((media) => ({
+        id: media.id,
+        altText: media.altText ?? "",
+        fileName: media.fileName,
+        sortOrder: media.sortOrder,
+        src: createProjectMediaUrl(media.imageData, media.mimeType),
+      })),
     };
   });
 

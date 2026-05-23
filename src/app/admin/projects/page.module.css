@@ -19,6 +19,7 @@
 .backLink:focus-visible,
 .submitButton:focus-visible,
 .dangerButton:focus-visible,
+.mediaDeleteButton:focus-visible,
 .projectItem:focus-within {
   outline: 3px solid rgba(20, 110, 245, 0.28);
   outline-offset: 2px;
@@ -289,6 +290,21 @@
   font-weight: 800;
 }
 
+.mediaSummary,
+.mediaCount {
+  display: inline-flex;
+  width: fit-content;
+  min-height: 24px;
+  align-items: center;
+  padding: 0 9px;
+  border: 1px solid rgba(101, 112, 128, 0.18);
+  border-radius: 999px;
+  background: rgba(101, 112, 128, 0.08);
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 800;
+}
+
 .badge {
   display: inline-flex;
   min-height: 28px;
@@ -319,6 +335,111 @@
   padding-top: 18px;
 }
 
+.mediaSection {
+  display: grid;
+  gap: 16px;
+  padding-top: 18px;
+  border-top: 1px solid var(--border);
+}
+
+.mediaHeader {
+  display: flex;
+  gap: 18px;
+  align-items: start;
+  justify-content: space-between;
+}
+
+.mediaTitle {
+  margin: 0;
+  color: var(--foreground);
+  font-size: 1.05rem;
+}
+
+.mediaDescription {
+  margin: 8px 0 0;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.mediaForm {
+  display: grid;
+  gap: 14px;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+}
+
+.mediaFieldGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) 120px;
+  gap: 14px;
+  align-items: start;
+}
+
+.mediaGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.mediaItem {
+  display: grid;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+}
+
+.mediaPreview {
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--background);
+  object-fit: cover;
+}
+
+.mediaMeta {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.mediaFileName,
+.mediaOrder {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mediaFileName {
+  color: var(--foreground);
+  font-weight: 800;
+}
+
+.mediaOrder {
+  color: var(--muted);
+  font-size: 0.84rem;
+}
+
+.mediaDeleteButton {
+  min-height: 36px;
+  padding: 0 12px;
+  border: 1px solid #f2b8b5;
+  border-radius: 8px;
+  background: #fff1f0;
+  color: #8a1f17;
+  cursor: pointer;
+  font-weight: 800;
+}
+
+.mediaDeleteButton:disabled {
+  cursor: wait;
+  opacity: 0.78;
+}
+
 .emptyState {
   margin: 0;
   color: var(--muted);
@@ -332,6 +453,11 @@
 
   .projectSummaryAside {
     justify-content: flex-start;
+  }
+
+  .mediaFieldGrid,
+  .mediaGrid {
+    grid-template-columns: 1fr;
   }
 }
 
