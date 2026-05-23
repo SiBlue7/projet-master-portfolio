@@ -21,6 +21,11 @@ export type ProjectViewModel = {
   slug: string;
   shortDescription: string;
   description: string;
+  stacks: string;
+  stackList: {
+    label: string;
+    slug: string;
+  }[];
   tagSlug: string;
   tagList: {
     label: string;
@@ -48,6 +53,8 @@ const emptyProject: ProjectViewModel = {
   slug: "",
   shortDescription: "",
   description: "",
+  stacks: "",
+  stackList: [],
   tagSlug: "",
   tagList: [],
   status: "DRAFT",
@@ -100,6 +107,7 @@ function ProjectFormFields({
   const demoUrlError = getFieldError(state, "demoUrl");
   const startedAtError = getFieldError(state, "startedAt");
   const endedAtError = getFieldError(state, "endedAt");
+  const stacksError = getFieldError(state, "stacks");
   const tagsError = getFieldError(state, "tags");
 
   return (
@@ -246,6 +254,34 @@ function ProjectFormFields({
         {tagsError ? (
           <p className={styles.fieldError} id={`${idPrefix}-tags-error`}>
             {tagsError}
+          </p>
+        ) : null}
+      </div>
+
+      <div className={styles.field}>
+        <label className={styles.label} htmlFor={`${idPrefix}-stacks`}>
+          Technologies utilisées
+        </label>
+        <input
+          className={styles.input}
+          id={`${idPrefix}-stacks`}
+          name="stacks"
+          type="text"
+          defaultValue={project.stacks}
+          placeholder="Next.js, Prisma, Docker"
+          aria-invalid={Boolean(stacksError)}
+          aria-describedby={
+            stacksError ? `${idPrefix}-stacks-error` : `${idPrefix}-stacks-help`
+          }
+          disabled={isPending}
+        />
+        <p className={styles.helpText} id={`${idPrefix}-stacks-help`}>
+          Séparez les technologies par des virgules. Elles seront affichées sur
+          le portfolio public.
+        </p>
+        {stacksError ? (
+          <p className={styles.fieldError} id={`${idPrefix}-stacks-error`}>
+            {stacksError}
           </p>
         ) : null}
       </div>
@@ -469,6 +505,15 @@ function ProjectEditor({ project }: { project: ProjectViewModel }) {
               {project.tagList.map((tag) => (
                 <span className={styles.tagBadge} key={tag.slug}>
                   {tag.label}
+                </span>
+              ))}
+            </span>
+          ) : null}
+          {project.stackList.length > 0 ? (
+            <span className={styles.tagList}>
+              {project.stackList.map((stack) => (
+                <span className={styles.stackBadge} key={stack.slug}>
+                  {stack.label}
                 </span>
               ))}
             </span>

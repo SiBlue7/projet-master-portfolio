@@ -232,6 +232,25 @@
   white-space: pre-wrap;
 }
 
+.stackList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 22px;
+}
+
+.stack {
+  display: inline-flex;
+  min-height: 34px;
+  align-items: center;
+  padding: 0 14px;
+  border: 1px solid rgba(18, 140, 95, 0.16);
+  border-radius: 999px;
+  background: rgba(18, 140, 95, 0.08);
+  color: #0f6b49;
+  font-weight: 800;
+}
+
 @media (max-width: 900px) {
   .hero,
   .metaGrid {

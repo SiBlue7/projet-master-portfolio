@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   normalizeProjectSlug,
   parseProjectFormData,
+  parseProjectStacksInput,
   parseProjectTagsInput,
 } from "./projects";
 
@@ -18,6 +19,7 @@ function createProjectFormData(overrides: Record<string, string> = {}) {
     demoUrl: "https://portfolio.justdoeat.org",
     startedAt: "2026-01-10",
     endedAt: "2026-05-20",
+    stacks: "Next.js, Prisma, Docker",
     tags: "en-cours",
     ...overrides,
   };
@@ -46,6 +48,25 @@ describe("project helpers", () => {
     ]);
   });
 
+  it("parses and deduplicates project technologies", () => {
+    expect(parseProjectStacksInput("Next.js, Prisma, next js, Docker")).toEqual(
+      [
+        {
+          label: "Next.js",
+          slug: "next-js",
+        },
+        {
+          label: "Prisma",
+          slug: "prisma",
+        },
+        {
+          label: "Docker",
+          slug: "docker",
+        },
+      ],
+    );
+  });
+
   it("parses a project form payload", () => {
     const result = parseProjectFormData(createProjectFormData());
 
@@ -62,6 +83,20 @@ describe("project helpers", () => {
         visibility: "PUBLIC",
         repositoryUrl: "https://github.com/SiBlue7/projet-master-portfolio",
         demoUrl: "https://portfolio.justdoeat.org",
+        stacks: [
+          {
+            label: "Next.js",
+            slug: "next-js",
+          },
+          {
+            label: "Prisma",
+            slug: "prisma",
+          },
+          {
+            label: "Docker",
+            slug: "docker",
+          },
+        ],
         tags: [
           {
             label: "En cours",

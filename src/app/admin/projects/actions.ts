@@ -7,6 +7,7 @@ import { authOptions } from "@/lib/auth";
 import {
   parseProjectFormData,
   type ProjectFormState,
+  type ProjectStackInput,
   type ProjectTagInput,
 } from "@/lib/projects";
 import { prisma } from "@/lib/prisma";
@@ -55,6 +56,22 @@ function buildProjectTagCreates(tags: ProjectTagInput[]) {
   }));
 }
 
+function buildProjectStackCreates(stacks: ProjectStackInput[]) {
+  return stacks.map((stack) => ({
+    stack: {
+      connectOrCreate: {
+        where: {
+          slug: stack.slug,
+        },
+        create: {
+          label: stack.label,
+          slug: stack.slug,
+        },
+      },
+    },
+  }));
+}
+
 export async function createProject(
   _previousState: ProjectFormState,
   formData: FormData,
@@ -75,12 +92,15 @@ export async function createProject(
     };
   }
 
-  const { tags, ...projectData } = parsedProject.data;
+  const { stacks, tags, ...projectData } = parsedProject.data;
 
   try {
     await prisma.project.create({
       data: {
         ...projectData,
+        stacks: {
+          create: buildProjectStackCreates(stacks),
+        },
         tags: {
           create: buildProjectTagCreates(tags),
         },
@@ -126,7 +146,7 @@ export async function updateProject(
     };
   }
 
-  const { tags, ...projectData } = parsedProject.data;
+  const { stacks, tags, ...projectData } = parsedProject.data;
 
   try {
     await prisma.project.update({
@@ -135,6 +155,10 @@ export async function updateProject(
       },
       data: {
         ...projectData,
+        stacks: {
+          deleteMany: {},
+          create: buildProjectStackCreates(stacks),
+        },
         tags: {
           deleteMany: {},
           create: buildProjectTagCreates(tags),

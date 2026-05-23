@@ -74,6 +74,21 @@ export default async function ProjectDetailsPage({
       demoUrl: true,
       startedAt: true,
       endedAt: true,
+      stacks: {
+        orderBy: {
+          stack: {
+            label: "asc",
+          },
+        },
+        select: {
+          stack: {
+            select: {
+              label: true,
+              slug: true,
+            },
+          },
+        },
+      },
       tags: {
         orderBy: {
           tag: {
@@ -99,6 +114,7 @@ export default async function ProjectDetailsPage({
   const projectTags = project.tags
     .map(({ tag }) => tag)
     .filter(isDefinedProjectTag);
+  const projectStacks = project.stacks.map(({ stack }) => stack);
 
   return (
     <main className={styles.page}>
@@ -187,6 +203,22 @@ export default async function ProjectDetailsPage({
           <h2 className={styles.sectionTitle}>Présentation</h2>
           <p className={styles.fullDescription}>{project.description}</p>
         </article>
+
+        {projectStacks.length > 0 ? (
+          <article className={styles.descriptionPanel}>
+            <h2 className={styles.sectionTitle}>Technologies utilisées</h2>
+            <div
+              className={styles.stackList}
+              aria-label={`Technologies du projet ${project.title}`}
+            >
+              {projectStacks.map((stack) => (
+                <span className={styles.stack} key={stack.slug}>
+                  {stack.label}
+                </span>
+              ))}
+            </div>
+          </article>
+        ) : null}
       </section>
     </main>
   );

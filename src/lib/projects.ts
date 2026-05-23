@@ -108,6 +108,11 @@ export type ProjectTagInput = {
   slug: string;
 };
 
+export type ProjectStackInput = {
+  label: string;
+  slug: string;
+};
+
 const projectTagsBySlug = new Map<ProjectTagSlug, ProjectTagInput>(
   PROJECT_TAGS.map((tag) => [tag.slug, tag]),
 );
@@ -127,6 +132,33 @@ export function parseProjectTagsInput(tagsValue: string): ProjectTagInput[] {
 
   return tag ? [{ ...tag }] : [];
 }
+
+export function parseProjectStacksInput(
+  stacksValue: string,
+): ProjectStackInput[] {
+  const stacksBySlug = new Map<string, ProjectStackInput>();
+
+  stacksValue
+    .split(",")
+    .map((stack) => stack.trim())
+    .filter(Boolean)
+    .forEach((label) => {
+      const slug = normalizeProjectSlug(label);
+
+      if (!slug || stacksBySlug.has(slug)) {
+        return;
+      }
+
+      stacksBySlug.set(slug, {
+        label,
+        slug,
+      });
+    });
+
+  return Array.from(stacksBySlug.values());
+}
+
+const maxProjectStacks = 16;
 
 export const projectSchema = z
   .object({
@@ -154,6 +186,18 @@ export const projectSchema = z
     demoUrl: optionalUrl("Le lien démo"),
     startedAt: optionalDate("La date de début"),
     endedAt: optionalDate("La date de fin"),
+    stacks: z
+      .string()
+      .max(600, "Les technologies doivent contenir 600 caractÃ¨res maximum.")
+      .transform(parseProjectStacksInput)
+      .refine(
+        (stacks) => stacks.length <= maxProjectStacks,
+        `Un projet peut contenir ${maxProjectStacks} technologies maximum.`,
+      )
+      .refine(
+        (stacks) => stacks.every((stack) => stack.label.length <= 40),
+        "Chaque technologie doit contenir 40 caractÃ¨res maximum.",
+      ),
     tags: z
       .string()
       .refine((tag) => {
@@ -204,6 +248,7 @@ export function parseProjectFormData(formData: FormData) {
     demoUrl: formData.get("demoUrl"),
     startedAt: formData.get("startedAt"),
     endedAt: formData.get("endedAt"),
+    stacks: formData.get("stacks") ?? "",
     tags: formData.get("tags") ?? "",
   });
 }

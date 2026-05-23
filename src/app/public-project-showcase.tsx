@@ -13,6 +13,10 @@ export type PublicProjectCardViewModel = {
   period: string;
   repositoryUrl: string | null;
   demoUrl: string | null;
+  stacks: {
+    label: string;
+    slug: string;
+  }[];
   tags: {
     label: string;
     slug: string;
@@ -169,6 +173,18 @@ export function PublicProjectShowcase({
                     {project.tags.map((tag) => (
                       <span className={styles.projectTag} key={tag.slug}>
                         {tag.label}
+                      </span>
+                    ))}
+                  </div>
+                ) : null}
+                {project.stacks.length > 0 ? (
+                  <div
+                    className={styles.projectStackList}
+                    aria-label={`Technologies du projet ${project.title}`}
+                  >
+                    {project.stacks.map((stack) => (
+                      <span className={styles.projectStack} key={stack.slug}>
+                        {stack.label}
                       </span>
                     ))}
                   </div>
