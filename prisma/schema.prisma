@@ -42,15 +42,31 @@ enum RunbookStepType {
   HTTP_REQUEST
 }
 
+enum AuditLogAction {
+  LOGIN_SUCCESS
+  LOGIN_FAILURE
+  CREATE
+  UPDATE
+  DELETE
+  UPLOAD
+  EXECUTE
+}
+
+enum AuditLogStatus {
+  SUCCESS
+  FAILURE
+}
+
 model User {
-  id           String   @id @default(cuid())
-  email        String   @unique
-  pseudo       String   @unique
+  id           String     @id @default(cuid())
+  email        String     @unique
+  pseudo       String     @unique
   name         String?
   passwordHash String
-  role         UserRole @default(ADMIN)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  role         UserRole   @default(ADMIN)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  auditLogs    AuditLog[]
 
   @@map("users")
 }
@@ -252,4 +268,29 @@ model ProfileTimelineItem {
   @@index([sortOrder])
   @@index([startDate])
   @@map("profile_timeline_items")
+}
+
+model AuditLog {
+  id          String         @id @default(cuid())
+  actorId     String?
+  actorEmail  String?
+  actorPseudo String?
+  action      AuditLogAction
+  status      AuditLogStatus @default(SUCCESS)
+  entityType  String
+  entityId    String?
+  summary     String
+  metadata    Json?
+  ipAddress   String?
+  userAgent   String?
+  createdAt   DateTime       @default(now())
+  actor       User?          @relation(fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([actorId])
+  @@index([action])
+  @@index([status])
+  @@index([entityType])
+  @@index([entityId])
+  @@index([createdAt])
+  @@map("audit_logs")
 }
