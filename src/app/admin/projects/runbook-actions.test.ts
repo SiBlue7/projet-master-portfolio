@@ -21,6 +21,7 @@ const mocks = vi.hoisted(() => ({
   getServerSession: vi.fn(),
   revalidatePath: vi.fn(),
   updateStep: vi.fn(),
+  writeAdminAuditLog: vi.fn(),
 }));
 
 vi.mock("next/cache", () => ({
@@ -51,6 +52,10 @@ vi.mock("@/lib/prisma", () => ({
       update: mocks.updateStep,
     },
   },
+}));
+
+vi.mock("@/lib/admin-audit", () => ({
+  writeAdminAuditLog: mocks.writeAdminAuditLog,
 }));
 
 function createFormData(values: Record<string, string>) {
@@ -150,6 +155,13 @@ describe("runbook actions", () => {
         title: "Déploiement",
       },
     });
+    expect(mocks.writeAdminAuditLog).toHaveBeenCalledWith(
+      expect.objectContaining({
+        action: "CREATE",
+        entityType: "runbook",
+        summary: "Création d'un runbook.",
+      }),
+    );
     expect(revalidatePath).toHaveBeenCalledWith(
       "/admin/projects/[projectId]",
       "page",

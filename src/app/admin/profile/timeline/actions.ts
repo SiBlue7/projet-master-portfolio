@@ -1,7 +1,8 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { getServerSession } from "next-auth";
+import { getServerSession, type Session } from "next-auth";
+import { writeAdminAuditLog } from "@/lib/admin-audit";
 import { authOptions } from "@/lib/auth";
 import {
   parseProfileTimelineItemFormData,
@@ -9,17 +10,25 @@ import {
 } from "@/lib/profile-timeline";
 import { prisma } from "@/lib/prisma";
 
-async function ensureAdminSession(): Promise<ProfileTimelineItemFormState | null> {
+async function ensureAdminSession(): Promise<
+  Session | ProfileTimelineItemFormState
+> {
   const session = await getServerSession(authOptions);
 
   if (session) {
-    return null;
+    return session;
   }
 
   return {
     status: "error",
     message: "Votre session a expiré. Reconnectez-vous pour continuer.",
   };
+}
+
+function isSessionError(
+  value: Session | ProfileTimelineItemFormState,
+): value is ProfileTimelineItemFormState {
+  return "status" in value;
 }
 
 function revalidateTimelinePages() {
@@ -31,10 +40,10 @@ export async function createProfileTimelineItem(
   _previousState: ProfileTimelineItemFormState,
   formData: FormData,
 ): Promise<ProfileTimelineItemFormState> {
-  const sessionError = await ensureAdminSession();
+  const session = await ensureAdminSession();
 
-  if (sessionError) {
-    return sessionError;
+  if (isSessionError(session)) {
+    return session;
   }
 
   const parsedTimelineItem = parseProfileTimelineItemFormData(formData);
@@ -47,8 +56,20 @@ export async function createProfileTimelineItem(
     };
   }
 
-  await prisma.profileTimelineItem.create({
+  const timelineItem = await prisma.profileTimelineItem.create({
     data: parsedTimelineItem.data,
+  });
+
+  await writeAdminAuditLog({
+    action: "CREATE",
+    entityId: timelineItem.id,
+    entityType: "profile_timeline_item",
+    metadata: {
+      title: parsedTimelineItem.data.title,
+      type: parsedTimelineItem.data.type,
+    },
+    session,
+    summary: "Création d'un élément de parcours.",
   });
 
   revalidateTimelinePages();
@@ -64,10 +85,10 @@ export async function updateProfileTimelineItem(
   _previousState: ProfileTimelineItemFormState,
   formData: FormData,
 ): Promise<ProfileTimelineItemFormState> {
-  const sessionError = await ensureAdminSession();
+  const session = await ensureAdminSession();
 
-  if (sessionError) {
-    return sessionError;
+  if (isSessionError(session)) {
+    return session;
   }
 
   const parsedTimelineItem = parseProfileTimelineItemFormData(formData);
@@ -87,6 +108,18 @@ export async function updateProfileTimelineItem(
     data: parsedTimelineItem.data,
   });
 
+  await writeAdminAuditLog({
+    action: "UPDATE",
+    entityId: itemId,
+    entityType: "profile_timeline_item",
+    metadata: {
+      title: parsedTimelineItem.data.title,
+      type: parsedTimelineItem.data.type,
+    },
+    session,
+    summary: "Mise à jour d'un élément de parcours.",
+  });
+
   revalidateTimelinePages();
 
   return {
@@ -103,16 +136,24 @@ export async function deleteProfileTimelineItem(
   void _previousState;
   void _formData;
 
-  const sessionError = await ensureAdminSession();
+  const session = await ensureAdminSession();
 
-  if (sessionError) {
-    return sessionError;
+  if (isSessionError(session)) {
+    return session;
   }
 
   await prisma.profileTimelineItem.delete({
     where: {
       id: itemId,
     },
+  });
+
+  await writeAdminAuditLog({
+    action: "DELETE",
+    entityId: itemId,
+    entityType: "profile_timeline_item",
+    session,
+    summary: "Suppression d'un élément de parcours.",
   });
 
   revalidateTimelinePages();

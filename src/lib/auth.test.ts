@@ -12,6 +12,14 @@ import {
   verifyAdminCredentials,
 } from "./auth";
 
+const mocks = vi.hoisted(() => ({
+  tryWriteAuditLog: vi.fn(),
+}));
+
+vi.mock("@/lib/audit", () => ({
+  tryWriteAuditLog: mocks.tryWriteAuditLog,
+}));
+
 const adminUser = {
   id: "admin-user-id",
   email: "admin@example.com",
@@ -23,6 +31,7 @@ const adminUser = {
 describe("verifyAdminCredentials", () => {
   beforeEach(() => {
     resetAdminLoginRateLimit();
+    mocks.tryWriteAuditLog.mockResolvedValue(undefined);
     vi.useRealTimers();
   });
 
@@ -246,6 +255,73 @@ describe("verifyAdminCredentials", () => {
     );
 
     expect(result?.id).toBe(adminUser.id);
+  });
+
+  it("writes audit logs for failed and successful authentications", async () => {
+    const request = {
+      headers: {
+        "user-agent": "Vitest",
+        "x-forwarded-for": "203.0.113.30",
+      },
+    };
+
+    await authorizeAdminCredentials(
+      {
+        identifier: "admin@example.com",
+        password: "wrong-password",
+      },
+      request,
+      {
+        comparePassword: vi.fn().mockResolvedValue(false),
+        findUserByLogin: vi.fn().mockResolvedValue(adminUser),
+      },
+    );
+
+    expect(mocks.tryWriteAuditLog).toHaveBeenCalledWith(
+      expect.objectContaining({
+        action: "LOGIN_FAILURE",
+        entityType: "auth",
+        ipAddress: "203.0.113.30",
+        metadata: {
+          identifier: "admin@example.com",
+          reason: "invalid_credentials",
+        },
+        status: "FAILURE",
+        userAgent: "Vitest",
+      }),
+    );
+
+    mocks.tryWriteAuditLog.mockClear();
+
+    await authorizeAdminCredentials(
+      {
+        identifier: "admin@example.com",
+        password: "plain-password",
+      },
+      request,
+      {
+        comparePassword: vi.fn().mockResolvedValue(true),
+        findUserByLogin: vi.fn().mockResolvedValue(adminUser),
+      },
+    );
+
+    expect(mocks.tryWriteAuditLog).toHaveBeenCalledWith(
+      expect.objectContaining({
+        action: "LOGIN_SUCCESS",
+        actor: {
+          email: adminUser.email,
+          id: adminUser.id,
+          pseudo: adminUser.pseudo,
+        },
+        entityId: adminUser.id,
+        entityType: "auth",
+        ipAddress: "203.0.113.30",
+        metadata: {
+          identifier: "admin@example.com",
+        },
+        userAgent: "Vitest",
+      }),
+    );
   });
 
   it("configures short-lived JWT sessions and secure cookie options", () => {

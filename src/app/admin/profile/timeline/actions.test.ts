@@ -13,6 +13,7 @@ const mocks = vi.hoisted(() => ({
   getServerSession: vi.fn(),
   revalidatePath: vi.fn(),
   update: vi.fn(),
+  writeAdminAuditLog: vi.fn(),
 }));
 
 vi.mock("next/cache", () => ({
@@ -31,6 +32,10 @@ vi.mock("@/lib/prisma", () => ({
       update: mocks.update,
     },
   },
+}));
+
+vi.mock("@/lib/admin-audit", () => ({
+  writeAdminAuditLog: mocks.writeAdminAuditLog,
 }));
 
 function createTimelineFormData(overrides: Record<string, string> = {}) {
@@ -87,6 +92,13 @@ describe("profile timeline actions", () => {
         endDate: expect.any(Date),
       }),
     });
+    expect(mocks.writeAdminAuditLog).toHaveBeenCalledWith(
+      expect.objectContaining({
+        action: "CREATE",
+        entityType: "profile_timeline_item",
+        summary: "Création d'un élément de parcours.",
+      }),
+    );
     expect(revalidatePath).toHaveBeenCalledWith("/");
     expect(revalidatePath).toHaveBeenCalledWith("/admin/profile/timeline");
   });

@@ -8,6 +8,7 @@ import {
   adminSessionMaxAgeSeconds,
   adminSessionUpdateAgeSeconds,
 } from "@/lib/auth-security";
+import { tryWriteAuditLog } from "@/lib/audit";
 import { prisma } from "@/lib/prisma";
 
 const adminLoginRateLimit = {
@@ -152,6 +153,10 @@ function getRequestIp(request: AuthRequestLike | undefined) {
   );
 }
 
+function getRequestUserAgent(request: AuthRequestLike | undefined) {
+  return getRequestHeader(request, "user-agent");
+}
+
 function getLoginIdentifier(credentials: unknown) {
   if (!credentials || typeof credentials !== "object") {
     return "unknown";
@@ -277,8 +282,24 @@ export async function authorizeAdminCredentials(
   dependencies: AuthDependencies = defaultAuthDependencies,
 ) {
   const rateLimitKey = getRateLimitKey(credentials, request);
+  const identifier = getLoginIdentifier(credentials);
+  const ipAddress = getRequestIp(request);
+  const userAgent = getRequestUserAgent(request);
 
   if (isLoginRateLimited(rateLimitKey)) {
+    await tryWriteAuditLog({
+      action: "LOGIN_FAILURE",
+      entityType: "auth",
+      ipAddress,
+      metadata: {
+        identifier,
+        reason: "rate_limited",
+      },
+      status: "FAILURE",
+      summary: "Tentative de connexion administrateur bloquée.",
+      userAgent,
+    });
+
     throw new Error(adminLoginRateLimitErrorCode);
   }
 
@@ -286,6 +307,19 @@ export async function authorizeAdminCredentials(
 
   if (!user) {
     const isBlocked = registerFailedLoginAttempt(rateLimitKey);
+
+    await tryWriteAuditLog({
+      action: "LOGIN_FAILURE",
+      entityType: "auth",
+      ipAddress,
+      metadata: {
+        identifier,
+        reason: isBlocked ? "rate_limit_started" : "invalid_credentials",
+      },
+      status: "FAILURE",
+      summary: "Tentative de connexion administrateur échouée.",
+      userAgent,
+    });
 
     if (isBlocked) {
       throw new Error(adminLoginRateLimitErrorCode);
@@ -295,6 +329,23 @@ export async function authorizeAdminCredentials(
   }
 
   clearLoginAttempts(rateLimitKey);
+
+  await tryWriteAuditLog({
+    action: "LOGIN_SUCCESS",
+    actor: {
+      email: user.email,
+      id: user.id,
+      pseudo: user.pseudo,
+    },
+    entityId: user.id,
+    entityType: "auth",
+    ipAddress,
+    metadata: {
+      identifier,
+    },
+    summary: "Connexion administrateur réussie.",
+    userAgent,
+  });
 
   return user;
 }

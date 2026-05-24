@@ -8,6 +8,7 @@ const mocks = vi.hoisted(() => ({
   revalidatePath: vi.fn(),
   getServerSession: vi.fn(),
   upsert: vi.fn(),
+  writeAdminAuditLog: vi.fn(),
 }));
 
 vi.mock("next/cache", () => ({
@@ -24,6 +25,10 @@ vi.mock("@/lib/prisma", () => ({
       upsert: mocks.upsert,
     },
   },
+}));
+
+vi.mock("@/lib/admin-audit", () => ({
+  writeAdminAuditLog: mocks.writeAdminAuditLog,
 }));
 
 function createProfileFormData(overrides: Record<string, string | File> = {}) {
@@ -89,6 +94,14 @@ describe("savePublicProfile", () => {
     );
     expect(revalidatePath).toHaveBeenCalledWith("/");
     expect(revalidatePath).toHaveBeenCalledWith("/admin/profile");
+    expect(mocks.writeAdminAuditLog).toHaveBeenCalledWith(
+      expect.objectContaining({
+        action: "UPDATE",
+        entityId: PUBLIC_PROFILE_ID,
+        entityType: "public_profile",
+        summary: "Mise à jour du profil public.",
+      }),
+    );
   });
 
   it("returns a field error for invalid avatars", async () => {
