@@ -7,6 +7,10 @@ import { Prisma } from "@/generated/prisma/client";
 import { writeAdminAuditLog } from "@/lib/admin-audit";
 import { authOptions } from "@/lib/auth";
 import {
+  GithubImportError,
+  importGithubRepositoryProject,
+} from "@/lib/github-import";
+import {
   parseProjectFormData,
   type ProjectFormState,
   type ProjectStackInput,
@@ -41,6 +45,16 @@ function duplicateSlugError(): ProjectFormState {
     message: "Certains champs doivent être corrigés.",
     errors: {
       slug: ["Ce slug est déjà utilisé par un autre projet."],
+    },
+  };
+}
+
+function githubImportError(message: string): ProjectFormState {
+  return {
+    status: "error",
+    message: "Le projet GitHub ne peut pas être importé.",
+    errors: {
+      repositoryUrl: [message],
     },
   };
 }
@@ -237,6 +251,74 @@ export async function createProject(
   return {
     status: "success",
     message: "Projet créé.",
+  };
+}
+
+export async function importProjectFromGithub(
+  _previousState: ProjectFormState,
+  formData: FormData,
+): Promise<ProjectFormState> {
+  const session = await ensureAdminSession();
+
+  if (isSessionError(session)) {
+    return session;
+  }
+
+  const repositoryUrl = formData.get("githubUrl");
+
+  if (typeof repositoryUrl !== "string") {
+    return githubImportError("Renseignez l'URL du dépôt GitHub.");
+  }
+
+  try {
+    const importedProject = await importGithubRepositoryProject(repositoryUrl);
+    const { stacks, tags, ...projectData } = importedProject.project;
+    const project = await prisma.project.create({
+      data: {
+        ...projectData,
+        stacks: {
+          create: buildProjectStackCreates(stacks),
+        },
+        tags: {
+          create: buildProjectTagCreates(tags),
+        },
+      },
+    });
+
+    await writeAdminAuditLog({
+      action: "CREATE",
+      entityId: project.id,
+      entityType: "project",
+      metadata: {
+        fullName: importedProject.fullName,
+        repositoryUrl: projectData.repositoryUrl,
+        source: "github_import",
+      },
+      session,
+      summary: "Import d'un projet depuis GitHub.",
+    });
+  } catch (error) {
+    if (error instanceof GithubImportError) {
+      return githubImportError(error.message);
+    }
+
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === "P2002"
+    ) {
+      return githubImportError(
+        "Un projet existe déjà avec ce slug. Modifiez le projet existant ou créez-le manuellement.",
+      );
+    }
+
+    throw error;
+  }
+
+  revalidateProjectPages();
+
+  return {
+    status: "success",
+    message: "Projet importé depuis GitHub en brouillon privé.",
   };
 }
 
