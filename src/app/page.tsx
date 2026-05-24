@@ -510,6 +510,52 @@ export default async function Home() {
           ))}
         </div>
       </section>
+
+      <section
+        className={styles.contactSection}
+        aria-labelledby="contact-title"
+      >
+        <div className={styles.contactContent}>
+          <p className={styles.sectionEyebrow}>Contact</p>
+          <h2 id="contact-title" className={styles.contactTitle}>
+            Échanger autour d&apos;une opportunité, d&apos;un projet ou
+            d&apos;un retour technique
+          </h2>
+          <p className={styles.contactDescription}>
+            Le moyen le plus direct reste l&apos;e-mail. Les profils GitHub et
+            LinkedIn permettent aussi de retrouver mon travail et mon parcours.
+          </p>
+        </div>
+
+        <div className={styles.contactActions}>
+          <a
+            className={styles.contactPrimary}
+            href={`mailto:${publicProfile.contactEmail}`}
+          >
+            {publicProfile.contactEmail}
+          </a>
+          {publicProfile.githubUrl ? (
+            <a
+              className={styles.contactSecondary}
+              href={publicProfile.githubUrl}
+              rel="noreferrer"
+              target="_blank"
+            >
+              GitHub
+            </a>
+          ) : null}
+          {publicProfile.linkedinUrl ? (
+            <a
+              className={styles.contactSecondary}
+              href={publicProfile.linkedinUrl}
+              rel="noreferrer"
+              target="_blank"
+            >
+              LinkedIn
+            </a>
+          ) : null}
+        </div>
+      </section>
     </main>
   );
 }
