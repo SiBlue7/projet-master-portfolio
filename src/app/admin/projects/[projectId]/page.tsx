@@ -7,6 +7,7 @@ import { isDefinedProjectTag } from "@/lib/projects";
 import { prisma } from "@/lib/prisma";
 import { ProjectDetailEditor } from "../project-detail-editor";
 import type { ProjectViewModel } from "../project-form";
+import type { RunbookViewModel } from "../runbook-manager";
 import styles from "../page.module.css";
 
 type AdminProjectDetailsPageProps = {
@@ -69,6 +70,65 @@ export default async function AdminProjectDetailsPage({
           imageData: true,
           mimeType: true,
           sortOrder: true,
+        },
+      },
+      runbooks: {
+        orderBy: [
+          {
+            sortOrder: "asc",
+          },
+          {
+            createdAt: "asc",
+          },
+        ],
+        select: {
+          id: true,
+          title: true,
+          slug: true,
+          description: true,
+          isActive: true,
+          sortOrder: true,
+          environments: {
+            orderBy: [
+              {
+                sortOrder: "asc",
+              },
+              {
+                createdAt: "asc",
+              },
+            ],
+            select: {
+              id: true,
+              kind: true,
+              name: true,
+              slug: true,
+              baseUrl: true,
+              sortOrder: true,
+            },
+          },
+          steps: {
+            orderBy: [
+              {
+                sortOrder: "asc",
+              },
+              {
+                createdAt: "asc",
+              },
+            ],
+            select: {
+              id: true,
+              environmentId: true,
+              title: true,
+              description: true,
+              type: true,
+              command: true,
+              url: true,
+              httpMethod: true,
+              expectedResult: true,
+              isExecutable: true,
+              sortOrder: true,
+            },
+          },
         },
       },
       stacks: {
@@ -134,6 +194,35 @@ export default async function AdminProjectDetailsPage({
       src: createProjectMediaUrl(media.imageData, media.mimeType),
     })),
   };
+  const runbooks: RunbookViewModel[] = project.runbooks.map((runbook) => ({
+    id: runbook.id,
+    title: runbook.title,
+    slug: runbook.slug,
+    description: runbook.description ?? "",
+    isActive: runbook.isActive,
+    sortOrder: runbook.sortOrder,
+    environments: runbook.environments.map((environment) => ({
+      id: environment.id,
+      kind: environment.kind,
+      name: environment.name,
+      slug: environment.slug,
+      baseUrl: environment.baseUrl ?? "",
+      sortOrder: environment.sortOrder,
+    })),
+    steps: runbook.steps.map((step) => ({
+      id: step.id,
+      environmentId: step.environmentId ?? "",
+      title: step.title,
+      description: step.description ?? "",
+      type: step.type,
+      command: step.command ?? "",
+      url: step.url ?? "",
+      httpMethod: step.httpMethod ?? "GET",
+      expectedResult: step.expectedResult ?? "",
+      isExecutable: step.isExecutable,
+      sortOrder: step.sortOrder,
+    })),
+  }));
 
   return (
     <main className={styles.page}>
@@ -151,7 +240,7 @@ export default async function AdminProjectDetailsPage({
           les captures de ce projet.
         </p>
 
-        <ProjectDetailEditor project={projectViewModel} />
+        <ProjectDetailEditor project={projectViewModel} runbooks={runbooks} />
       </section>
     </main>
   );
