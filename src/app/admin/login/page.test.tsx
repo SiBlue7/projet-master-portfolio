@@ -1,5 +1,6 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { adminLoginRateLimitErrorCode } from "@/lib/auth-security";
 import AdminLoginPage from "./page";
 
 const mocks = vi.hoisted(() => ({
@@ -110,6 +111,30 @@ describe("AdminLoginPage", () => {
 
     expect(await screen.findByRole("alert")).toHaveTextContent(
       "Identifiants invalides.",
+    );
+    expect(mocks.push).not.toHaveBeenCalled();
+  });
+
+  it("renders a dedicated error when login is rate limited", async () => {
+    mocks.signIn.mockResolvedValue({
+      error: adminLoginRateLimitErrorCode,
+      ok: false,
+      status: 401,
+      url: null,
+    });
+
+    render(<AdminLoginPage />);
+
+    fireEvent.change(screen.getByLabelText("Pseudo ou adresse e-mail"), {
+      target: { value: "admin" },
+    });
+    fireEvent.change(screen.getByLabelText("Mot de passe"), {
+      target: { value: "wrong-password" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Se connecter" }));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Trop de tentatives de connexion. Réessayez dans quelques minutes.",
     );
     expect(mocks.push).not.toHaveBeenCalled();
   });
