@@ -62,6 +62,41 @@ describe("AdminProjectDetailsPage", () => {
           sortOrder: 0,
         },
       ],
+      runbooks: [
+        {
+          id: "runbook-id",
+          title: "Déploiement",
+          slug: "deploiement",
+          description: "Procédure de déploiement.",
+          isActive: true,
+          sortOrder: 0,
+          environments: [
+            {
+              id: "environment-id",
+              kind: "PREPROD",
+              name: "Préproduction",
+              slug: "preproduction",
+              baseUrl: "https://preprod.justdoeat.org",
+              sortOrder: 0,
+            },
+          ],
+          steps: [
+            {
+              id: "step-id",
+              environmentId: "environment-id",
+              title: "Vérifier le healthcheck",
+              description: "Contrôle de la route de santé.",
+              type: "HTTP_REQUEST",
+              command: null,
+              url: "/api/health",
+              httpMethod: "GET",
+              expectedResult: "La route retourne ok.",
+              isExecutable: true,
+              sortOrder: 1,
+            },
+          ],
+        },
+      ],
       stacks: [
         {
           stack: {
@@ -100,16 +135,25 @@ describe("AdminProjectDetailsPage", () => {
     expect(
       screen.getByRole("heading", { name: "Modifier le projet" }),
     ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "Runbooks" }),
+    ).toBeInTheDocument();
+    expect(screen.getByText("Déploiement")).toBeInTheDocument();
+    expect(screen.getAllByText("Préproduction").length).toBeGreaterThan(0);
+    expect(screen.getByText("Vérifier le healthcheck")).toBeInTheDocument();
     expect(screen.getByDisplayValue("portfolio-master")).toBeInTheDocument();
     expect(screen.getByDisplayValue("Next.js, Prisma")).toBeInTheDocument();
     expect(screen.getByRole("img", { name: "Capture admin" })).toHaveAttribute(
       "src",
       "data:image/png;base64,AQID",
     );
-    expect(
-      screen.getByRole("button", { name: "Enregistrer" }),
-    ).toBeInTheDocument();
+    expect(screen.getAllByRole("button", { name: "Enregistrer" }).length).toBe(
+      3,
+    );
     expect(screen.getAllByRole("button", { name: "Supprimer" }).length).toBe(2);
+    expect(
+      screen.getByRole("button", { name: "Supprimer le runbook" }),
+    ).toBeInTheDocument();
   });
 
   it("returns not found for missing projects", async () => {

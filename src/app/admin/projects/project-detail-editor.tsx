@@ -14,6 +14,7 @@ import {
   type ProjectViewModel,
 } from "./project-form";
 import styles from "./page.module.css";
+import { RunbookManager, type RunbookViewModel } from "./runbook-manager";
 
 const initialState: ProjectFormState = {
   status: "idle",
@@ -21,8 +22,10 @@ const initialState: ProjectFormState = {
 
 export function ProjectDetailEditor({
   project,
+  runbooks,
 }: {
   project: ProjectViewModel;
+  runbooks: RunbookViewModel[];
 }) {
   const [updateState, updateAction, isUpdating] = useActionState(
     updateProject.bind(null, project.id),
@@ -83,6 +86,8 @@ export function ProjectDetailEditor({
       <section className={styles.panel}>
         <ProjectMediaManager project={project} />
       </section>
+
+      <RunbookManager projectId={project.id} runbooks={runbooks} />
 
       <section className={styles.panel} aria-labelledby="delete-project-title">
         <h2 id="delete-project-title" className={styles.panelTitle}>

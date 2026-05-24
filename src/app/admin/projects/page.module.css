@@ -22,6 +22,7 @@
 .submitButton:focus-visible,
 .dangerButton:focus-visible,
 .mediaDeleteButton:focus-visible,
+.nestedItem:focus-within,
 .projectItem:focus-within {
   outline: 3px solid rgba(20, 110, 245, 0.28);
   outline-offset: 2px;
@@ -251,6 +252,12 @@
   gap: 12px;
 }
 
+.runbookList {
+  display: grid;
+  gap: 12px;
+  margin-top: 18px;
+}
+
 .projectItem {
   border: 1px solid var(--border);
   border-radius: 8px;
@@ -401,6 +408,84 @@
   padding-top: 18px;
 }
 
+.checkboxField {
+  display: flex;
+  min-height: 46px;
+  align-items: center;
+  gap: 10px;
+  color: var(--foreground);
+  font-weight: 700;
+}
+
+.checkboxField input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--accent);
+}
+
+.nestedPanel {
+  display: grid;
+  gap: 16px;
+  padding: 18px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+}
+
+.nestedHeader {
+  display: flex;
+  gap: 18px;
+  align-items: start;
+  justify-content: space-between;
+}
+
+.nestedForm {
+  display: grid;
+  gap: 16px;
+}
+
+.nestedList {
+  display: grid;
+  gap: 10px;
+}
+
+.nestedItem {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--background);
+}
+
+.nestedSummary {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 16px;
+  align-items: center;
+  padding: 14px 16px;
+  cursor: pointer;
+  list-style: none;
+}
+
+.nestedSummary::-webkit-details-marker {
+  display: none;
+}
+
+.nestedSummary > span:first-child {
+  display: grid;
+  min-width: 0;
+  gap: 4px;
+}
+
+.nestedDetails {
+  display: grid;
+  gap: 14px;
+  padding: 0 16px 16px;
+  border-top: 1px solid var(--border);
+}
+
+.nestedDetails .nestedForm {
+  padding-top: 16px;
+}
+
 .mediaSection {
   display: grid;
   gap: 16px;
@@ -516,6 +601,7 @@
   .panelHeader,
   .editorHeader,
   .projectListItem,
+  .nestedSummary,
   .projectSummary {
     grid-template-columns: 1fr;
   }
