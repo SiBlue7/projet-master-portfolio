@@ -59,6 +59,9 @@ describe("AdminPage", () => {
     expect(
       screen.getByRole("link", { name: "Créer un projet" }),
     ).toHaveAttribute("href", "/admin/projects");
+    expect(
+      screen.getByRole("link", { name: "Consulter les logs" }),
+    ).toHaveAttribute("href", "/admin/logs");
   });
 
   it("signs out authenticated users", async () => {
