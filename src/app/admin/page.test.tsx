@@ -4,6 +4,13 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import AdminPage from "./page";
 
 const mocks = vi.hoisted(() => ({
+  countProjectMedia: vi.fn(),
+  countProjects: vi.fn(),
+  countRunbooks: vi.fn(),
+  countTimelineItems: vi.fn(),
+  findAuditLogs: vi.fn(),
+  findProjects: vi.fn(),
+  findUniqueProfile: vi.fn(),
   getServerSession: vi.fn(),
   signOut: vi.fn(),
 }));
@@ -22,9 +29,92 @@ vi.mock("next/navigation", () => ({
   }),
 }));
 
+vi.mock("@/lib/prisma", () => ({
+  prisma: {
+    auditLog: {
+      findMany: mocks.findAuditLogs,
+    },
+    profileTimelineItem: {
+      count: mocks.countTimelineItems,
+    },
+    project: {
+      count: mocks.countProjects,
+      findMany: mocks.findProjects,
+    },
+    projectMedia: {
+      count: mocks.countProjectMedia,
+    },
+    publicProfile: {
+      findUnique: mocks.findUniqueProfile,
+    },
+    runbook: {
+      count: mocks.countRunbooks,
+    },
+  },
+}));
+
 describe("AdminPage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mocks.countProjects.mockImplementation(
+      (query?: {
+        where?: {
+          media?: {
+            none?: Record<string, never>;
+          };
+          OR?: unknown[];
+          visibility?: string;
+        };
+      }) => {
+        if (!query?.where) {
+          return Promise.resolve(4);
+        }
+
+        if (query.where.visibility === "PUBLIC") {
+          return Promise.resolve(2);
+        }
+
+        if (query.where.visibility === "PRIVATE") {
+          return Promise.resolve(2);
+        }
+
+        if (query.where.media?.none) {
+          return Promise.resolve(1);
+        }
+
+        if (query.where.OR) {
+          return Promise.resolve(1);
+        }
+
+        return Promise.resolve(0);
+      },
+    );
+    mocks.countTimelineItems.mockResolvedValue(3);
+    mocks.countProjectMedia.mockResolvedValue(5);
+    mocks.countRunbooks.mockResolvedValue(2);
+    mocks.findUniqueProfile.mockResolvedValue({
+      avatarData: new Uint8Array([1, 2, 3]),
+      githubUrl: "https://github.com/SiBlue7",
+      linkedinUrl: "https://www.linkedin.com/in/enzo-chevalier",
+    });
+    mocks.findProjects.mockResolvedValue([
+      {
+        id: "project-id",
+        status: "IN_PROGRESS",
+        title: "Portfolio master",
+        updatedAt: new Date(Date.UTC(2026, 4, 24)),
+        visibility: "PUBLIC",
+      },
+    ]);
+    mocks.findAuditLogs.mockResolvedValue([
+      {
+        action: "UPDATE",
+        createdAt: new Date(Date.UTC(2026, 4, 25)),
+        id: "audit-log-id",
+        status: "SUCCESS",
+        summary: "Projet mis à jour.",
+      },
+    ]);
   });
 
   it("renders the admin page for authenticated users", async () => {
@@ -45,23 +135,39 @@ describe("AdminPage", () => {
     expect(
       screen.getByRole("heading", { name: "Compte administrateur" }),
     ).toBeInTheDocument();
+    expect(screen.getByText("4")).toBeInTheDocument();
+    expect(screen.getByText("2 publics · 2 privés")).toBeInTheDocument();
+    expect(
+      screen.getByText("captures et photos de projets"),
+    ).toBeInTheDocument();
+    expect(screen.getByText("procédures actives")).toBeInTheDocument();
     expect(screen.getByText("admin@example.com")).toBeInTheDocument();
     expect(screen.getByText("ADMIN")).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: "Se déconnecter" }),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("link", { name: "Gérer le profil public" }),
-    ).toHaveAttribute("href", "/admin/profile");
+      screen
+        .getAllByRole("link", { name: /Profil public/ })
+        .map((link) => link.getAttribute("href")),
+    ).toContain("/admin/profile");
     expect(
-      screen.getByRole("link", { name: "Gérer le parcours" }),
-    ).toHaveAttribute("href", "/admin/profile/timeline");
+      screen
+        .getAllByRole("link", { name: /Parcours/ })
+        .map((link) => link.getAttribute("href")),
+    ).toContain("/admin/profile/timeline");
     expect(
-      screen.getByRole("link", { name: "Créer un projet" }),
+      screen.getByRole("link", { name: /Créer un projet/ }),
     ).toHaveAttribute("href", "/admin/projects");
     expect(
-      screen.getByRole("link", { name: "Consulter les logs" }),
+      screen.getByRole("link", { name: /Logs d'activité/ }),
     ).toHaveAttribute("href", "/admin/logs");
+    expect(screen.getByRole("link", { name: /Healthcheck/ })).toHaveAttribute(
+      "href",
+      "/api/health",
+    );
+    expect(screen.getByText("Portfolio master")).toBeInTheDocument();
+    expect(screen.getByText("Projet mis à jour.")).toBeInTheDocument();
   });
 
   it("signs out authenticated users", async () => {
