@@ -358,6 +358,9 @@ export default async function Home() {
             >
               Me contacter
             </a>
+            <a className={styles.secondaryAction} href="/statistics">
+              Statistiques
+            </a>
             {publicProfile.githubUrl ? (
               <a
                 className={styles.secondaryAction}
