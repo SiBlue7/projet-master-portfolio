@@ -291,6 +291,10 @@ export async function importProjectFromGithub(
       entityType: "project",
       metadata: {
         fullName: importedProject.fullName,
+        githubIsPrivate: projectData.githubIsPrivate,
+        githubPushedAt: projectData.githubPushedAt?.toISOString() ?? null,
+        githubReadmeImported: Boolean(projectData.githubReadme),
+        githubVisibility: projectData.githubVisibility,
         repositoryUrl: projectData.repositoryUrl,
         source: "github_import",
       },
@@ -319,6 +323,104 @@ export async function importProjectFromGithub(
   return {
     status: "success",
     message: "Projet importé depuis GitHub en brouillon privé.",
+  };
+}
+
+export async function syncProjectWithGithub(
+  projectId: string,
+  _previousState: ProjectFormState,
+  _formData: FormData,
+): Promise<ProjectFormState> {
+  void _previousState;
+  void _formData;
+
+  const session = await ensureAdminSession();
+
+  if (isSessionError(session)) {
+    return session;
+  }
+
+  const project = await prisma.project.findUnique({
+    where: {
+      id: projectId,
+    },
+    select: {
+      repositoryUrl: true,
+      slug: true,
+      status: true,
+    },
+  });
+
+  if (!project) {
+    return {
+      status: "error",
+      message: "Projet introuvable.",
+    };
+  }
+
+  if (!project.repositoryUrl) {
+    return githubImportError(
+      "Ajoutez un lien GitHub au projet avant de lancer la synchronisation.",
+    );
+  }
+
+  try {
+    const importedProject = await importGithubRepositoryProject(
+      project.repositoryUrl,
+    );
+    const githubData = importedProject.project;
+
+    await prisma.project.update({
+      where: {
+        id: projectId,
+      },
+      data: {
+        demoUrl: githubData.demoUrl,
+        description: githubData.description,
+        githubIsPrivate: githubData.githubIsPrivate,
+        githubPushedAt: githubData.githubPushedAt,
+        githubReadme: githubData.githubReadme,
+        githubVisibility: githubData.githubVisibility,
+        repositoryUrl: githubData.repositoryUrl,
+        shortDescription: githubData.shortDescription,
+        startedAt: githubData.startedAt,
+        status: githubData.status === "ARCHIVED" ? "ARCHIVED" : project.status,
+        stacks: {
+          deleteMany: {},
+          create: buildProjectStackCreates(githubData.stacks),
+        },
+      },
+    });
+
+    await writeAdminAuditLog({
+      action: "UPDATE",
+      entityId: projectId,
+      entityType: "project",
+      metadata: {
+        fullName: importedProject.fullName,
+        githubIsPrivate: githubData.githubIsPrivate,
+        githubPushedAt: githubData.githubPushedAt?.toISOString() ?? null,
+        githubReadmeImported: Boolean(githubData.githubReadme),
+        githubVisibility: githubData.githubVisibility,
+        repositoryUrl: githubData.repositoryUrl,
+        source: "github_sync",
+      },
+      session,
+      summary: "Synchronisation des métadonnées GitHub d'un projet.",
+    });
+  } catch (error) {
+    if (error instanceof GithubImportError) {
+      return githubImportError(error.message);
+    }
+
+    throw error;
+  }
+
+  revalidateProjectDetails(project.slug);
+
+  return {
+    status: "success",
+    message: "Métadonnées GitHub synchronisées.",
   };
 }
 

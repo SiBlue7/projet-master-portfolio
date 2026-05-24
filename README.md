@@ -76,6 +76,7 @@ Les variables attendues sont listées dans `.env.example`.
 
 Variables principales :
 
+- `GITHUB_TOKEN` : token GitHub optionnel pour importer et synchroniser les dépôts privés.
 - `DATABASE_URL` : URL de connexion PostgreSQL.
 - `APP_ENV` : environnement courant (`local`, `preprod`, puis plus tard `production`).
 - `NEXTAUTH_URL` : URL publique de l'application.

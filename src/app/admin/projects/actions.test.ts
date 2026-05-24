@@ -1,3 +1,4 @@
+import { Buffer } from "node:buffer";
 import { revalidatePath } from "next/cache";
 import { getServerSession } from "next-auth";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -7,6 +8,7 @@ import {
   deleteProject,
   deleteProjectMedia,
   importProjectFromGithub,
+  syncProjectWithGithub,
   updateProject,
 } from "./actions";
 
@@ -190,6 +192,8 @@ describe("project actions", () => {
             language: "TypeScript",
             name: "projet-master-portfolio",
             private: false,
+            pushed_at: "2026-05-20T08:30:00Z",
+            visibility: "public",
           }),
         ),
       )
@@ -197,6 +201,16 @@ describe("project actions", () => {
         new Response(
           JSON.stringify({
             TypeScript: 1000,
+          }),
+        ),
+      )
+      .mockResolvedValueOnce(
+        new Response(
+          JSON.stringify({
+            content: Buffer.from("# Portfolio\n\nImported README.").toString(
+              "base64",
+            ),
+            encoding: "base64",
           }),
         ),
       );
@@ -216,6 +230,10 @@ describe("project actions", () => {
     expect(mocks.create).toHaveBeenCalledWith({
       data: expect.objectContaining({
         description: expect.stringContaining("SiBlue7/projet-master-portfolio"),
+        githubIsPrivate: false,
+        githubPushedAt: expect.any(Date),
+        githubReadme: "# Portfolio\n\nImported README.",
+        githubVisibility: "public",
         repositoryUrl: "https://github.com/SiBlue7/projet-master-portfolio",
         shortDescription: "Portfolio administrable.",
         slug: "projet-master-portfolio",
@@ -244,12 +262,157 @@ describe("project actions", () => {
         entityType: "project",
         metadata: {
           fullName: "SiBlue7/projet-master-portfolio",
+          githubIsPrivate: false,
+          githubPushedAt: "2026-05-20T08:30:00.000Z",
+          githubReadmeImported: true,
+          githubVisibility: "public",
           repositoryUrl: "https://github.com/SiBlue7/projet-master-portfolio",
           source: "github_import",
         },
         summary: "Import d'un projet depuis GitHub.",
       }),
     );
+  });
+
+  it("syncs project metadata from GitHub without replacing local editorial fields", async () => {
+    mocks.findProject.mockResolvedValue({
+      repositoryUrl: "https://github.com/SiBlue7/projet-master-portfolio",
+      slug: "portfolio-master",
+      status: "IN_PROGRESS",
+    });
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(
+        new Response(
+          JSON.stringify({
+            archived: false,
+            created_at: "2026-01-10T12:00:00Z",
+            description: "Description GitHub mise à jour.",
+            full_name: "SiBlue7/projet-master-portfolio",
+            homepage: "https://portfolio.justdoeat.org",
+            html_url: "https://github.com/SiBlue7/projet-master-portfolio",
+            language: "TypeScript",
+            name: "projet-master-portfolio",
+            private: false,
+            pushed_at: "2026-05-21T09:45:00Z",
+            visibility: "public",
+          }),
+        ),
+      )
+      .mockResolvedValueOnce(
+        new Response(
+          JSON.stringify({
+            CSS: 500,
+            TypeScript: 1000,
+          }),
+        ),
+      )
+      .mockResolvedValueOnce(
+        new Response(
+          JSON.stringify({
+            content: Buffer.from("# Portfolio\n\nSynced README.").toString(
+              "base64",
+            ),
+            encoding: "base64",
+          }),
+        ),
+      );
+    vi.stubGlobal("fetch", fetchMock);
+
+    const result = await syncProjectWithGithub(
+      "project-id",
+      { status: "idle" },
+      new FormData(),
+    );
+
+    expect(result).toEqual({
+      status: "success",
+      message: "Métadonnées GitHub synchronisées.",
+    });
+    expect(mocks.update).toHaveBeenCalledWith({
+      where: {
+        id: "project-id",
+      },
+      data: expect.objectContaining({
+        demoUrl: "https://portfolio.justdoeat.org/",
+        githubIsPrivate: false,
+        githubPushedAt: expect.any(Date),
+        githubReadme: "# Portfolio\n\nSynced README.",
+        githubVisibility: "public",
+        description: expect.stringContaining("Description GitHub mise à jour."),
+        repositoryUrl: "https://github.com/SiBlue7/projet-master-portfolio",
+        shortDescription: "Description GitHub mise à jour.",
+        startedAt: expect.any(Date),
+        status: "IN_PROGRESS",
+        stacks: {
+          deleteMany: {},
+          create: [
+            expect.objectContaining({
+              stack: expect.objectContaining({
+                connectOrCreate: expect.objectContaining({
+                  where: {
+                    slug: "typescript",
+                  },
+                }),
+              }),
+            }),
+            expect.objectContaining({
+              stack: expect.objectContaining({
+                connectOrCreate: expect.objectContaining({
+                  where: {
+                    slug: "css",
+                  },
+                }),
+              }),
+            }),
+          ],
+        },
+      }),
+    });
+    expect(mocks.update.mock.calls[0][0].data).not.toHaveProperty("title");
+    expect(mocks.update.mock.calls[0][0].data).not.toHaveProperty("slug");
+    expect(mocks.writeAdminAuditLog).toHaveBeenCalledWith(
+      expect.objectContaining({
+        action: "UPDATE",
+        entityId: "project-id",
+        entityType: "project",
+        metadata: {
+          fullName: "SiBlue7/projet-master-portfolio",
+          repositoryUrl: "https://github.com/SiBlue7/projet-master-portfolio",
+          githubIsPrivate: false,
+          githubPushedAt: "2026-05-21T09:45:00.000Z",
+          githubReadmeImported: true,
+          githubVisibility: "public",
+          source: "github_sync",
+        },
+        summary: "Synchronisation des métadonnées GitHub d'un projet.",
+      }),
+    );
+  });
+
+  it("rejects GitHub sync without repository URL", async () => {
+    mocks.findProject.mockResolvedValue({
+      repositoryUrl: null,
+      slug: "portfolio-master",
+      status: "IN_PROGRESS",
+    });
+
+    const result = await syncProjectWithGithub(
+      "project-id",
+      { status: "idle" },
+      new FormData(),
+    );
+
+    expect(result).toEqual({
+      status: "error",
+      message: "Le projet GitHub ne peut pas être importé.",
+      errors: {
+        repositoryUrl: [
+          "Ajoutez un lien GitHub au projet avant de lancer la synchronisation.",
+        ],
+      },
+    });
+    expect(mocks.update).not.toHaveBeenCalled();
   });
 
   it("updates a project", async () => {

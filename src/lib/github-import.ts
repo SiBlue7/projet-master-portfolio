@@ -1,3 +1,4 @@
+import { Buffer } from "node:buffer";
 import { z } from "zod";
 import {
   normalizeProjectSlug,
@@ -16,9 +17,15 @@ const githubRepositorySchema = z.object({
   language: z.string().nullable(),
   name: z.string(),
   private: z.boolean(),
+  pushed_at: z.string().nullable(),
+  visibility: z.string().nullable().optional(),
 });
 
 const githubLanguagesSchema = z.record(z.string(), z.number().nonnegative());
+const githubReadmeSchema = z.object({
+  content: z.string(),
+  encoding: z.string(),
+});
 
 const githubOwnerPattern = /^[a-z0-9](?:[a-z0-9-]{0,37}[a-z0-9])?$/i;
 const githubRepositoryPattern = /^[a-z0-9._-]{1,100}$/i;
@@ -42,6 +49,10 @@ export type ImportedGithubProject = {
     demoUrl: string | null;
     description: string;
     endedAt: Date | null;
+    githubIsPrivate: boolean;
+    githubPushedAt: Date | null;
+    githubReadme: string | null;
+    githubVisibility: string;
     repositoryUrl: string;
     shortDescription: string;
     showDetails: boolean;
@@ -199,6 +210,30 @@ async function fetchGithubLanguages(owner: string, repo: string) {
   }
 }
 
+async function fetchGithubReadme(owner: string, repo: string) {
+  try {
+    const readme = await fetchGithubJson(
+      `https://api.github.com/repos/${owner}/${repo}/readme`,
+      githubReadmeSchema,
+    );
+
+    if (readme.encoding.toLowerCase() !== "base64") {
+      return null;
+    }
+
+    const decodedReadme = Buffer.from(
+      readme.content.replace(/\s/g, ""),
+      "base64",
+    )
+      .toString("utf8")
+      .trim();
+
+    return decodedReadme ? truncateText(decodedReadme, 30000) : null;
+  } catch {
+    return null;
+  }
+}
+
 function truncateText(text: string, maxLength: number) {
   const trimmedText = text.trim();
 
@@ -231,7 +266,11 @@ function normalizeOptionalHttpUrl(url: string | null) {
   }
 }
 
-function parseGithubDate(dateValue: string) {
+function parseGithubDate(dateValue: string | null | undefined) {
+  if (!dateValue) {
+    return null;
+  }
+
   const date = new Date(dateValue);
 
   return Number.isNaN(date.getTime()) ? null : date;
@@ -246,6 +285,7 @@ export async function importGithubRepositoryProject(
     githubRepositorySchema,
   );
   const languageLabels = await fetchGithubLanguages(owner, repo);
+  const readme = await fetchGithubReadme(owner, repo);
   const stacks = parseProjectStacksInput(
     (languageLabels.length > 0
       ? languageLabels
@@ -270,6 +310,11 @@ export async function importGithubRepositoryProject(
       demoUrl: normalizeOptionalHttpUrl(repository.homepage),
       description,
       endedAt: null,
+      githubIsPrivate: repository.private,
+      githubPushedAt: parseGithubDate(repository.pushed_at),
+      githubReadme: readme,
+      githubVisibility:
+        repository.visibility ?? (repository.private ? "private" : "public"),
       repositoryUrl: repository.html_url,
       shortDescription,
       showDetails: true,

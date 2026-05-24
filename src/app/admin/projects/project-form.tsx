@@ -49,6 +49,10 @@ export type ProjectViewModel = {
   demoUrl: string;
   startedAt: string;
   endedAt: string;
+  githubPushedAt: string;
+  githubVisibility: string;
+  githubIsPrivate: boolean | null;
+  githubReadme: string;
   media: {
     id: string;
     altText: string;
@@ -87,6 +91,10 @@ const emptyProject: ProjectViewModel = {
   demoUrl: "",
   startedAt: "",
   endedAt: "",
+  githubPushedAt: "",
+  githubVisibility: "",
+  githubIsPrivate: null,
+  githubReadme: "",
   media: [],
 };
 

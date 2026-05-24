@@ -28,6 +28,20 @@ function createProjectMediaUrl(imageData: Uint8Array, mimeType: string) {
   return `data:${mimeType};base64,${Buffer.from(imageData).toString("base64")}`;
 }
 
+const dateTimeFormatter = new Intl.DateTimeFormat("fr-FR", {
+  dateStyle: "medium",
+  timeStyle: "short",
+  timeZone: "Europe/Paris",
+});
+
+function dateToDateTimeLabel(date: Date | null) {
+  if (!date) {
+    return "";
+  }
+
+  return dateTimeFormatter.format(date);
+}
+
 export default async function AdminProjectDetailsPage({
   params,
 }: AdminProjectDetailsPageProps) {
@@ -59,6 +73,10 @@ export default async function AdminProjectDetailsPage({
       demoUrl: true,
       startedAt: true,
       endedAt: true,
+      githubPushedAt: true,
+      githubVisibility: true,
+      githubIsPrivate: true,
+      githubReadme: true,
       media: {
         orderBy: [
           {
@@ -196,6 +214,10 @@ export default async function AdminProjectDetailsPage({
     demoUrl: project.demoUrl ?? "",
     startedAt: dateToDateInputValue(project.startedAt),
     endedAt: dateToDateInputValue(project.endedAt),
+    githubPushedAt: dateToDateTimeLabel(project.githubPushedAt),
+    githubVisibility: project.githubVisibility ?? "",
+    githubIsPrivate: project.githubIsPrivate,
+    githubReadme: project.githubReadme ?? "",
     media: project.media.map((media) => ({
       id: media.id,
       altText: media.altText ?? "",
