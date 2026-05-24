@@ -15,9 +15,7 @@ import {
 import {
   addProjectMedia,
   createProject,
-  deleteProject,
   deleteProjectMedia,
-  updateProject,
   type ProjectMediaFormField,
   type ProjectMediaFormState,
 } from "./actions";
@@ -52,10 +50,6 @@ export type ProjectViewModel = {
     sortOrder: number;
     src: string;
   }[];
-};
-
-type ProjectManagerProps = {
-  projects: ProjectViewModel[];
 };
 
 const initialState: ProjectFormState = {
@@ -96,7 +90,7 @@ function getMediaFieldError(
   return state.errors?.[field]?.[0];
 }
 
-function StateMessage({
+export function StateMessage({
   state,
 }: {
   state: { status: "idle" | "success" | "error"; message?: string };
@@ -117,7 +111,7 @@ function StateMessage({
   );
 }
 
-function ProjectFormFields({
+export function ProjectFormFields({
   idPrefix,
   isPending,
   project,
@@ -484,7 +478,7 @@ function ProjectFormFields({
   );
 }
 
-function CreateProjectForm() {
+export function CreateProjectForm() {
   const [state, formAction, isPending] = useActionState(
     createProject,
     initialState,
@@ -532,7 +526,11 @@ function DeleteProjectMediaForm({ mediaId }: { mediaId: string }) {
   );
 }
 
-function ProjectMediaManager({ project }: { project: ProjectViewModel }) {
+export function ProjectMediaManager({
+  project,
+}: {
+  project: ProjectViewModel;
+}) {
   const [state, formAction, isPending] = useActionState(
     addProjectMedia.bind(null, project.id),
     initialMediaState,
@@ -702,127 +700,5 @@ function ProjectMediaManager({ project }: { project: ProjectViewModel }) {
         </p>
       )}
     </section>
-  );
-}
-
-function ProjectEditor({ project }: { project: ProjectViewModel }) {
-  const [updateState, updateAction, isUpdating] = useActionState(
-    updateProject.bind(null, project.id),
-    initialState,
-  );
-  const [deleteState, deleteAction, isDeleting] = useActionState(
-    deleteProject.bind(null, project.id),
-    initialState,
-  );
-
-  return (
-    <details className={styles.projectItem}>
-      <summary className={styles.projectSummary}>
-        <div className={styles.projectSummaryMain}>
-          <span className={styles.projectSlug}>{project.slug}</span>
-          <span className={styles.projectTitle}>{project.title}</span>
-          <span className={styles.projectDescription}>
-            {project.shortDescription}
-          </span>
-          {project.tagList.length > 0 ? (
-            <span className={styles.tagList}>
-              {project.tagList.map((tag) => (
-                <span className={styles.tagBadge} key={tag.slug}>
-                  {tag.label}
-                </span>
-              ))}
-            </span>
-          ) : null}
-          {project.stackList.length > 0 ? (
-            <span className={styles.tagList}>
-              {project.stackList.map((stack) => (
-                <span className={styles.stackBadge} key={stack.slug}>
-                  {stack.label}
-                </span>
-              ))}
-            </span>
-          ) : null}
-          {project.media.length > 0 ? (
-            <span className={styles.mediaSummary}>
-              {project.media.length} capture
-              {project.media.length > 1 ? "s" : ""}
-            </span>
-          ) : null}
-        </div>
-        <span className={styles.projectSummaryAside}>
-          <span className={styles.badge}>
-            {PROJECT_STATUS_LABELS[project.status]}
-          </span>
-          <span className={styles.badge}>
-            {PROJECT_VISIBILITY_LABELS[project.visibility]}
-          </span>
-          <span className={styles.projectEditHint}>Modifier</span>
-        </span>
-      </summary>
-
-      <div className={styles.projectDetails}>
-        <form className={styles.form} action={updateAction}>
-          <ProjectFormFields
-            idPrefix={`project-${project.id}`}
-            isPending={isUpdating}
-            project={project}
-            state={updateState}
-          />
-          <StateMessage state={updateState} />
-          <div className={styles.actions}>
-            <button
-              className={styles.submitButton}
-              type="submit"
-              disabled={isUpdating}
-            >
-              {isUpdating ? "Enregistrement..." : "Enregistrer"}
-            </button>
-          </div>
-        </form>
-
-        <ProjectMediaManager project={project} />
-
-        <form action={deleteAction}>
-          <StateMessage state={deleteState} />
-          <button
-            className={styles.dangerButton}
-            type="submit"
-            disabled={isDeleting}
-          >
-            {isDeleting ? "Suppression..." : "Supprimer"}
-          </button>
-        </form>
-      </div>
-    </details>
-  );
-}
-
-export function ProjectManager({ projects }: ProjectManagerProps) {
-  return (
-    <div className={styles.manager}>
-      <section className={styles.panel} aria-labelledby="create-title">
-        <h2 id="create-title" className={styles.panelTitle}>
-          Créer un projet
-        </h2>
-        <CreateProjectForm />
-      </section>
-
-      <section className={styles.panel} aria-labelledby="existing-title">
-        <h2 id="existing-title" className={styles.panelTitle}>
-          Projets existants
-        </h2>
-        {projects.length > 0 ? (
-          <div className={styles.projectList}>
-            {projects.map((project) => (
-              <ProjectEditor key={project.id} project={project} />
-            ))}
-          </div>
-        ) : (
-          <p className={styles.emptyState}>
-            Aucun projet renseigné pour le moment.
-          </p>
-        )}
-      </section>
-    </div>
   );
 }

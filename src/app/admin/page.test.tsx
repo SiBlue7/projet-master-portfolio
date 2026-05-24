@@ -57,7 +57,7 @@ describe("AdminPage", () => {
       screen.getByRole("link", { name: "Gérer le parcours" }),
     ).toHaveAttribute("href", "/admin/profile/timeline");
     expect(
-      screen.getByRole("link", { name: "Gérer les projets" }),
+      screen.getByRole("link", { name: "Créer un projet" }),
     ).toHaveAttribute("href", "/admin/projects");
   });
 

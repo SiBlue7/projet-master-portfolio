@@ -1,24 +1,9 @@
-import { Buffer } from "node:buffer";
 import Link from "next/link";
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import { authOptions } from "@/lib/auth";
-import { isDefinedProjectTag } from "@/lib/projects";
-import { prisma } from "@/lib/prisma";
-import { ProjectManager, type ProjectViewModel } from "./project-form";
+import { CreateProjectForm } from "./project-form";
 import styles from "./page.module.css";
-
-function dateToDateInputValue(date: Date | null) {
-  if (!date) {
-    return "";
-  }
-
-  return date.toISOString().slice(0, 10);
-}
-
-function createProjectMediaUrl(imageData: Uint8Array, mimeType: string) {
-  return `data:${mimeType};base64,${Buffer.from(imageData).toString("base64")}`;
-}
 
 export default async function AdminProjectsPage() {
   const session = await getServerSession(authOptions);
@@ -26,108 +11,6 @@ export default async function AdminProjectsPage() {
   if (!session) {
     redirect("/admin/login");
   }
-
-  const projects = await prisma.project.findMany({
-    orderBy: [
-      {
-        startedAt: "desc",
-      },
-      {
-        createdAt: "desc",
-      },
-    ],
-    select: {
-      id: true,
-      title: true,
-      slug: true,
-      shortDescription: true,
-      description: true,
-      status: true,
-      visibility: true,
-      repositoryUrl: true,
-      demoUrl: true,
-      startedAt: true,
-      endedAt: true,
-      media: {
-        orderBy: [
-          {
-            sortOrder: "asc",
-          },
-          {
-            createdAt: "asc",
-          },
-        ],
-        select: {
-          id: true,
-          altText: true,
-          fileName: true,
-          imageData: true,
-          mimeType: true,
-          sortOrder: true,
-        },
-      },
-      stacks: {
-        orderBy: {
-          stack: {
-            label: "asc",
-          },
-        },
-        select: {
-          stack: {
-            select: {
-              label: true,
-              slug: true,
-            },
-          },
-        },
-      },
-      tags: {
-        orderBy: {
-          tag: {
-            label: "asc",
-          },
-        },
-        select: {
-          tag: {
-            select: {
-              label: true,
-              slug: true,
-            },
-          },
-        },
-      },
-    },
-  });
-
-  const projectViewModels: ProjectViewModel[] = projects.map((project) => {
-    const stacks = project.stacks.map(({ stack }) => stack);
-    const tags = project.tags.map(({ tag }) => tag).filter(isDefinedProjectTag);
-
-    return {
-      id: project.id,
-      title: project.title,
-      slug: project.slug,
-      shortDescription: project.shortDescription,
-      description: project.description,
-      stacks: stacks.map((stack) => stack.label).join(", "),
-      stackList: stacks,
-      tagSlug: tags[0]?.slug ?? "",
-      tagList: tags,
-      status: project.status,
-      visibility: project.visibility,
-      repositoryUrl: project.repositoryUrl ?? "",
-      demoUrl: project.demoUrl ?? "",
-      startedAt: dateToDateInputValue(project.startedAt),
-      endedAt: dateToDateInputValue(project.endedAt),
-      media: project.media.map((media) => ({
-        id: media.id,
-        altText: media.altText ?? "",
-        fileName: media.fileName,
-        sortOrder: media.sortOrder,
-        src: createProjectMediaUrl(media.imageData, media.mimeType),
-      })),
-    };
-  });
 
   return (
     <main className={styles.page}>
@@ -141,11 +24,24 @@ export default async function AdminProjectsPage() {
           Gestion des projets
         </h1>
         <p className={styles.description}>
-          Créez manuellement les projets qui seront ensuite affichés sur le
-          portfolio public.
+          Créez manuellement un projet, puis retrouvez-le dans la liste pour le
+          modifier depuis sa page détail admin.
         </p>
 
-        <ProjectManager projects={projectViewModels} />
+        <div className={styles.pageActions}>
+          <Link className={styles.secondaryLink} href="/admin/projects/list">
+            Voir les projets existants
+          </Link>
+        </div>
+
+        <div className={styles.manager}>
+          <section className={styles.panel} aria-labelledby="create-title">
+            <h2 id="create-title" className={styles.panelTitle}>
+              Créer un projet
+            </h2>
+            <CreateProjectForm />
+          </section>
+        </div>
       </section>
     </main>
   );
