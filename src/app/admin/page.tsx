@@ -65,6 +65,9 @@ export default async function AdminPage() {
             <Link className={styles.panelLink} href="/admin/projects">
               Créer un projet
             </Link>
+            <Link className={styles.panelLink} href="/admin/logs">
+              Consulter les logs
+            </Link>
           </div>
         </div>
       </section>

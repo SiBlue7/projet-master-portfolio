@@ -1,0 +1,212 @@
+.page {
+  min-height: 100vh;
+  padding: 48px 24px;
+  background: var(--background);
+}
+
+.main {
+  width: min(100%, 1120px);
+  margin: 0 auto;
+}
+
+.backLink {
+  display: inline-flex;
+  margin-bottom: 28px;
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.backLink:focus-visible {
+  outline: 3px solid rgba(20, 110, 245, 0.28);
+  outline-offset: 2px;
+}
+
+.eyebrow {
+  margin: 0 0 12px;
+  color: var(--accent);
+  font-size: 0.875rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.title {
+  margin: 0;
+  color: var(--foreground);
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  line-height: 1;
+}
+
+.description {
+  max-width: 720px;
+  margin: 20px 0 0;
+  color: var(--muted);
+  font-size: 1rem;
+  line-height: 1.65;
+}
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin: 28px 0 0;
+}
+
+.statCard {
+  padding: 18px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+}
+
+.statCard dt {
+  color: var(--muted);
+  font-size: 0.875rem;
+  font-weight: 800;
+}
+
+.statCard dd {
+  margin: 8px 0 0;
+  color: var(--foreground);
+  font-size: 2rem;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.panel {
+  margin-top: 24px;
+  padding: 24px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+}
+
+.panelHeader {
+  display: flex;
+  gap: 20px;
+  align-items: start;
+  justify-content: space-between;
+  margin-bottom: 22px;
+}
+
+.panelTitle {
+  margin: 0;
+  color: var(--foreground);
+  font-size: 1.25rem;
+}
+
+.panelDescription {
+  margin: 8px 0 0;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.logList {
+  display: grid;
+  gap: 12px;
+}
+
+.logItem {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(180px, auto);
+  gap: 18px;
+  align-items: center;
+  padding: 16px 18px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--background);
+}
+
+.logMain {
+  display: grid;
+  min-width: 0;
+  gap: 8px;
+}
+
+.logBadges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.actionBadge,
+.successBadge,
+.failureBadge {
+  display: inline-flex;
+  min-height: 26px;
+  align-items: center;
+  padding: 0 10px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 900;
+}
+
+.actionBadge {
+  border: 1px solid rgba(20, 110, 245, 0.18);
+  background: #eef5ff;
+  color: var(--accent);
+}
+
+.successBadge {
+  border: 1px solid rgba(18, 140, 95, 0.18);
+  background: rgba(18, 140, 95, 0.08);
+  color: #0f6b49;
+}
+
+.failureBadge {
+  border: 1px solid #f2b8b5;
+  background: #fff1f0;
+  color: #8a1f17;
+}
+
+.logSummary {
+  margin: 0;
+  color: var(--foreground);
+  font-size: 1rem;
+  line-height: 1.35;
+}
+
+.logMeta {
+  margin: 0;
+  overflow-wrap: anywhere;
+  color: var(--muted);
+  font-size: 0.875rem;
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+.logAside {
+  display: grid;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 0.875rem;
+  font-weight: 700;
+  text-align: right;
+}
+
+.emptyState {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+@media (max-width: 760px) {
+  .statsGrid,
+  .logItem {
+    grid-template-columns: 1fr;
+  }
+
+  .logAside {
+    text-align: left;
+  }
+}
+
+@media (max-width: 640px) {
+  .page {
+    padding: 40px 20px;
+  }
+
+  .panel {
+    padding: 20px;
+  }
+}
