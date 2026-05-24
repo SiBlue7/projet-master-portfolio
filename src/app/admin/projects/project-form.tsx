@@ -16,6 +16,7 @@ import {
   addProjectMedia,
   createProject,
   deleteProjectMedia,
+  importProjectFromGithub,
   type ProjectMediaFormField,
   type ProjectMediaFormState,
 } from "./actions";
@@ -600,6 +601,60 @@ export function CreateProjectForm() {
           disabled={isPending}
         >
           {isPending ? "Création..." : "Créer le projet"}
+        </button>
+      </div>
+    </form>
+  );
+}
+
+export function GithubImportProjectForm() {
+  const [state, formAction, isPending] = useActionState(
+    importProjectFromGithub,
+    initialState,
+  );
+  const repositoryUrlError = getFieldError(state, "repositoryUrl");
+
+  return (
+    <form className={styles.form} action={formAction}>
+      <div className={styles.field}>
+        <label className={styles.label} htmlFor="github-import-url">
+          URL GitHub du dépôt
+        </label>
+        <input
+          className={styles.input}
+          id="github-import-url"
+          name="githubUrl"
+          type="url"
+          placeholder="https://github.com/SiBlue7/projet-master-portfolio"
+          aria-invalid={Boolean(repositoryUrlError)}
+          aria-describedby={
+            repositoryUrlError
+              ? "github-import-url-error"
+              : "github-import-url-help"
+          }
+          disabled={isPending}
+          required
+        />
+        <p className={styles.helpText} id="github-import-url-help">
+          Le projet importé sera créé en brouillon privé, avec le lien GitHub et
+          les technologies détectées.
+        </p>
+        {repositoryUrlError ? (
+          <p className={styles.fieldError} id="github-import-url-error">
+            {repositoryUrlError}
+          </p>
+        ) : null}
+      </div>
+
+      <StateMessage state={state} />
+
+      <div className={styles.actions}>
+        <button
+          className={styles.submitButton}
+          type="submit"
+          disabled={isPending}
+        >
+          {isPending ? "Import..." : "Importer depuis GitHub"}
         </button>
       </div>
     </form>

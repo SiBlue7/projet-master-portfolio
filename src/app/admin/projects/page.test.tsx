@@ -22,7 +22,7 @@ describe("AdminProjectsPage", () => {
     vi.clearAllMocks();
   });
 
-  it("renders a creation-only project page", async () => {
+  it("renders project creation and GitHub import forms", async () => {
     mocks.getServerSession.mockResolvedValue({
       user: {
         pseudo: "admin",
@@ -38,6 +38,9 @@ describe("AdminProjectsPage", () => {
       screen.getByRole("heading", { name: "Créer un projet" }),
     ).toBeInTheDocument();
     expect(
+      screen.getByRole("heading", { name: "Importer depuis GitHub" }),
+    ).toBeInTheDocument();
+    expect(
       screen.getByRole("link", { name: "Voir les projets existants" }),
     ).toHaveAttribute("href", "/admin/projects/list");
     expect(
@@ -51,6 +54,7 @@ describe("AdminProjectsPage", () => {
     expect(screen.getByLabelText("Technologies utilisées")).toBeInTheDocument();
     expect(screen.getByLabelText("Statut")).toBeInTheDocument();
     expect(screen.getByLabelText("Visibilité")).toBeInTheDocument();
+    expect(screen.getByLabelText("URL GitHub du dépôt")).toBeInTheDocument();
   });
 
   it("redirects anonymous users to login", async () => {

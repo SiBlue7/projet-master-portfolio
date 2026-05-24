@@ -6,6 +6,7 @@ import {
   createProject,
   deleteProject,
   deleteProjectMedia,
+  importProjectFromGithub,
   updateProject,
 } from "./actions";
 
@@ -77,13 +78,16 @@ function createProjectFormData(overrides: Record<string, string> = {}) {
 
 describe("project actions", () => {
   beforeEach(() => {
+    vi.unstubAllGlobals();
     vi.clearAllMocks();
     mocks.getServerSession.mockResolvedValue({
       user: {
         pseudo: "admin",
       },
     });
-    mocks.create.mockResolvedValue({});
+    mocks.create.mockResolvedValue({
+      id: "project-id",
+    });
     mocks.update.mockResolvedValue({});
     mocks.delete.mockResolvedValue({});
     mocks.createMedia.mockResolvedValue({});
@@ -169,6 +173,83 @@ describe("project actions", () => {
     );
     expect(revalidatePath).toHaveBeenCalledWith("/");
     expect(revalidatePath).toHaveBeenCalledWith("/admin/projects");
+  });
+
+  it("imports a project from a GitHub repository URL", async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(
+        new Response(
+          JSON.stringify({
+            archived: false,
+            created_at: "2026-01-10T12:00:00Z",
+            description: "Portfolio administrable.",
+            full_name: "SiBlue7/projet-master-portfolio",
+            homepage: "",
+            html_url: "https://github.com/SiBlue7/projet-master-portfolio",
+            language: "TypeScript",
+            name: "projet-master-portfolio",
+            private: false,
+          }),
+        ),
+      )
+      .mockResolvedValueOnce(
+        new Response(
+          JSON.stringify({
+            TypeScript: 1000,
+          }),
+        ),
+      );
+    const formData = new FormData();
+    formData.set(
+      "githubUrl",
+      "https://github.com/SiBlue7/projet-master-portfolio",
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    const result = await importProjectFromGithub({ status: "idle" }, formData);
+
+    expect(result).toEqual({
+      status: "success",
+      message: "Projet importé depuis GitHub en brouillon privé.",
+    });
+    expect(mocks.create).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        description: expect.stringContaining("SiBlue7/projet-master-portfolio"),
+        repositoryUrl: "https://github.com/SiBlue7/projet-master-portfolio",
+        shortDescription: "Portfolio administrable.",
+        slug: "projet-master-portfolio",
+        stacks: {
+          create: [
+            expect.objectContaining({
+              stack: expect.objectContaining({
+                connectOrCreate: expect.objectContaining({
+                  where: {
+                    slug: "typescript",
+                  },
+                }),
+              }),
+            }),
+          ],
+        },
+        status: "DRAFT",
+        title: "Projet master portfolio",
+        visibility: "PRIVATE",
+      }),
+    });
+    expect(mocks.writeAdminAuditLog).toHaveBeenCalledWith(
+      expect.objectContaining({
+        action: "CREATE",
+        entityId: "project-id",
+        entityType: "project",
+        metadata: {
+          fullName: "SiBlue7/projet-master-portfolio",
+          repositoryUrl: "https://github.com/SiBlue7/projet-master-portfolio",
+          source: "github_import",
+        },
+        summary: "Import d'un projet depuis GitHub.",
+      }),
+    );
   });
 
   it("updates a project", async () => {
