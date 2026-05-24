@@ -29,6 +29,19 @@ enum ProfileTimelineItemType {
   CERTIFICATION
 }
 
+enum RunbookEnvironmentKind {
+  LOCAL
+  PREPROD
+  PRODUCTION
+  OTHER
+}
+
+enum RunbookStepType {
+  MANUAL
+  COMMAND
+  HTTP_REQUEST
+}
+
 model User {
   id           String   @id @default(cuid())
   email        String   @unique
@@ -57,6 +70,7 @@ model Project {
   createdAt        DateTime                @default(now())
   updatedAt        DateTime                @updatedAt
   media            ProjectMedia[]
+  runbooks         Runbook[]
   stacks           ProjectStackOnProject[]
   tags             ProjectTagOnProject[]
 
@@ -129,6 +143,73 @@ model ProjectMedia {
   @@index([projectId])
   @@index([sortOrder])
   @@map("project_media")
+}
+
+model Runbook {
+  id           String               @id @default(cuid())
+  projectId    String
+  title        String
+  slug         String
+  description  String?
+  isActive     Boolean              @default(true)
+  sortOrder    Int                  @default(0)
+  createdAt    DateTime             @default(now())
+  updatedAt    DateTime             @updatedAt
+  project      Project              @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  environments RunbookEnvironment[]
+  steps        RunbookStep[]
+
+  @@unique([projectId, slug])
+  @@index([projectId])
+  @@index([sortOrder])
+  @@map("runbooks")
+}
+
+model RunbookEnvironment {
+  id        String                 @id @default(cuid())
+  runbookId String
+  kind      RunbookEnvironmentKind @default(OTHER)
+  name      String
+  slug      String
+  baseUrl   String?
+  variables Json?
+  sortOrder Int                    @default(0)
+  createdAt DateTime               @default(now())
+  updatedAt DateTime               @updatedAt
+  runbook   Runbook                @relation(fields: [runbookId], references: [id], onDelete: Cascade)
+  steps     RunbookStep[]
+
+  @@unique([runbookId, slug])
+  @@index([runbookId])
+  @@index([kind])
+  @@index([sortOrder])
+  @@map("runbook_environments")
+}
+
+model RunbookStep {
+  id             String              @id @default(cuid())
+  runbookId      String
+  environmentId  String?
+  title          String
+  description    String?
+  type           RunbookStepType     @default(MANUAL)
+  command        String?
+  url            String?
+  httpMethod     String?
+  payload        Json?
+  expectedResult String?
+  isExecutable   Boolean             @default(false)
+  sortOrder      Int                 @default(0)
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+  runbook        Runbook             @relation(fields: [runbookId], references: [id], onDelete: Cascade)
+  environment    RunbookEnvironment? @relation(fields: [environmentId], references: [id], onDelete: SetNull)
+
+  @@index([runbookId])
+  @@index([environmentId])
+  @@index([type])
+  @@index([sortOrder])
+  @@map("runbook_steps")
 }
 
 model PublicProfile {
