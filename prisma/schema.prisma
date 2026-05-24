@@ -56,23 +56,28 @@ model User {
 }
 
 model Project {
-  id               String                  @id @default(cuid())
-  title            String
-  slug             String                  @unique
-  shortDescription String
-  description      String
-  status           ProjectStatus           @default(DRAFT)
-  visibility       ProjectVisibility       @default(PRIVATE)
-  repositoryUrl    String?
-  demoUrl          String?
-  startedAt        DateTime?
-  endedAt          DateTime?
-  createdAt        DateTime                @default(now())
-  updatedAt        DateTime                @updatedAt
-  media            ProjectMedia[]
-  runbooks         Runbook[]
-  stacks           ProjectStackOnProject[]
-  tags             ProjectTagOnProject[]
+  id                String                  @id @default(cuid())
+  title             String
+  slug              String                  @unique
+  shortDescription  String
+  description       String
+  status            ProjectStatus           @default(DRAFT)
+  visibility        ProjectVisibility       @default(PRIVATE)
+  showDetails       Boolean                 @default(true)
+  showTechnologies  Boolean                 @default(true)
+  showExternalLinks Boolean                 @default(true)
+  showMedia         Boolean                 @default(true)
+  showMetadata      Boolean                 @default(true)
+  repositoryUrl     String?
+  demoUrl           String?
+  startedAt         DateTime?
+  endedAt           DateTime?
+  createdAt         DateTime                @default(now())
+  updatedAt         DateTime                @updatedAt
+  media             ProjectMedia[]
+  runbooks          Runbook[]
+  stacks            ProjectStackOnProject[]
+  tags              ProjectTagOnProject[]
 
   @@index([status])
   @@index([visibility])

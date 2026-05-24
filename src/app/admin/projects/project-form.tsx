@@ -39,6 +39,11 @@ export type ProjectViewModel = {
   }[];
   status: ProjectStatus;
   visibility: ProjectVisibility;
+  showDetails: boolean;
+  showTechnologies: boolean;
+  showExternalLinks: boolean;
+  showMedia: boolean;
+  showMetadata: boolean;
   repositoryUrl: string;
   demoUrl: string;
   startedAt: string;
@@ -72,6 +77,11 @@ const emptyProject: ProjectViewModel = {
   tagList: [],
   status: "DRAFT",
   visibility: "PRIVATE",
+  showDetails: true,
+  showTechnologies: true,
+  showExternalLinks: true,
+  showMedia: true,
+  showMetadata: true,
   repositoryUrl: "",
   demoUrl: "",
   startedAt: "",
@@ -426,6 +436,96 @@ export function ProjectFormFields({
           ) : null}
         </div>
       </div>
+
+      <fieldset className={styles.checkboxGroup}>
+        <legend className={styles.label}>Sections publiques visibles</legend>
+        <p className={styles.helpText}>
+          La visibilité globale du projet reste prioritaire. Ces options
+          masquent uniquement certaines sections quand le projet est public.
+        </p>
+
+        <div className={styles.checkboxGrid}>
+          <label
+            className={styles.checkboxField}
+            htmlFor={`${idPrefix}-showDetails`}
+          >
+            <input type="hidden" name="showDetails" value="off" />
+            <input
+              id={`${idPrefix}-showDetails`}
+              name="showDetails"
+              type="checkbox"
+              value="on"
+              defaultChecked={project.showDetails}
+              disabled={isPending}
+            />
+            Présentation détaillée
+          </label>
+
+          <label
+            className={styles.checkboxField}
+            htmlFor={`${idPrefix}-showTechnologies`}
+          >
+            <input type="hidden" name="showTechnologies" value="off" />
+            <input
+              id={`${idPrefix}-showTechnologies`}
+              name="showTechnologies"
+              type="checkbox"
+              value="on"
+              defaultChecked={project.showTechnologies}
+              disabled={isPending}
+            />
+            Technologies
+          </label>
+
+          <label
+            className={styles.checkboxField}
+            htmlFor={`${idPrefix}-showExternalLinks`}
+          >
+            <input type="hidden" name="showExternalLinks" value="off" />
+            <input
+              id={`${idPrefix}-showExternalLinks`}
+              name="showExternalLinks"
+              type="checkbox"
+              value="on"
+              defaultChecked={project.showExternalLinks}
+              disabled={isPending}
+            />
+            Liens GitHub et démo
+          </label>
+
+          <label
+            className={styles.checkboxField}
+            htmlFor={`${idPrefix}-showMedia`}
+          >
+            <input type="hidden" name="showMedia" value="off" />
+            <input
+              id={`${idPrefix}-showMedia`}
+              name="showMedia"
+              type="checkbox"
+              value="on"
+              defaultChecked={project.showMedia}
+              disabled={isPending}
+            />
+            Captures et carrousel
+          </label>
+
+          <label
+            className={styles.checkboxField}
+            htmlFor={`${idPrefix}-showMetadata`}
+          >
+            <input type="hidden" name="showMetadata" value="off" />
+            <input
+              id={`${idPrefix}-showMetadata`}
+              name="showMetadata"
+              type="checkbox"
+              value="on"
+              defaultChecked={project.showMetadata}
+              disabled={isPending}
+            />
+            Statut, période et identifiant
+          </label>
+        </div>
+      </fieldset>
 
       <div className={styles.fieldGrid}>
         <div className={styles.field}>

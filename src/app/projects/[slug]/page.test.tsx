@@ -33,6 +33,11 @@ describe("ProjectDetailsPage", () => {
       shortDescription: "Portfolio administrable.",
       description: "Projet de portfolio avec administration.",
       status: "IN_PROGRESS",
+      showDetails: true,
+      showTechnologies: true,
+      showExternalLinks: true,
+      showMedia: true,
+      showMetadata: true,
       repositoryUrl: "https://github.com/SiBlue7/projet-master-portfolio",
       demoUrl: "https://portfolio.justdoeat.org",
       startedAt: new Date(Date.UTC(2026, 0, 1)),
@@ -138,5 +143,74 @@ describe("ProjectDetailsPage", () => {
     ).rejects.toThrow("NEXT_NOT_FOUND");
 
     expect(notFound).toHaveBeenCalled();
+  });
+
+  it("hides project sections based on fine visibility settings", async () => {
+    mocks.findFirst.mockResolvedValue({
+      title: "Portfolio master",
+      slug: "portfolio-master",
+      shortDescription: "Portfolio administrable.",
+      description: "Projet de portfolio avec administration.",
+      status: "IN_PROGRESS",
+      showDetails: false,
+      showTechnologies: false,
+      showExternalLinks: false,
+      showMedia: false,
+      showMetadata: false,
+      repositoryUrl: "https://github.com/SiBlue7/projet-master-portfolio",
+      demoUrl: "https://portfolio.justdoeat.org",
+      startedAt: new Date(Date.UTC(2026, 0, 1)),
+      endedAt: null,
+      media: [
+        {
+          id: "media-id",
+          altText: "Capture publique",
+          imageData: new Uint8Array([1, 2, 3]),
+          mimeType: "image/png",
+        },
+      ],
+      stacks: [
+        {
+          stack: {
+            label: "Next.js",
+            slug: "next-js",
+          },
+        },
+      ],
+      tags: [
+        {
+          tag: {
+            label: "En cours",
+            slug: "en-cours",
+          },
+        },
+      ],
+    });
+
+    render(
+      await ProjectDetailsPage({
+        params: Promise.resolve({
+          slug: "portfolio-master",
+        }),
+      }),
+    );
+
+    expect(screen.getByText("Portfolio administrable.")).toBeInTheDocument();
+    expect(
+      screen.queryByText("Projet de portfolio avec administration."),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("heading", { name: "Technologies utilisées" }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("heading", { name: "Captures du projet" }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("link", { name: "Voir la démo" }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("link", { name: "GitHub" }),
+    ).not.toBeInTheDocument();
+    expect(screen.queryByText("Depuis Janvier 2026")).not.toBeInTheDocument();
   });
 });

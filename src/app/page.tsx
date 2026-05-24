@@ -67,6 +67,10 @@ type PublicProject = {
   slug: string;
   shortDescription: string;
   status: ProjectStatus;
+  showTechnologies: boolean;
+  showExternalLinks: boolean;
+  showMedia: boolean;
+  showMetadata: boolean;
   repositoryUrl: string | null;
   demoUrl: string | null;
   startedAt: Date | null;
@@ -228,6 +232,10 @@ export default async function Home() {
         slug: true,
         shortDescription: true,
         status: true,
+        showTechnologies: true,
+        showExternalLinks: true,
+        showMedia: true,
+        showMetadata: true,
         repositoryUrl: true,
         demoUrl: true,
         startedAt: true,
@@ -309,16 +317,24 @@ export default async function Home() {
         title: project.title,
         slug: project.slug,
         shortDescription: project.shortDescription,
-        statusLabel: PROJECT_STATUS_LABELS[project.status],
-        period: formatPublicProjectPeriod(project),
-        repositoryUrl: project.repositoryUrl,
-        demoUrl: project.demoUrl,
-        media: project.media.map((media) => ({
-          id: media.id,
-          altText: media.altText || `Capture du projet ${project.title}`,
-          src: createProjectMediaUrl(media.imageData, media.mimeType),
-        })),
-        stacks: project.stacks.map(({ stack }) => stack),
+        statusLabel: project.showMetadata
+          ? PROJECT_STATUS_LABELS[project.status]
+          : null,
+        period: project.showMetadata
+          ? formatPublicProjectPeriod(project)
+          : null,
+        repositoryUrl: project.showExternalLinks ? project.repositoryUrl : null,
+        demoUrl: project.showExternalLinks ? project.demoUrl : null,
+        media: project.showMedia
+          ? project.media.map((media) => ({
+              id: media.id,
+              altText: media.altText || `Capture du projet ${project.title}`,
+              src: createProjectMediaUrl(media.imageData, media.mimeType),
+            }))
+          : [],
+        stacks: project.showTechnologies
+          ? project.stacks.map(({ stack }) => stack)
+          : [],
         tags: project.tags.map(({ tag }) => tag).filter(isDefinedProjectTag),
       };
     },

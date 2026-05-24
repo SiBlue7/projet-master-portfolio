@@ -84,6 +84,8 @@ const optionalDate = (label: string) =>
       .nullable(),
   );
 
+const checkboxField = z.preprocess((value) => value === "on", z.boolean());
+
 function dateInputToDate(dateValue: string | null) {
   if (!dateValue) {
     return null;
@@ -182,6 +184,11 @@ export const projectSchema = z
     visibility: z.enum(PROJECT_VISIBILITIES, {
       message: "La visibilité est obligatoire.",
     }),
+    showDetails: checkboxField,
+    showTechnologies: checkboxField,
+    showExternalLinks: checkboxField,
+    showMedia: checkboxField,
+    showMetadata: checkboxField,
     repositoryUrl: optionalUrl("Le lien GitHub"),
     demoUrl: optionalUrl("Le lien démo"),
     startedAt: optionalDate("La date de début"),
@@ -236,6 +243,16 @@ export type ProjectFormState = {
   errors?: ProjectFormErrors;
 };
 
+function getCheckboxFormValue(formData: FormData, field: string) {
+  const values = formData.getAll(field);
+
+  if (values.length === 0) {
+    return "on";
+  }
+
+  return values.includes("on") ? "on" : "off";
+}
+
 export function parseProjectFormData(formData: FormData) {
   return projectSchema.safeParse({
     title: formData.get("title"),
@@ -244,6 +261,11 @@ export function parseProjectFormData(formData: FormData) {
     description: formData.get("description"),
     status: formData.get("status"),
     visibility: formData.get("visibility"),
+    showDetails: getCheckboxFormValue(formData, "showDetails"),
+    showTechnologies: getCheckboxFormValue(formData, "showTechnologies"),
+    showExternalLinks: getCheckboxFormValue(formData, "showExternalLinks"),
+    showMedia: getCheckboxFormValue(formData, "showMedia"),
+    showMetadata: getCheckboxFormValue(formData, "showMetadata"),
     repositoryUrl: formData.get("repositoryUrl"),
     demoUrl: formData.get("demoUrl"),
     startedAt: formData.get("startedAt"),

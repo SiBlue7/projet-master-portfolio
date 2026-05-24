@@ -81,6 +81,11 @@ describe("project helpers", () => {
           "Projet de portfolio avec administration et préproduction.",
         status: "IN_PROGRESS",
         visibility: "PUBLIC",
+        showDetails: true,
+        showTechnologies: true,
+        showExternalLinks: true,
+        showMedia: true,
+        showMetadata: true,
         repositoryUrl: "https://github.com/SiBlue7/projet-master-portfolio",
         demoUrl: "https://portfolio.justdoeat.org",
         stacks: [
@@ -127,6 +132,30 @@ describe("project helpers", () => {
       expect(result.error.flatten().fieldErrors.endedAt?.[0]).toBe(
         "La date de fin doit être postérieure à la date de début.",
       );
+    }
+  });
+
+  it("parses unchecked public section visibility options", () => {
+    const result = parseProjectFormData(
+      createProjectFormData({
+        showDetails: "off",
+        showExternalLinks: "off",
+        showMedia: "off",
+        showMetadata: "off",
+        showTechnologies: "off",
+      }),
+    );
+
+    expect(result.success).toBe(true);
+
+    if (result.success) {
+      expect(result.data).toMatchObject({
+        showDetails: false,
+        showExternalLinks: false,
+        showMedia: false,
+        showMetadata: false,
+        showTechnologies: false,
+      });
     }
   });
 });

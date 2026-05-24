@@ -76,6 +76,11 @@ export default async function ProjectDetailsPage({
       shortDescription: true,
       description: true,
       status: true,
+      showDetails: true,
+      showTechnologies: true,
+      showExternalLinks: true,
+      showMedia: true,
+      showMetadata: true,
       repositoryUrl: true,
       demoUrl: true,
       startedAt: true,
@@ -142,7 +147,16 @@ export default async function ProjectDetailsPage({
     altText: media.altText || `Capture du projet ${project.title}`,
     src: createProjectMediaUrl(media.imageData, media.mimeType),
   }));
-  const coverMedia = projectMedia[0] ?? null;
+  const visibleProjectStacks = project.showTechnologies ? projectStacks : [];
+  const visibleProjectMedia = project.showMedia ? projectMedia : [];
+  const coverMedia = visibleProjectMedia[0] ?? null;
+  const hasExternalLinks =
+    project.showExternalLinks && (project.demoUrl || project.repositoryUrl);
+  const hasDetailSections =
+    project.showMetadata ||
+    project.showDetails ||
+    visibleProjectStacks.length > 0 ||
+    visibleProjectMedia.length > 0;
 
   return (
     <main className={styles.page}>
@@ -169,28 +183,30 @@ export default async function ProjectDetailsPage({
             </div>
           ) : null}
 
-          <div className={styles.actions}>
-            {project.demoUrl ? (
-              <a
-                className={styles.primaryAction}
-                href={project.demoUrl}
-                rel="noreferrer"
-                target="_blank"
-              >
-                Voir la démo
-              </a>
-            ) : null}
-            {project.repositoryUrl ? (
-              <a
-                className={styles.secondaryAction}
-                href={project.repositoryUrl}
-                rel="noreferrer"
-                target="_blank"
-              >
-                GitHub
-              </a>
-            ) : null}
-          </div>
+          {hasExternalLinks ? (
+            <div className={styles.actions}>
+              {project.demoUrl ? (
+                <a
+                  className={styles.primaryAction}
+                  href={project.demoUrl}
+                  rel="noreferrer"
+                  target="_blank"
+                >
+                  Voir la démo
+                </a>
+              ) : null}
+              {project.repositoryUrl ? (
+                <a
+                  className={styles.secondaryAction}
+                  href={project.repositoryUrl}
+                  rel="noreferrer"
+                  target="_blank"
+                >
+                  GitHub
+                </a>
+              ) : null}
+            </div>
+          ) : null}
         </div>
 
         {coverMedia ? (
@@ -218,57 +234,63 @@ export default async function ProjectDetailsPage({
         )}
       </section>
 
-      <section className={styles.details} aria-label="Détails du projet">
-        <div className={styles.metaGrid}>
-          <div className={styles.metaItem}>
-            <span className={styles.metaLabel}>Statut</span>
-            <span className={styles.metaValue}>
-              {PROJECT_STATUS_LABELS[project.status as ProjectStatus]}
-            </span>
-          </div>
-          <div className={styles.metaItem}>
-            <span className={styles.metaLabel}>Période</span>
-            <span className={styles.metaValue}>
-              {formatProjectPeriod(project)}
-            </span>
-          </div>
-          <div className={styles.metaItem}>
-            <span className={styles.metaLabel}>Identifiant</span>
-            <span className={styles.metaValue}>{project.slug}</span>
-          </div>
-        </div>
-
-        <article className={styles.descriptionPanel}>
-          <h2 className={styles.sectionTitle}>Présentation</h2>
-          <p className={styles.fullDescription}>{project.description}</p>
-        </article>
-
-        {projectStacks.length > 0 ? (
-          <article className={styles.descriptionPanel}>
-            <h2 className={styles.sectionTitle}>Technologies utilisées</h2>
-            <div
-              className={styles.stackList}
-              aria-label={`Technologies du projet ${project.title}`}
-            >
-              {projectStacks.map((stack) => (
-                <span className={styles.stack} key={stack.slug}>
-                  {stack.label}
+      {hasDetailSections ? (
+        <section className={styles.details} aria-label="Détails du projet">
+          {project.showMetadata ? (
+            <div className={styles.metaGrid}>
+              <div className={styles.metaItem}>
+                <span className={styles.metaLabel}>Statut</span>
+                <span className={styles.metaValue}>
+                  {PROJECT_STATUS_LABELS[project.status as ProjectStatus]}
                 </span>
-              ))}
+              </div>
+              <div className={styles.metaItem}>
+                <span className={styles.metaLabel}>Période</span>
+                <span className={styles.metaValue}>
+                  {formatProjectPeriod(project)}
+                </span>
+              </div>
+              <div className={styles.metaItem}>
+                <span className={styles.metaLabel}>Identifiant</span>
+                <span className={styles.metaValue}>{project.slug}</span>
+              </div>
             </div>
-          </article>
-        ) : null}
+          ) : null}
 
-        {projectMedia.length > 0 ? (
-          <article className={styles.descriptionPanel}>
-            <h2 className={styles.sectionTitle}>Captures du projet</h2>
-            <ProjectMediaCarousel
-              items={projectMedia}
-              projectTitle={project.title}
-            />
-          </article>
-        ) : null}
-      </section>
+          {project.showDetails ? (
+            <article className={styles.descriptionPanel}>
+              <h2 className={styles.sectionTitle}>Présentation</h2>
+              <p className={styles.fullDescription}>{project.description}</p>
+            </article>
+          ) : null}
+
+          {visibleProjectStacks.length > 0 ? (
+            <article className={styles.descriptionPanel}>
+              <h2 className={styles.sectionTitle}>Technologies utilisées</h2>
+              <div
+                className={styles.stackList}
+                aria-label={`Technologies du projet ${project.title}`}
+              >
+                {visibleProjectStacks.map((stack) => (
+                  <span className={styles.stack} key={stack.slug}>
+                    {stack.label}
+                  </span>
+                ))}
+              </div>
+            </article>
+          ) : null}
+
+          {visibleProjectMedia.length > 0 ? (
+            <article className={styles.descriptionPanel}>
+              <h2 className={styles.sectionTitle}>Captures du projet</h2>
+              <ProjectMediaCarousel
+                items={visibleProjectMedia}
+                projectTitle={project.title}
+              />
+            </article>
+          ) : null}
+        </section>
+      ) : null}
     </main>
   );
 }
