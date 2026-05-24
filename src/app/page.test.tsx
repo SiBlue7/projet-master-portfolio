@@ -188,6 +188,10 @@ describe("Home", () => {
         slug: "portfolio-master",
         shortDescription: "Portfolio administrable.",
         status: "IN_PROGRESS",
+        showTechnologies: true,
+        showExternalLinks: true,
+        showMedia: true,
+        showMetadata: true,
         repositoryUrl: "https://github.com/SiBlue7/projet-master-portfolio",
         demoUrl: "https://portfolio.justdoeat.org",
         startedAt: new Date(Date.UTC(2026, 0, 1)),
@@ -235,6 +239,10 @@ describe("Home", () => {
         slug: "api-securite",
         shortDescription: "API orientée authentification et audit.",
         status: "COMPLETED",
+        showTechnologies: true,
+        showExternalLinks: true,
+        showMedia: true,
+        showMetadata: true,
         repositoryUrl: null,
         demoUrl: null,
         startedAt: new Date(Date.UTC(2025, 8, 1)),
@@ -263,6 +271,10 @@ describe("Home", () => {
         slug: "dashboard-soc",
         shortDescription: "Visualisation de signaux de sécurité.",
         status: "DRAFT",
+        showTechnologies: true,
+        showExternalLinks: true,
+        showMedia: true,
+        showMetadata: true,
         repositoryUrl: null,
         demoUrl: null,
         startedAt: null,
@@ -333,5 +345,65 @@ describe("Home", () => {
         },
       }),
     );
+  });
+
+  it("hides public project card sections with fine visibility settings", async () => {
+    mocks.findUnique.mockResolvedValue(null);
+    mocks.findProjects.mockResolvedValue([
+      {
+        id: "project-id",
+        title: "Portfolio master",
+        slug: "portfolio-master",
+        shortDescription: "Portfolio administrable.",
+        status: "IN_PROGRESS",
+        showTechnologies: false,
+        showExternalLinks: false,
+        showMedia: false,
+        showMetadata: false,
+        repositoryUrl: "https://github.com/SiBlue7/projet-master-portfolio",
+        demoUrl: "https://portfolio.justdoeat.org",
+        startedAt: new Date(Date.UTC(2026, 0, 1)),
+        endedAt: null,
+        media: [
+          {
+            id: "project-media-id",
+            altText: "Capture portfolio",
+            imageData: new Uint8Array([1, 2, 3]),
+            mimeType: "image/png",
+          },
+        ],
+        stacks: [
+          {
+            stack: {
+              label: "Next.js",
+              slug: "next-js",
+            },
+          },
+        ],
+        tags: [
+          {
+            tag: {
+              label: "En cours",
+              slug: "en-cours",
+            },
+          },
+        ],
+      },
+    ]);
+
+    render(await Home());
+
+    expect(screen.getByText("Portfolio master")).toBeInTheDocument();
+    expect(screen.queryByText("Depuis Janvier 2026")).not.toBeInTheDocument();
+    expect(screen.queryByText("Next.js")).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("img", { name: "Capture portfolio" }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("link", { name: "GitHub" }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("link", { name: "Démo" }),
+    ).not.toBeInTheDocument();
   });
 });

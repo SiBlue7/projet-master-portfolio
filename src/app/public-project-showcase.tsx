@@ -11,8 +11,8 @@ export type PublicProjectCardViewModel = {
   title: string;
   slug: string;
   shortDescription: string;
-  statusLabel: string;
-  period: string;
+  statusLabel: string | null;
+  period: string | null;
   repositoryUrl: string | null;
   demoUrl: string | null;
   media: {
@@ -255,12 +255,20 @@ export function PublicProjectShowcase({
               <ProjectCardMediaPreview project={project} />
 
               <div className={styles.projectCardBody}>
-                <div className={styles.projectCardHeader}>
-                  <span className={styles.projectStatus}>
-                    {project.statusLabel}
-                  </span>
-                  <span className={styles.projectPeriod}>{project.period}</span>
-                </div>
+                {project.statusLabel || project.period ? (
+                  <div className={styles.projectCardHeader}>
+                    {project.statusLabel ? (
+                      <span className={styles.projectStatus}>
+                        {project.statusLabel}
+                      </span>
+                    ) : null}
+                    {project.period ? (
+                      <span className={styles.projectPeriod}>
+                        {project.period}
+                      </span>
+                    ) : null}
+                  </div>
+                ) : null}
                 <h3 className={styles.projectTitle}>{project.title}</h3>
                 <p className={styles.projectDescription}>
                   {project.shortDescription}
