@@ -10,7 +10,8 @@
 .band,
 .projectsSection,
 .timelineSection,
-.foundationSection {
+.foundationSection,
+.contactSection {
   width: min(100%, 1120px);
   margin: 0 auto;
 }
@@ -95,6 +96,8 @@
 .primaryAction:focus-visible,
 .secondaryAction:focus-visible,
 .contactList a:focus-visible,
+.contactPrimary:focus-visible,
+.contactSecondary:focus-visible,
 .projectPrimaryLink:focus-visible,
 .projectSecondaryLink:focus-visible,
 .projectFilterButton:focus-visible,
@@ -823,11 +826,78 @@
   background: var(--surface);
 }
 
+.contactSection {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(280px, 0.9fr);
+  gap: 34px;
+  align-items: end;
+  margin-top: 58px;
+  padding: 34px;
+  border: 1px solid rgba(20, 110, 245, 0.18);
+  border-radius: 8px;
+  background:
+    linear-gradient(135deg, rgba(20, 110, 245, 0.1), transparent 42%),
+    linear-gradient(315deg, rgba(15, 118, 110, 0.12), transparent 36%),
+    var(--surface);
+}
+
+.contactContent {
+  min-width: 0;
+}
+
+.contactTitle {
+  max-width: 760px;
+  margin: 0;
+  color: var(--foreground);
+  font-size: clamp(1.9rem, 4vw, 3.1rem);
+  line-height: 1.02;
+}
+
+.contactDescription {
+  max-width: 680px;
+  margin: 18px 0 0;
+  color: var(--muted);
+  font-size: 1.02rem;
+  line-height: 1.7;
+}
+
+.contactActions {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+}
+
+.contactPrimary,
+.contactSecondary {
+  display: flex;
+  min-height: 50px;
+  align-items: center;
+  justify-content: center;
+  padding: 0 18px;
+  border-radius: 8px;
+  overflow-wrap: anywhere;
+  font-weight: 800;
+  text-align: center;
+}
+
+.contactPrimary {
+  border: 1px solid var(--accent);
+  background: var(--accent);
+  color: var(--accent-foreground);
+}
+
+.contactSecondary {
+  border: 1px solid rgba(216, 222, 232, 0.9);
+  background: rgba(255, 255, 255, 0.72);
+  color: var(--foreground);
+}
+
 @media (max-width: 900px) {
   .hero,
   .projectsHeader,
   .timelineSectionHeader,
-  .foundationSection {
+  .foundationSection,
+  .contactSection {
     grid-template-columns: 1fr;
   }
 
@@ -846,6 +916,11 @@
 
   .timelineSection {
     padding-top: 56px;
+  }
+
+  .contactSection {
+    align-items: start;
+    margin-top: 46px;
   }
 
   .projectsSection {
@@ -902,7 +977,9 @@
   }
 
   .projectPrimaryLink,
-  .projectSecondaryLink {
+  .projectSecondaryLink,
+  .contactPrimary,
+  .contactSecondary {
     width: 100%;
   }
 

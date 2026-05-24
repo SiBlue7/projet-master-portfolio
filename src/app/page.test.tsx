@@ -62,6 +62,14 @@ describe("Home", () => {
     expect(
       screen.getByRole("img", { name: "Avatar de Enzo Chevalier" }),
     ).toHaveAttribute("src", "data:image/png;base64,AQID");
+    expect(
+      screen.getByRole("heading", {
+        name: /Échanger autour d'une opportunité/,
+      }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getAllByRole("link", { name: "enzo@example.com" }).at(-1),
+    ).toHaveAttribute("href", "mailto:enzo@example.com");
   });
 
   it("renders public timeline items grouped by type", async () => {
