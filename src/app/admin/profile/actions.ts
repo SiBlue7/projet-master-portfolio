@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { getServerSession } from "next-auth";
+import { writeAdminAuditLog } from "@/lib/admin-audit";
 import { authOptions } from "@/lib/auth";
 import {
   PUBLIC_PROFILE_ID,
@@ -82,6 +83,18 @@ export async function savePublicProfile(
       ...parsedProfile.data,
       ...avatarUpdate,
     },
+  });
+
+  await writeAdminAuditLog({
+    action: "UPDATE",
+    entityId: PUBLIC_PROFILE_ID,
+    entityType: "public_profile",
+    metadata: {
+      avatarRemoved: shouldRemoveAvatar,
+      avatarUploaded: Boolean(avatarFileData),
+    },
+    session,
+    summary: "Mise à jour du profil public.",
   });
 
   revalidatePath("/");

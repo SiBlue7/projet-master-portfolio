@@ -2,8 +2,9 @@
 
 import { Buffer } from "node:buffer";
 import { revalidatePath } from "next/cache";
-import { getServerSession } from "next-auth";
+import { getServerSession, type Session } from "next-auth";
 import { Prisma } from "@/generated/prisma/client";
+import { writeAdminAuditLog } from "@/lib/admin-audit";
 import { authOptions } from "@/lib/auth";
 import {
   parseProjectFormData,
@@ -44,17 +45,23 @@ function duplicateSlugError(): ProjectFormState {
   };
 }
 
-async function ensureAdminSession(): Promise<SessionErrorState | null> {
+async function ensureAdminSession(): Promise<Session | SessionErrorState> {
   const session = await getServerSession(authOptions);
 
   if (session) {
-    return null;
+    return session;
   }
 
   return {
     status: "error",
     message: "Votre session a expiré. Reconnectez-vous pour continuer.",
   };
+}
+
+function isSessionError(
+  value: Session | SessionErrorState,
+): value is SessionErrorState {
+  return "status" in value;
 }
 
 function revalidateProjectPages() {
@@ -172,10 +179,10 @@ export async function createProject(
   _previousState: ProjectFormState,
   formData: FormData,
 ): Promise<ProjectFormState> {
-  const sessionError = await ensureAdminSession();
+  const session = await ensureAdminSession();
 
-  if (sessionError) {
-    return sessionError;
+  if (isSessionError(session)) {
+    return session;
   }
 
   const parsedProject = parseProjectFormData(formData);
@@ -191,7 +198,7 @@ export async function createProject(
   const { stacks, tags, ...projectData } = parsedProject.data;
 
   try {
-    await prisma.project.create({
+    const project = await prisma.project.create({
       data: {
         ...projectData,
         stacks: {
@@ -201,6 +208,18 @@ export async function createProject(
           create: buildProjectTagCreates(tags),
         },
       },
+    });
+
+    await writeAdminAuditLog({
+      action: "CREATE",
+      entityId: project.id,
+      entityType: "project",
+      metadata: {
+        slug: projectData.slug,
+        title: projectData.title,
+      },
+      session,
+      summary: "Création d'un projet.",
     });
   } catch (error) {
     if (
@@ -226,10 +245,10 @@ export async function updateProject(
   _previousState: ProjectFormState,
   formData: FormData,
 ): Promise<ProjectFormState> {
-  const sessionError = await ensureAdminSession();
+  const session = await ensureAdminSession();
 
-  if (sessionError) {
-    return sessionError;
+  if (isSessionError(session)) {
+    return session;
   }
 
   const parsedProject = parseProjectFormData(formData);
@@ -261,6 +280,18 @@ export async function updateProject(
         },
       },
     });
+
+    await writeAdminAuditLog({
+      action: "UPDATE",
+      entityId: projectId,
+      entityType: "project",
+      metadata: {
+        slug: projectData.slug,
+        title: projectData.title,
+      },
+      session,
+      summary: "Mise à jour d'un projet.",
+    });
   } catch (error) {
     if (
       error instanceof Prisma.PrismaClientKnownRequestError &&
@@ -288,16 +319,24 @@ export async function deleteProject(
   void _previousState;
   void _formData;
 
-  const sessionError = await ensureAdminSession();
+  const session = await ensureAdminSession();
 
-  if (sessionError) {
-    return sessionError;
+  if (isSessionError(session)) {
+    return session;
   }
 
   await prisma.project.delete({
     where: {
       id: projectId,
     },
+  });
+
+  await writeAdminAuditLog({
+    action: "DELETE",
+    entityId: projectId,
+    entityType: "project",
+    session,
+    summary: "Suppression d'un projet.",
   });
 
   revalidateProjectPages();
@@ -313,10 +352,10 @@ export async function addProjectMedia(
   _previousState: ProjectMediaFormState,
   formData: FormData,
 ): Promise<ProjectMediaFormState> {
-  const sessionError = await ensureAdminSession();
+  const session = await ensureAdminSession();
 
-  if (sessionError) {
-    return sessionError;
+  if (isSessionError(session)) {
+    return session;
   }
 
   const parsedMedia = parseProjectMediaFormData(formData);
@@ -341,7 +380,7 @@ export async function addProjectMedia(
     };
   }
 
-  await prisma.projectMedia.create({
+  const media = await prisma.projectMedia.create({
     data: {
       projectId,
       altText: parsedMedia.altText,
@@ -350,6 +389,20 @@ export async function addProjectMedia(
       mimeType: parsedMedia.image.type,
       sortOrder: parsedMedia.sortOrder,
     },
+  });
+
+  await writeAdminAuditLog({
+    action: "UPLOAD",
+    entityId: media.id,
+    entityType: "project_media",
+    metadata: {
+      fileName: parsedMedia.image.name || "capture-projet",
+      mimeType: parsedMedia.image.type,
+      projectId,
+      projectSlug: project.slug,
+    },
+    session,
+    summary: "Ajout d'une capture de projet.",
   });
 
   revalidateProjectDetails(project.slug);
@@ -368,10 +421,10 @@ export async function deleteProjectMedia(
   void _previousState;
   void _formData;
 
-  const sessionError = await ensureAdminSession();
+  const session = await ensureAdminSession();
 
-  if (sessionError) {
-    return sessionError;
+  if (isSessionError(session)) {
+    return session;
   }
 
   const media = await prisma.projectMedia.findUnique({
@@ -398,6 +451,17 @@ export async function deleteProjectMedia(
     where: {
       id: mediaId,
     },
+  });
+
+  await writeAdminAuditLog({
+    action: "DELETE",
+    entityId: mediaId,
+    entityType: "project_media",
+    metadata: {
+      projectSlug: media.project.slug,
+    },
+    session,
+    summary: "Suppression d'une capture de projet.",
   });
 
   revalidateProjectDetails(media.project.slug);

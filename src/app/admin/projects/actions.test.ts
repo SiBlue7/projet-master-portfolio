@@ -19,6 +19,7 @@ const mocks = vi.hoisted(() => ({
   getServerSession: vi.fn(),
   revalidatePath: vi.fn(),
   update: vi.fn(),
+  writeAdminAuditLog: vi.fn(),
 }));
 
 vi.mock("next/cache", () => ({
@@ -43,6 +44,10 @@ vi.mock("@/lib/prisma", () => ({
       findUnique: mocks.findMedia,
     },
   },
+}));
+
+vi.mock("@/lib/admin-audit", () => ({
+  writeAdminAuditLog: mocks.writeAdminAuditLog,
 }));
 
 function createProjectFormData(overrides: Record<string, string> = {}) {
@@ -151,6 +156,17 @@ describe("project actions", () => {
         },
       }),
     });
+    expect(mocks.writeAdminAuditLog).toHaveBeenCalledWith(
+      expect.objectContaining({
+        action: "CREATE",
+        entityType: "project",
+        metadata: {
+          slug: "portfolio-master",
+          title: "Portfolio master",
+        },
+        summary: "Création d'un projet.",
+      }),
+    );
     expect(revalidatePath).toHaveBeenCalledWith("/");
     expect(revalidatePath).toHaveBeenCalledWith("/admin/projects");
   });

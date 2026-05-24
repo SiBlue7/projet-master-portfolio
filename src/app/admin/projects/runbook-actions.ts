@@ -1,8 +1,9 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { getServerSession } from "next-auth";
+import { getServerSession, type Session } from "next-auth";
 import { Prisma } from "@/generated/prisma/client";
+import { writeAdminAuditLog } from "@/lib/admin-audit";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import {
@@ -19,17 +20,23 @@ type SessionErrorState = {
   message: string;
 };
 
-async function ensureAdminSession(): Promise<SessionErrorState | null> {
+async function ensureAdminSession(): Promise<Session | SessionErrorState> {
   const session = await getServerSession(authOptions);
 
   if (session) {
-    return null;
+    return session;
   }
 
   return {
     status: "error",
     message: "Votre session a expiré. Reconnectez-vous pour continuer.",
   };
+}
+
+function isSessionError(
+  value: Session | SessionErrorState,
+): value is SessionErrorState {
+  return "status" in value;
 }
 
 function revalidateRunbookPages(projectId: string | null) {
@@ -99,10 +106,10 @@ export async function createRunbook(
   _previousState: RunbookFormState,
   formData: FormData,
 ): Promise<RunbookFormState> {
-  const sessionError = await ensureAdminSession();
+  const session = await ensureAdminSession();
 
-  if (sessionError) {
-    return sessionError;
+  if (isSessionError(session)) {
+    return session;
   }
 
   const parsedRunbook = parseRunbookFormData(formData);
@@ -132,11 +139,24 @@ export async function createRunbook(
   }
 
   try {
-    await prisma.runbook.create({
+    const runbook = await prisma.runbook.create({
       data: {
         ...parsedRunbook.data,
         projectId,
       },
+    });
+
+    await writeAdminAuditLog({
+      action: "CREATE",
+      entityId: runbook.id,
+      entityType: "runbook",
+      metadata: {
+        projectId,
+        slug: parsedRunbook.data.slug,
+        title: parsedRunbook.data.title,
+      },
+      session,
+      summary: "Création d'un runbook.",
     });
   } catch (error) {
     if (
@@ -162,10 +182,10 @@ export async function updateRunbook(
   _previousState: RunbookFormState,
   formData: FormData,
 ): Promise<RunbookFormState> {
-  const sessionError = await ensureAdminSession();
+  const session = await ensureAdminSession();
 
-  if (sessionError) {
-    return sessionError;
+  if (isSessionError(session)) {
+    return session;
   }
 
   const parsedRunbook = parseRunbookFormData(formData);
@@ -194,6 +214,19 @@ export async function updateRunbook(
       },
       data: parsedRunbook.data,
     });
+
+    await writeAdminAuditLog({
+      action: "UPDATE",
+      entityId: runbookId,
+      entityType: "runbook",
+      metadata: {
+        projectId,
+        slug: parsedRunbook.data.slug,
+        title: parsedRunbook.data.title,
+      },
+      session,
+      summary: "Mise à jour d'un runbook.",
+    });
   } catch (error) {
     if (
       error instanceof Prisma.PrismaClientKnownRequestError &&
@@ -221,10 +254,10 @@ export async function deleteRunbook(
   void _previousState;
   void _formData;
 
-  const sessionError = await ensureAdminSession();
+  const session = await ensureAdminSession();
 
-  if (sessionError) {
-    return sessionError;
+  if (isSessionError(session)) {
+    return session;
   }
 
   const projectId = await getRunbookProjectId(runbookId);
@@ -242,6 +275,17 @@ export async function deleteRunbook(
     },
   });
 
+  await writeAdminAuditLog({
+    action: "DELETE",
+    entityId: runbookId,
+    entityType: "runbook",
+    metadata: {
+      projectId,
+    },
+    session,
+    summary: "Suppression d'un runbook.",
+  });
+
   revalidateRunbookPages(projectId);
 
   return {
@@ -255,10 +299,10 @@ export async function createRunbookEnvironment(
   _previousState: RunbookEnvironmentFormState,
   formData: FormData,
 ): Promise<RunbookEnvironmentFormState> {
-  const sessionError = await ensureAdminSession();
+  const session = await ensureAdminSession();
 
-  if (sessionError) {
-    return sessionError;
+  if (isSessionError(session)) {
+    return session;
   }
 
   const parsedEnvironment = parseRunbookEnvironmentFormData(formData);
@@ -281,11 +325,26 @@ export async function createRunbookEnvironment(
   }
 
   try {
-    await prisma.runbookEnvironment.create({
+    const environment = await prisma.runbookEnvironment.create({
       data: {
         ...parsedEnvironment.data,
         runbookId,
       },
+    });
+
+    await writeAdminAuditLog({
+      action: "CREATE",
+      entityId: environment.id,
+      entityType: "runbook_environment",
+      metadata: {
+        kind: parsedEnvironment.data.kind,
+        name: parsedEnvironment.data.name,
+        projectId,
+        runbookId,
+        slug: parsedEnvironment.data.slug,
+      },
+      session,
+      summary: "Création d'un environnement de runbook.",
     });
   } catch (error) {
     if (
@@ -311,10 +370,10 @@ export async function updateRunbookEnvironment(
   _previousState: RunbookEnvironmentFormState,
   formData: FormData,
 ): Promise<RunbookEnvironmentFormState> {
-  const sessionError = await ensureAdminSession();
+  const session = await ensureAdminSession();
 
-  if (sessionError) {
-    return sessionError;
+  if (isSessionError(session)) {
+    return session;
   }
 
   const parsedEnvironment = parseRunbookEnvironmentFormData(formData);
@@ -354,6 +413,20 @@ export async function updateRunbookEnvironment(
       },
       data: parsedEnvironment.data,
     });
+
+    await writeAdminAuditLog({
+      action: "UPDATE",
+      entityId: environmentId,
+      entityType: "runbook_environment",
+      metadata: {
+        kind: parsedEnvironment.data.kind,
+        name: parsedEnvironment.data.name,
+        projectId: environment.runbook.projectId,
+        slug: parsedEnvironment.data.slug,
+      },
+      session,
+      summary: "Mise à jour d'un environnement de runbook.",
+    });
   } catch (error) {
     if (
       error instanceof Prisma.PrismaClientKnownRequestError &&
@@ -381,10 +454,10 @@ export async function deleteRunbookEnvironment(
   void _previousState;
   void _formData;
 
-  const sessionError = await ensureAdminSession();
+  const session = await ensureAdminSession();
 
-  if (sessionError) {
-    return sessionError;
+  if (isSessionError(session)) {
+    return session;
   }
 
   const environment = await prisma.runbookEnvironment.findUnique({
@@ -413,6 +486,17 @@ export async function deleteRunbookEnvironment(
     },
   });
 
+  await writeAdminAuditLog({
+    action: "DELETE",
+    entityId: environmentId,
+    entityType: "runbook_environment",
+    metadata: {
+      projectId: environment.runbook.projectId,
+    },
+    session,
+    summary: "Suppression d'un environnement de runbook.",
+  });
+
   revalidateRunbookPages(environment.runbook.projectId);
 
   return {
@@ -426,10 +510,10 @@ export async function createRunbookStep(
   _previousState: RunbookStepFormState,
   formData: FormData,
 ): Promise<RunbookStepFormState> {
-  const sessionError = await ensureAdminSession();
+  const session = await ensureAdminSession();
 
-  if (sessionError) {
-    return sessionError;
+  if (isSessionError(session)) {
+    return session;
   }
 
   const parsedStep = parseRunbookStepFormData(formData);
@@ -468,11 +552,25 @@ export async function createRunbookStep(
     };
   }
 
-  await prisma.runbookStep.create({
+  const step = await prisma.runbookStep.create({
     data: {
       ...parsedStep.data,
       runbookId,
     },
+  });
+
+  await writeAdminAuditLog({
+    action: "CREATE",
+    entityId: step.id,
+    entityType: "runbook_step",
+    metadata: {
+      projectId,
+      runbookId,
+      title: parsedStep.data.title,
+      type: parsedStep.data.type,
+    },
+    session,
+    summary: "Création d'une étape de runbook.",
   });
 
   revalidateRunbookPages(projectId);
@@ -488,10 +586,10 @@ export async function updateRunbookStep(
   _previousState: RunbookStepFormState,
   formData: FormData,
 ): Promise<RunbookStepFormState> {
-  const sessionError = await ensureAdminSession();
+  const session = await ensureAdminSession();
 
-  if (sessionError) {
-    return sessionError;
+  if (isSessionError(session)) {
+    return session;
   }
 
   const parsedStep = parseRunbookStepFormData(formData);
@@ -549,6 +647,19 @@ export async function updateRunbookStep(
     data: parsedStep.data,
   });
 
+  await writeAdminAuditLog({
+    action: "UPDATE",
+    entityId: stepId,
+    entityType: "runbook_step",
+    metadata: {
+      projectId: step.runbook.projectId,
+      title: parsedStep.data.title,
+      type: parsedStep.data.type,
+    },
+    session,
+    summary: "Mise à jour d'une étape de runbook.",
+  });
+
   revalidateRunbookPages(step.runbook.projectId);
 
   return {
@@ -565,10 +676,10 @@ export async function deleteRunbookStep(
   void _previousState;
   void _formData;
 
-  const sessionError = await ensureAdminSession();
+  const session = await ensureAdminSession();
 
-  if (sessionError) {
-    return sessionError;
+  if (isSessionError(session)) {
+    return session;
   }
 
   const step = await prisma.runbookStep.findUnique({
@@ -595,6 +706,17 @@ export async function deleteRunbookStep(
     where: {
       id: stepId,
     },
+  });
+
+  await writeAdminAuditLog({
+    action: "DELETE",
+    entityId: stepId,
+    entityType: "runbook_step",
+    metadata: {
+      projectId: step.runbook.projectId,
+    },
+    session,
+    summary: "Suppression d'une étape de runbook.",
   });
 
   revalidateRunbookPages(step.runbook.projectId);

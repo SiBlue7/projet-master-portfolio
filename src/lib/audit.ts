@@ -50,3 +50,11 @@ export async function writeAuditLog({
     },
   });
 }
+
+export async function tryWriteAuditLog(input: WriteAuditLogInput) {
+  try {
+    await writeAuditLog(input);
+  } catch (error) {
+    console.error("Unable to write audit log.", error);
+  }
+}
