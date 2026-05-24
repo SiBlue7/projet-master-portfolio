@@ -43,6 +43,14 @@ describe("Home", () => {
 
     render(await Home());
 
+    expect(screen.getByRole("link", { name: "Accueil" })).toHaveAttribute(
+      "href",
+      "#accueil",
+    );
+    expect(screen.getByRole("link", { name: "Contact" })).toHaveAttribute(
+      "href",
+      "#contact",
+    );
     expect(
       screen.getByRole("heading", { name: "Enzo Chevalier" }),
     ).toBeInTheDocument();
@@ -145,6 +153,10 @@ describe("Home", () => {
 
     render(await Home());
 
+    expect(screen.getByRole("link", { name: "Parcours" })).toHaveAttribute(
+      "href",
+      "#parcours",
+    );
     expect(
       screen.getByRole("heading", { name: "Formation" }),
     ).toBeInTheDocument();
@@ -181,6 +193,13 @@ describe("Home", () => {
     expect(
       screen.getByRole("heading", { name: "Portfolio technique" }),
     ).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Socle" })).toHaveAttribute(
+      "href",
+      "#socle",
+    );
+    expect(
+      screen.queryByRole("link", { name: "Projets" }),
+    ).not.toBeInTheDocument();
     expect(screen.getByText("PostgreSQL + Prisma")).toBeInTheDocument();
     expect(
       screen.queryByRole("heading", { name: "Parcours" }),
@@ -309,6 +328,10 @@ describe("Home", () => {
 
     render(await Home());
 
+    expect(screen.getByRole("link", { name: "Projets" })).toHaveAttribute(
+      "href",
+      "#projets",
+    );
     expect(
       screen.getByRole("heading", {
         name: "Des réalisations pensées comme des produits complets",

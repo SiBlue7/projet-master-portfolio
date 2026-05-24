@@ -32,6 +32,7 @@ export type PublicProjectCardViewModel = {
 
 type PublicProjectShowcaseProps = {
   projects: PublicProjectCardViewModel[];
+  sectionId?: string;
 };
 
 function ProjectCardMediaPreview({
@@ -142,6 +143,7 @@ function ProjectCardMediaPreview({
 
 export function PublicProjectShowcase({
   projects,
+  sectionId,
 }: PublicProjectShowcaseProps) {
   const listRef = useRef<HTMLDivElement>(null);
   const [selectedTag, setSelectedTag] = useState("all");
@@ -190,6 +192,7 @@ export function PublicProjectShowcase({
 
   return (
     <section
+      id={sectionId}
       className={styles.projectsSection}
       aria-labelledby="projects-title"
     >
