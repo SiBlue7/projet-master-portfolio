@@ -3,7 +3,18 @@ import type { NextAuthOptions, User } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { z } from "zod";
 import type { UserRole } from "@/generated/prisma/client";
+import {
+  adminLoginRateLimitErrorCode,
+  adminSessionMaxAgeSeconds,
+  adminSessionUpdateAgeSeconds,
+} from "@/lib/auth-security";
 import { prisma } from "@/lib/prisma";
+
+const adminLoginRateLimit = {
+  blockDurationMs: 15 * 60 * 1000,
+  maxAttempts: 5,
+  windowMs: 10 * 60 * 1000,
+} as const;
 
 const optionalCredential = z.string().trim().optional();
 
@@ -47,6 +58,20 @@ type AuthDependencies = {
   comparePassword: (password: string, hash: string) => Promise<boolean>;
 };
 
+type AuthRequestLike = {
+  headers?: Headers | Record<string, string | string[] | undefined>;
+  socket?: {
+    remoteAddress?: string;
+  };
+};
+
+type LoginAttemptRecord = {
+  attempts: number[];
+  blockedUntil: number | null;
+};
+
+const loginAttempts = new Map<string, LoginAttemptRecord>();
+
 const authUserSelect = {
   id: true,
   email: true,
@@ -86,6 +111,131 @@ const defaultAuthDependencies: AuthDependencies = {
   comparePassword: (password, hash) => bcrypt.compare(password, hash),
 };
 
+function isHeadersInstance(
+  headers: AuthRequestLike["headers"],
+): headers is Headers {
+  return typeof Headers !== "undefined" && headers instanceof Headers;
+}
+
+function getRequestHeader(request: AuthRequestLike | undefined, name: string) {
+  const headers = request?.headers;
+
+  if (!headers) {
+    return null;
+  }
+
+  if (isHeadersInstance(headers)) {
+    return headers.get(name);
+  }
+
+  const value = headers[name.toLowerCase()] ?? headers[name];
+
+  if (Array.isArray(value)) {
+    return value[0] ?? null;
+  }
+
+  return value ?? null;
+}
+
+function getRequestIp(request: AuthRequestLike | undefined) {
+  const forwardedFor = getRequestHeader(request, "x-forwarded-for");
+
+  if (forwardedFor) {
+    return forwardedFor.split(",")[0]?.trim() || "unknown";
+  }
+
+  return (
+    getRequestHeader(request, "cf-connecting-ip") ??
+    getRequestHeader(request, "x-real-ip") ??
+    request?.socket?.remoteAddress ??
+    "unknown"
+  );
+}
+
+function getLoginIdentifier(credentials: unknown) {
+  if (!credentials || typeof credentials !== "object") {
+    return "unknown";
+  }
+
+  const credentialRecord = credentials as Record<string, unknown>;
+  const rawIdentifier =
+    credentialRecord.identifier ??
+    credentialRecord.email ??
+    credentialRecord.pseudo ??
+    "unknown";
+
+  return String(rawIdentifier).trim().toLowerCase() || "unknown";
+}
+
+function getRateLimitKey(
+  credentials: unknown,
+  request: AuthRequestLike | undefined,
+) {
+  return `${getRequestIp(request)}:${getLoginIdentifier(credentials)}`;
+}
+
+function getFreshAttemptRecord(key: string, now: number) {
+  const record = loginAttempts.get(key) ?? {
+    attempts: [],
+    blockedUntil: null,
+  };
+  const attempts = record.attempts.filter(
+    (attemptedAt) => now - attemptedAt < adminLoginRateLimit.windowMs,
+  );
+  const blockedUntil =
+    record.blockedUntil && record.blockedUntil > now
+      ? record.blockedUntil
+      : null;
+
+  return {
+    attempts,
+    blockedUntil,
+  };
+}
+
+function isLoginRateLimited(key: string) {
+  const now = Date.now();
+  const record = getFreshAttemptRecord(key, now);
+
+  if (record.blockedUntil) {
+    loginAttempts.set(key, record);
+    return true;
+  }
+
+  if (record.attempts.length === 0) {
+    loginAttempts.delete(key);
+  } else {
+    loginAttempts.set(key, record);
+  }
+
+  return false;
+}
+
+function registerFailedLoginAttempt(key: string) {
+  const now = Date.now();
+  const record = getFreshAttemptRecord(key, now);
+  const attempts = [...record.attempts, now];
+  const blockedUntil =
+    attempts.length >= adminLoginRateLimit.maxAttempts
+      ? now + adminLoginRateLimit.blockDurationMs
+      : record.blockedUntil;
+
+  loginAttempts.set(key, {
+    attempts,
+    blockedUntil,
+  });
+
+  return Boolean(blockedUntil && blockedUntil > now);
+}
+
+function clearLoginAttempts(key: string) {
+  loginAttempts.delete(key);
+}
+
+export function resetAdminLoginRateLimit() {
+  loginAttempts.clear();
+}
+
 export async function verifyAdminCredentials(
   credentials: unknown,
   dependencies: AuthDependencies = defaultAuthDependencies,
@@ -121,7 +271,53 @@ export async function verifyAdminCredentials(
   };
 }
 
+export async function authorizeAdminCredentials(
+  credentials: unknown,
+  request?: AuthRequestLike,
+  dependencies: AuthDependencies = defaultAuthDependencies,
+) {
+  const rateLimitKey = getRateLimitKey(credentials, request);
+
+  if (isLoginRateLimited(rateLimitKey)) {
+    throw new Error(adminLoginRateLimitErrorCode);
+  }
+
+  const user = await verifyAdminCredentials(credentials, dependencies);
+
+  if (!user) {
+    const isBlocked = registerFailedLoginAttempt(rateLimitKey);
+
+    if (isBlocked) {
+      throw new Error(adminLoginRateLimitErrorCode);
+    }
+
+    return null;
+  }
+
+  clearLoginAttempts(rateLimitKey);
+
+  return user;
+}
+
+const useSecureCookies =
+  process.env.NEXTAUTH_URL?.startsWith("https://") ||
+  process.env.NODE_ENV === "production";
+
 export const authOptions: NextAuthOptions = {
+  cookies: {
+    sessionToken: {
+      name: useSecureCookies
+        ? "__Secure-next-auth.session-token"
+        : "next-auth.session-token",
+      options: {
+        httpOnly: true,
+        maxAge: adminSessionMaxAgeSeconds,
+        path: "/",
+        sameSite: "lax",
+        secure: Boolean(useSecureCookies),
+      },
+    },
+  },
   pages: {
     signIn: "/admin/login",
   },
@@ -132,11 +328,17 @@ export const authOptions: NextAuthOptions = {
         identifier: { label: "Pseudo ou adresse e-mail", type: "text" },
         password: { label: "Mot de passe", type: "password" },
       },
-      authorize: (credentials) => verifyAdminCredentials(credentials),
+      authorize: (credentials, request) =>
+        authorizeAdminCredentials(credentials, request),
     }),
   ],
+  jwt: {
+    maxAge: adminSessionMaxAgeSeconds,
+  },
   session: {
+    maxAge: adminSessionMaxAgeSeconds,
     strategy: "jwt",
+    updateAge: adminSessionUpdateAgeSeconds,
   },
   callbacks: {
     jwt({ token, user }) {

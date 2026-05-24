@@ -4,6 +4,7 @@ import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import type { FormEvent } from "react";
 import { useState } from "react";
+import { adminLoginRateLimitErrorCode } from "@/lib/auth-security";
 import styles from "./page.module.css";
 
 const adminRedirectPath = "/admin";
@@ -99,6 +100,13 @@ export function LoginForm() {
     });
 
     setIsSubmitting(false);
+
+    if (result?.error === adminLoginRateLimitErrorCode) {
+      setErrorMessage(
+        "Trop de tentatives de connexion. Réessayez dans quelques minutes.",
+      );
+      return;
+    }
 
     if (!result || result.error) {
       setErrorMessage("Identifiants invalides.");
