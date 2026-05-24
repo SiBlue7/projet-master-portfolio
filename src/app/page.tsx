@@ -43,6 +43,8 @@ const foundations = [
   { label: "Sécurité", value: "NextAuth" },
 ];
 
+const identityTags = ["Next.js", "Prisma", "Docker", "Cloudflare"];
+
 const monthYearFormatter = new Intl.DateTimeFormat("fr-FR", {
   month: "long",
   timeZone: "UTC",
@@ -339,6 +341,23 @@ export default async function Home() {
       };
     },
   );
+  const heroStats = [
+    {
+      label: "Projets",
+      value: publicProjects.length.toString(),
+      detail: "publics",
+    },
+    {
+      label: "Parcours",
+      value: timelineItems.length.toString(),
+      detail: "étapes",
+    },
+    {
+      label: "Socle",
+      value: "Fullstack",
+      detail: "sécurité",
+    },
+  ];
 
   return (
     <main className={styles.page}>
@@ -359,7 +378,12 @@ export default async function Home() {
         aria-labelledby="home-title"
       >
         <div className={styles.content}>
-          <p className={styles.eyebrow}>Portfolio technique</p>
+          <div className={styles.heroKicker}>
+            <span className={styles.kickerDot} aria-hidden="true" />
+            <span>Portfolio M2 Cyber</span>
+            <span className={styles.kickerSeparator} aria-hidden="true" />
+            <span>Fullstack & sécurité</span>
+          </div>
           <h1 id="home-title" className={styles.title}>
             {publicProfile.displayName}
           </h1>
@@ -397,27 +421,72 @@ export default async function Home() {
               </a>
             ) : null}
           </div>
+
+          <dl className={styles.heroStats} aria-label="Repères du portfolio">
+            {heroStats.map((stat) => (
+              <div className={styles.heroStat} key={stat.label}>
+                <dt>{stat.label}</dt>
+                <dd>
+                  <strong>{stat.value}</strong>
+                  <span>{stat.detail}</span>
+                </dd>
+              </div>
+            ))}
+          </dl>
         </div>
 
         <aside className={styles.profileCard} aria-label="Résumé du profil">
-          {avatarUrl ? (
-            <div className={styles.avatar}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                alt={`Avatar de ${publicProfile.displayName}`}
-                src={avatarUrl}
-              />
+          <div className={styles.profileCardHeader}>
+            {avatarUrl ? (
+              <div className={styles.avatar}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  alt={`Avatar de ${publicProfile.displayName}`}
+                  src={avatarUrl}
+                />
+              </div>
+            ) : (
+              <div className={styles.avatar} aria-hidden="true">
+                {initials}
+              </div>
+            )}
+            <div>
+              <p className={styles.cardLabel}>Profil public</p>
+              <p className={styles.cardName}>{publicProfile.displayName}</p>
+              <p className={styles.cardHeadline}>{publicProfile.headline}</p>
             </div>
-          ) : (
-            <div className={styles.avatar} aria-hidden="true">
-              {initials}
-            </div>
-          )}
-          <div>
-            <p className={styles.cardLabel}>Profil</p>
-            <p className={styles.cardName}>{publicProfile.displayName}</p>
-            <p className={styles.cardHeadline}>{publicProfile.headline}</p>
           </div>
+
+          <div
+            className={styles.identityScreen}
+            aria-label="Identité technique"
+          >
+            <div className={styles.identityScreenBar} aria-hidden="true">
+              <span />
+              <span />
+              <span />
+            </div>
+            <dl className={styles.identityLines}>
+              <div>
+                <dt>focus</dt>
+                <dd>cybersécurité applicative</dd>
+              </div>
+              <div>
+                <dt>build</dt>
+                <dd>interfaces admin & publiques</dd>
+              </div>
+              <div>
+                <dt>deploy</dt>
+                <dd>CI/CD, préprod, monitoring</dd>
+              </div>
+            </dl>
+            <div className={styles.identityTags} aria-label="Technologies clés">
+              {identityTags.map((tag) => (
+                <span key={tag}>{tag}</span>
+              ))}
+            </div>
+          </div>
+
           <dl className={styles.contactList}>
             <div>
               <dt>E-mail</dt>
