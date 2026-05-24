@@ -51,6 +51,8 @@ describe("Home", () => {
       "href",
       "#contact",
     );
+    expect(screen.getByText("Portfolio M2 Cyber")).toBeInTheDocument();
+    expect(screen.getByText("Fullstack & sécurité")).toBeInTheDocument();
     expect(
       screen.getByRole("heading", { name: "Enzo Chevalier" }),
     ).toBeInTheDocument();
@@ -70,6 +72,8 @@ describe("Home", () => {
     expect(
       screen.getByRole("img", { name: "Avatar de Enzo Chevalier" }),
     ).toHaveAttribute("src", "data:image/png;base64,AQID");
+    expect(screen.getByText("cybersécurité applicative")).toBeInTheDocument();
+    expect(screen.getByText("Cloudflare")).toBeInTheDocument();
     expect(
       screen.getByRole("heading", {
         name: /Échanger autour d'une opportunité/,
@@ -426,7 +430,9 @@ describe("Home", () => {
 
     expect(screen.getByText("Portfolio master")).toBeInTheDocument();
     expect(screen.queryByText("Depuis Janvier 2026")).not.toBeInTheDocument();
-    expect(screen.queryByText("Next.js")).not.toBeInTheDocument();
+    expect(
+      screen.queryByLabelText("Technologies du projet Portfolio master"),
+    ).not.toBeInTheDocument();
     expect(
       screen.queryByRole("img", { name: "Capture portfolio" }),
     ).not.toBeInTheDocument();
