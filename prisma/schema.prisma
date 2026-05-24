@@ -88,6 +88,10 @@ model Project {
   demoUrl           String?
   startedAt         DateTime?
   endedAt           DateTime?
+  githubPushedAt    DateTime?
+  githubVisibility  String?
+  githubIsPrivate   Boolean?
+  githubReadme      String?
   createdAt         DateTime                @default(now())
   updatedAt         DateTime                @updatedAt
   media             ProjectMedia[]
@@ -98,6 +102,8 @@ model Project {
   @@index([status])
   @@index([visibility])
   @@index([startedAt])
+  @@index([githubPushedAt])
+  @@index([githubVisibility])
   @@map("projects")
 }
 

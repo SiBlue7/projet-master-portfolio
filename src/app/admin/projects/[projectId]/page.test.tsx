@@ -57,6 +57,10 @@ describe("AdminProjectDetailsPage", () => {
       demoUrl: "https://portfolio.justdoeat.org",
       startedAt: new Date(Date.UTC(2026, 0, 10)),
       endedAt: null,
+      githubPushedAt: new Date(Date.UTC(2026, 4, 20, 8, 30)),
+      githubVisibility: "private",
+      githubIsPrivate: true,
+      githubReadme: "# Portfolio\n\nImported README.",
       media: [
         {
           id: "media-id",
@@ -143,9 +147,22 @@ describe("AdminProjectDetailsPage", () => {
     expect(
       screen.getByRole("heading", { name: "Runbooks" }),
     ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "Synchronisation GitHub" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Synchroniser avec GitHub" }),
+    ).toBeInTheDocument();
     expect(screen.getByText("Déploiement")).toBeInTheDocument();
     expect(screen.getAllByText("Préproduction").length).toBeGreaterThan(0);
     expect(screen.getByText("Vérifier le healthcheck")).toBeInTheDocument();
+    expect(screen.getAllByText(/GitHub/).length).toBeGreaterThan(2);
+    expect(screen.getByText("private")).toBeInTheDocument();
+    expect(screen.getByText("Oui")).toBeInTheDocument();
+    expect(screen.getAllByText(/README/).length).toBeGreaterThan(0);
+    expect(
+      screen.getByText((content) => content.includes("# Portfolio")),
+    ).toBeInTheDocument();
     expect(screen.getByDisplayValue("portfolio-master")).toBeInTheDocument();
     expect(screen.getByDisplayValue("Next.js, Prisma")).toBeInTheDocument();
     expect(screen.getByRole("img", { name: "Capture admin" })).toHaveAttribute(

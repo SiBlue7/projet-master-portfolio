@@ -378,6 +378,61 @@
   font-weight: 800;
 }
 
+.githubMetadataGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin: 0 0 18px;
+}
+
+.githubMetadataGrid > div {
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--background);
+}
+
+.githubMetadataGrid dt {
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+
+.githubMetadataGrid dd {
+  margin: 6px 0 0;
+  overflow-wrap: anywhere;
+  color: var(--foreground);
+  font-weight: 800;
+}
+
+.githubReadme {
+  margin-bottom: 18px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--background);
+}
+
+.githubReadme summary {
+  padding: 14px;
+  cursor: pointer;
+  color: var(--foreground);
+  font-weight: 800;
+}
+
+.githubReadme pre {
+  max-height: 360px;
+  margin: 0;
+  overflow: auto;
+  padding: 0 14px 14px;
+  color: var(--muted);
+  font-family:
+    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+    "Courier New", monospace;
+  font-size: 0.85rem;
+  line-height: 1.55;
+  white-space: pre-wrap;
+}
+
 .badge {
   display: inline-flex;
   min-height: 28px;
@@ -635,7 +690,8 @@
   }
 
   .mediaFieldGrid,
-  .mediaGrid {
+  .mediaGrid,
+  .githubMetadataGrid {
     grid-template-columns: 1fr;
   }
 }

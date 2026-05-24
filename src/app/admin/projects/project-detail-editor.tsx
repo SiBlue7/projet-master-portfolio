@@ -6,7 +6,7 @@ import {
   PROJECT_VISIBILITY_LABELS,
   type ProjectFormState,
 } from "@/lib/projects";
-import { deleteProject, updateProject } from "./actions";
+import { deleteProject, syncProjectWithGithub, updateProject } from "./actions";
 import {
   ProjectFormFields,
   ProjectMediaManager,
@@ -33,6 +33,10 @@ export function ProjectDetailEditor({
   );
   const [deleteState, deleteAction, isDeleting] = useActionState(
     deleteProject.bind(null, project.id),
+    initialState,
+  );
+  const [syncState, syncAction, isSyncing] = useActionState(
+    syncProjectWithGithub.bind(null, project.id),
     initialState,
   );
 
@@ -80,6 +84,71 @@ export function ProjectDetailEditor({
               {isUpdating ? "Enregistrement..." : "Enregistrer"}
             </button>
           </div>
+        </form>
+      </section>
+
+      <section className={styles.panel} aria-labelledby="github-sync-title">
+        <div className={styles.panelHeader}>
+          <div>
+            <h2 id="github-sync-title" className={styles.panelTitle}>
+              Synchronisation GitHub
+            </h2>
+            <p className={styles.panelDescription}>
+              Recharge la description, la page démo, la date de création GitHub
+              et les technologies détectées depuis l&apos;API GitHub.
+            </p>
+          </div>
+        </div>
+
+        <dl className={styles.githubMetadataGrid}>
+          <div>
+            <dt>Dernière activité GitHub</dt>
+            <dd>{project.githubPushedAt || "Non synchronisée"}</dd>
+          </div>
+          <div>
+            <dt>Visibilité GitHub</dt>
+            <dd>{project.githubVisibility || "Non synchronisée"}</dd>
+          </div>
+          <div>
+            <dt>Dépôt privé</dt>
+            <dd>
+              {project.githubIsPrivate === null
+                ? "Non synchronisé"
+                : project.githubIsPrivate
+                  ? "Oui"
+                  : "Non"}
+            </dd>
+          </div>
+        </dl>
+
+        {project.githubReadme ? (
+          <details className={styles.githubReadme}>
+            <summary>Voir le README importé</summary>
+            <pre>{project.githubReadme}</pre>
+          </details>
+        ) : (
+          <p className={styles.emptyState}>
+            Aucun README GitHub importé pour le moment.
+          </p>
+        )}
+
+        <form className={styles.form} action={syncAction}>
+          <StateMessage state={syncState} />
+          <div className={styles.actions}>
+            <button
+              className={styles.submitButton}
+              type="submit"
+              disabled={isSyncing || !project.repositoryUrl}
+            >
+              {isSyncing ? "Synchronisation..." : "Synchroniser avec GitHub"}
+            </button>
+          </div>
+          {!project.repositoryUrl ? (
+            <p className={styles.emptyState}>
+              Ajoutez un lien GitHub au projet avant de lancer la
+              synchronisation.
+            </p>
+          ) : null}
         </form>
       </section>
 

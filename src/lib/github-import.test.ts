@@ -1,3 +1,4 @@
+import { Buffer } from "node:buffer";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   importGithubRepositoryProject,
@@ -54,12 +55,22 @@ describe("github import helpers", () => {
           language: "TypeScript",
           name: "projet-master-portfolio",
           private: false,
+          pushed_at: "2026-05-20T08:30:00Z",
+          visibility: "public",
         }),
       )
       .mockResolvedValueOnce(
         githubResponse({
           CSS: 400,
           TypeScript: 2000,
+        }),
+      )
+      .mockResolvedValueOnce(
+        githubResponse({
+          content: Buffer.from("# Portfolio\n\nImported README.").toString(
+            "base64",
+          ),
+          encoding: "base64",
         }),
       );
 
@@ -79,6 +90,9 @@ describe("github import helpers", () => {
       fullName: "SiBlue7/projet-master-portfolio",
       project: {
         demoUrl: "https://portfolio.justdoeat.org/",
+        githubIsPrivate: false,
+        githubReadme: "# Portfolio\n\nImported README.",
+        githubVisibility: "public",
         repositoryUrl: "https://github.com/SiBlue7/projet-master-portfolio",
         shortDescription: "Portfolio administrable.",
         slug: "projet-master-portfolio",
@@ -89,6 +103,9 @@ describe("github import helpers", () => {
     });
     expect(importedProject.project.startedAt?.toISOString()).toBe(
       "2026-01-10T12:00:00.000Z",
+    );
+    expect(importedProject.project.githubPushedAt?.toISOString()).toBe(
+      "2026-05-20T08:30:00.000Z",
     );
     expect(importedProject.project.stacks).toEqual([
       {
