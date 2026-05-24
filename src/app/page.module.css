@@ -6,6 +6,7 @@
     var(--background);
 }
 
+.anchorNav,
 .hero,
 .band,
 .projectsSection,
@@ -14,6 +15,51 @@
 .contactSection {
   width: min(100%, 1120px);
   margin: 0 auto;
+}
+
+.hero,
+.band,
+.projectsSection,
+.timelineSection,
+.foundationSection,
+.contactSection {
+  scroll-margin-top: 92px;
+}
+
+.anchorNav {
+  position: sticky;
+  top: 14px;
+  z-index: 20;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 22px;
+  padding: 8px;
+  border: 1px solid rgba(216, 222, 232, 0.88);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(14px);
+}
+
+.anchorNav a {
+  display: inline-flex;
+  min-height: 36px;
+  align-items: center;
+  justify-content: center;
+  padding: 0 14px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  color: var(--foreground);
+  font-size: 0.92rem;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.anchorNav a:hover {
+  border-color: rgba(20, 110, 245, 0.18);
+  background: rgba(20, 110, 245, 0.08);
+  color: var(--accent);
 }
 
 .hero {
@@ -95,6 +141,7 @@
 
 .primaryAction:focus-visible,
 .secondaryAction:focus-visible,
+.anchorNav a:focus-visible,
 .contactList a:focus-visible,
 .contactPrimary:focus-visible,
 .contactSecondary:focus-visible,
@@ -943,6 +990,23 @@
 @media (max-width: 720px) {
   .page {
     padding: 32px 18px;
+  }
+
+  .anchorNav {
+    position: static;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    margin-bottom: 18px;
+    scrollbar-width: none;
+  }
+
+  .anchorNav::-webkit-scrollbar {
+    display: none;
+  }
+
+  .anchorNav a {
+    flex: 0 0 auto;
+    white-space: nowrap;
   }
 
   .band,

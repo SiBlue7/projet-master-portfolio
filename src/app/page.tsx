@@ -342,7 +342,22 @@ export default async function Home() {
 
   return (
     <main className={styles.page}>
-      <section className={styles.hero} aria-labelledby="home-title">
+      <nav
+        className={styles.anchorNav}
+        aria-label="Navigation de la page d'accueil"
+      >
+        <a href="#accueil">Accueil</a>
+        {publicProjects.length > 0 ? <a href="#projets">Projets</a> : null}
+        {hasTimelineItems ? <a href="#parcours">Parcours</a> : null}
+        <a href="#socle">Socle</a>
+        <a href="#contact">Contact</a>
+      </nav>
+
+      <section
+        id="accueil"
+        className={styles.hero}
+        aria-labelledby="home-title"
+      >
         <div className={styles.content}>
           <p className={styles.eyebrow}>Portfolio technique</p>
           <h1 id="home-title" className={styles.title}>
@@ -454,11 +469,12 @@ export default async function Home() {
       </section>
 
       {publicProjects.length > 0 ? (
-        <PublicProjectShowcase projects={publicProjects} />
+        <PublicProjectShowcase projects={publicProjects} sectionId="projets" />
       ) : null}
 
       {hasTimelineItems ? (
         <section
+          id="parcours"
           className={styles.timelineSection}
           aria-labelledby="timeline-title"
         >
@@ -491,6 +507,7 @@ export default async function Home() {
       ) : null}
 
       <section
+        id="socle"
         className={styles.foundationSection}
         aria-labelledby="stack-title"
       >
@@ -512,6 +529,7 @@ export default async function Home() {
       </section>
 
       <section
+        id="contact"
         className={styles.contactSection}
         aria-labelledby="contact-title"
       >
