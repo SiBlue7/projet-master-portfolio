@@ -60,6 +60,8 @@ async function ensureAdminSession(): Promise<SessionErrorState | null> {
 function revalidateProjectPages() {
   revalidatePath("/");
   revalidatePath("/admin/projects");
+  revalidatePath("/admin/projects/list");
+  revalidatePath("/admin/projects/[projectId]", "page");
   revalidatePath("/projects/[slug]", "page");
 }
 

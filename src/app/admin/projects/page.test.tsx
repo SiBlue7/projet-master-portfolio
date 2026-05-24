@@ -4,16 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import AdminProjectsPage from "./page";
 
 const mocks = vi.hoisted(() => ({
-  findMany: vi.fn(),
   getServerSession: vi.fn(),
-}));
-
-vi.mock("@/lib/prisma", () => ({
-  prisma: {
-    project: {
-      findMany: mocks.findMany,
-    },
-  },
 }));
 
 vi.mock("next-auth", () => ({
@@ -31,59 +22,12 @@ describe("AdminProjectsPage", () => {
     vi.clearAllMocks();
   });
 
-  it("renders project management with existing projects", async () => {
+  it("renders a creation-only project page", async () => {
     mocks.getServerSession.mockResolvedValue({
       user: {
         pseudo: "admin",
       },
     });
-    mocks.findMany.mockResolvedValue([
-      {
-        id: "project-id",
-        title: "Portfolio master",
-        slug: "portfolio-master",
-        shortDescription: "Portfolio administrable.",
-        description: "Projet de portfolio avec administration.",
-        status: "IN_PROGRESS",
-        visibility: "PUBLIC",
-        repositoryUrl: "https://github.com/SiBlue7/projet-master-portfolio",
-        demoUrl: "https://portfolio.justdoeat.org",
-        startedAt: new Date(Date.UTC(2026, 0, 10)),
-        endedAt: null,
-        media: [
-          {
-            id: "media-id",
-            altText: "Capture admin",
-            fileName: "capture.png",
-            imageData: new Uint8Array([1, 2, 3]),
-            mimeType: "image/png",
-            sortOrder: 0,
-          },
-        ],
-        stacks: [
-          {
-            stack: {
-              label: "Next.js",
-              slug: "next-js",
-            },
-          },
-          {
-            stack: {
-              label: "Prisma",
-              slug: "prisma",
-            },
-          },
-        ],
-        tags: [
-          {
-            tag: {
-              label: "En cours",
-              slug: "en-cours",
-            },
-          },
-        ],
-      },
-    ]);
 
     render(await AdminProjectsPage());
 
@@ -94,39 +38,19 @@ describe("AdminProjectsPage", () => {
       screen.getByRole("heading", { name: "Créer un projet" }),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("heading", { name: "Projets existants" }),
-    ).toBeInTheDocument();
-    expect(screen.getAllByLabelText("Titre").length).toBeGreaterThan(0);
-    expect(screen.getAllByLabelText("Slug").length).toBeGreaterThan(0);
+      screen.getByRole("link", { name: "Voir les projets existants" }),
+    ).toHaveAttribute("href", "/admin/projects/list");
     expect(
-      screen.getAllByLabelText("Description courte").length,
-    ).toBeGreaterThan(0);
-    expect(
-      screen.getAllByLabelText("Description complète").length,
-    ).toBeGreaterThan(0);
-    expect(screen.getAllByLabelText("Tag de tri").length).toBeGreaterThan(0);
-    expect(
-      screen.getAllByLabelText("Technologies utilisées").length,
-    ).toBeGreaterThan(0);
-    expect(screen.getAllByLabelText("Statut").length).toBeGreaterThan(0);
-    expect(screen.getAllByLabelText("Visibilité").length).toBeGreaterThan(0);
-    expect(screen.getAllByLabelText("Lien GitHub").length).toBeGreaterThan(0);
-    expect(screen.getAllByLabelText("Lien démo").length).toBeGreaterThan(0);
-    expect(screen.getAllByLabelText("Date de début").length).toBeGreaterThan(0);
-    expect(screen.getAllByLabelText("Date de fin").length).toBeGreaterThan(0);
-    expect(screen.getByText("Portfolio master")).toBeInTheDocument();
-    expect(screen.getByText("portfolio-master")).toBeInTheDocument();
-    expect(screen.getByText("Portfolio administrable.")).toBeInTheDocument();
-    expect(screen.getAllByText("Next.js").length).toBeGreaterThan(0);
-    expect(screen.getAllByText("Prisma").length).toBeGreaterThan(0);
-    expect(screen.getAllByText("En cours").length).toBeGreaterThan(0);
-    expect(screen.getAllByText("1 capture").length).toBeGreaterThan(0);
-    expect(screen.getByRole("img", { name: "Capture admin" })).toHaveAttribute(
-      "src",
-      "data:image/png;base64,AQID",
-    );
-    expect(screen.getAllByText("Public").length).toBeGreaterThan(0);
-    expect(screen.getByText("Modifier")).toBeInTheDocument();
+      screen.queryByRole("heading", { name: "Projets existants" }),
+    ).not.toBeInTheDocument();
+    expect(screen.getByLabelText("Titre")).toBeInTheDocument();
+    expect(screen.getByLabelText("Slug")).toBeInTheDocument();
+    expect(screen.getByLabelText("Description courte")).toBeInTheDocument();
+    expect(screen.getByLabelText("Description complète")).toBeInTheDocument();
+    expect(screen.getByLabelText("Tag de tri")).toBeInTheDocument();
+    expect(screen.getByLabelText("Technologies utilisées")).toBeInTheDocument();
+    expect(screen.getByLabelText("Statut")).toBeInTheDocument();
+    expect(screen.getByLabelText("Visibilité")).toBeInTheDocument();
   });
 
   it("redirects anonymous users to login", async () => {
@@ -135,6 +59,5 @@ describe("AdminProjectsPage", () => {
     await expect(AdminProjectsPage()).rejects.toThrow("NEXT_REDIRECT");
 
     expect(redirect).toHaveBeenCalledWith("/admin/login");
-    expect(mocks.findMany).not.toHaveBeenCalled();
   });
 });

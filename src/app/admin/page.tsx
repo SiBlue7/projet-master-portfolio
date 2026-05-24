@@ -63,7 +63,7 @@ export default async function AdminPage() {
               Gérer le parcours
             </Link>
             <Link className={styles.panelLink} href="/admin/projects">
-              Gérer les projets
+              Créer un projet
             </Link>
           </div>
         </div>
