@@ -7,6 +7,10 @@ import {
   type ProjectStatus,
 } from "@/lib/projects";
 import { prisma } from "@/lib/prisma";
+import {
+  RUNBOOK_ENVIRONMENT_KIND_LABELS,
+  RUNBOOK_STEP_TYPE_LABELS,
+} from "@/lib/runbooks";
 import { ProjectMediaCarousel } from "./project-media-carousel";
 import styles from "./page.module.css";
 
@@ -85,6 +89,63 @@ export default async function ProjectDetailsPage({
       demoUrl: true,
       startedAt: true,
       endedAt: true,
+      runbooks: {
+        where: {
+          isActive: true,
+          isPublic: true,
+        },
+        orderBy: [
+          {
+            sortOrder: "asc",
+          },
+          {
+            createdAt: "asc",
+          },
+        ],
+        select: {
+          id: true,
+          title: true,
+          slug: true,
+          description: true,
+          environments: {
+            orderBy: [
+              {
+                sortOrder: "asc",
+              },
+              {
+                createdAt: "asc",
+              },
+            ],
+            select: {
+              id: true,
+              kind: true,
+              name: true,
+              baseUrl: true,
+            },
+          },
+          steps: {
+            orderBy: [
+              {
+                sortOrder: "asc",
+              },
+              {
+                createdAt: "asc",
+              },
+            ],
+            select: {
+              id: true,
+              environmentId: true,
+              title: true,
+              description: true,
+              type: true,
+              command: true,
+              url: true,
+              httpMethod: true,
+              expectedResult: true,
+            },
+          },
+        },
+      },
       media: {
         orderBy: [
           {
@@ -149,6 +210,7 @@ export default async function ProjectDetailsPage({
   }));
   const visibleProjectStacks = project.showTechnologies ? projectStacks : [];
   const visibleProjectMedia = project.showMedia ? projectMedia : [];
+  const visibleRunbooks = project.runbooks;
   const coverMedia = visibleProjectMedia[0] ?? null;
   const hasExternalLinks =
     project.showExternalLinks && (project.demoUrl || project.repositoryUrl);
@@ -156,7 +218,8 @@ export default async function ProjectDetailsPage({
     project.showMetadata ||
     project.showDetails ||
     visibleProjectStacks.length > 0 ||
-    visibleProjectMedia.length > 0;
+    visibleProjectMedia.length > 0 ||
+    visibleRunbooks.length > 0;
 
   return (
     <main className={styles.page}>
@@ -287,6 +350,113 @@ export default async function ProjectDetailsPage({
                 items={visibleProjectMedia}
                 projectTitle={project.title}
               />
+            </article>
+          ) : null}
+
+          {visibleRunbooks.length > 0 ? (
+            <article className={styles.descriptionPanel}>
+              <h2 className={styles.sectionTitle}>Runbooks publics</h2>
+              <p className={styles.runbookIntro}>
+                Procédures documentées pour comprendre, vérifier ou exploiter le
+                projet. Aucune action n&apos;est exécutée depuis cette page.
+              </p>
+              <div className={styles.runbookList}>
+                {visibleRunbooks.map((runbook) => (
+                  <section className={styles.runbookCard} key={runbook.id}>
+                    <div className={styles.runbookHeader}>
+                      <div>
+                        <p className={styles.runbookSlug}>{runbook.slug}</p>
+                        <h3 className={styles.runbookTitle}>{runbook.title}</h3>
+                        {runbook.description ? (
+                          <p className={styles.runbookDescription}>
+                            {runbook.description}
+                          </p>
+                        ) : null}
+                      </div>
+                      <span className={styles.runbookCount}>
+                        {runbook.steps.length} étape
+                        {runbook.steps.length > 1 ? "s" : ""}
+                      </span>
+                    </div>
+
+                    {runbook.environments.length > 0 ? (
+                      <div
+                        className={styles.runbookEnvironmentList}
+                        aria-label={`Environnements du runbook ${runbook.title}`}
+                      >
+                        {runbook.environments.map((environment) => (
+                          <span
+                            className={styles.runbookEnvironment}
+                            key={environment.id}
+                          >
+                            <strong>{environment.name}</strong>
+                            <small>
+                              {
+                                RUNBOOK_ENVIRONMENT_KIND_LABELS[
+                                  environment.kind
+                                ]
+                              }
+                            </small>
+                            {environment.baseUrl ? (
+                              <small>{environment.baseUrl}</small>
+                            ) : null}
+                          </span>
+                        ))}
+                      </div>
+                    ) : null}
+
+                    {runbook.steps.length > 0 ? (
+                      <ol className={styles.runbookStepList}>
+                        {runbook.steps.map((step) => {
+                          const environment = runbook.environments.find(
+                            (candidate) => candidate.id === step.environmentId,
+                          );
+
+                          return (
+                            <li className={styles.runbookStep} key={step.id}>
+                              <div className={styles.runbookStepHeader}>
+                                <span className={styles.runbookStepType}>
+                                  {RUNBOOK_STEP_TYPE_LABELS[step.type]}
+                                </span>
+                                {environment ? (
+                                  <span className={styles.runbookStepEnv}>
+                                    {environment.name}
+                                  </span>
+                                ) : null}
+                              </div>
+                              <h4 className={styles.runbookStepTitle}>
+                                {step.title}
+                              </h4>
+                              {step.description ? (
+                                <p className={styles.runbookStepText}>
+                                  {step.description}
+                                </p>
+                              ) : null}
+                              {step.command ? (
+                                <pre className={styles.runbookCode}>
+                                  <code>{step.command}</code>
+                                </pre>
+                              ) : null}
+                              {step.url ? (
+                                <p className={styles.runbookEndpoint}>
+                                  <span>{step.httpMethod ?? "GET"}</span>
+                                  <code>{step.url}</code>
+                                </p>
+                              ) : null}
+                              {step.expectedResult ? (
+                                <p className={styles.runbookExpected}>
+                                  <strong>Résultat attendu</strong>
+                                  {step.expectedResult}
+                                </p>
+                              ) : null}
+                            </li>
+                          );
+                        })}
+                      </ol>
+                    ) : null}
+                  </section>
+                ))}
+              </div>
             </article>
           ) : null}
         </section>

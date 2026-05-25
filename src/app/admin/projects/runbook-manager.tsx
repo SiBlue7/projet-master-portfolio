@@ -36,6 +36,7 @@ export type RunbookViewModel = {
   slug: string;
   description: string;
   isActive: boolean;
+  isPublic: boolean;
   sortOrder: number;
   environments: RunbookEnvironmentViewModel[];
   steps: RunbookStepViewModel[];
@@ -81,6 +82,7 @@ const emptyRunbook: RunbookViewModel = {
   environments: [],
   id: "new-runbook",
   isActive: true,
+  isPublic: false,
   slug: "",
   sortOrder: 0,
   steps: [],
@@ -230,6 +232,17 @@ function RunbookFormFields({
             disabled={isPending}
           />
           Runbook actif
+        </label>
+
+        <label className={styles.checkboxField} htmlFor={`${idPrefix}-public`}>
+          <input
+            id={`${idPrefix}-public`}
+            name="isPublic"
+            type="checkbox"
+            defaultChecked={runbook.isPublic}
+            disabled={isPending}
+          />
+          Visible sur la page publique du projet
         </label>
 
         <div className={styles.field}>
@@ -978,6 +991,9 @@ function RunbookEditor({ runbook }: { runbook: RunbookViewModel }) {
         <span className={styles.projectSummaryAside}>
           <span className={styles.badge}>
             {runbook.isActive ? "Actif" : "Inactif"}
+          </span>
+          <span className={styles.badge}>
+            {runbook.isPublic ? "Public" : "Privé"}
           </span>
           <span className={styles.mediaSummary}>
             {runbook.environments.length} env.

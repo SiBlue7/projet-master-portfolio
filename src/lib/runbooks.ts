@@ -134,6 +134,7 @@ const checkboxField = z.preprocess((value) => value === "on", z.boolean());
 export const runbookSchema = z.object({
   description: optionalText("La description", 1000),
   isActive: checkboxField,
+  isPublic: checkboxField,
   slug: slugField("Le slug"),
   sortOrder: sortOrderField,
   title: requiredText("Le titre", 140),
@@ -277,6 +278,7 @@ export function parseRunbookFormData(formData: FormData) {
   return runbookSchema.safeParse({
     description: formData.get("description"),
     isActive: formData.get("isActive"),
+    isPublic: formData.get("isPublic"),
     slug: formData.get("slug"),
     sortOrder: formData.get("sortOrder"),
     title: formData.get("title"),

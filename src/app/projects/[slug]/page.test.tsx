@@ -42,6 +42,46 @@ describe("ProjectDetailsPage", () => {
       demoUrl: "https://portfolio.justdoeat.org",
       startedAt: new Date(Date.UTC(2026, 0, 1)),
       endedAt: null,
+      runbooks: [
+        {
+          id: "runbook-id",
+          title: "Déploiement préproduction",
+          slug: "deploiement-preproduction",
+          description: "Procédure publique de vérification après déploiement.",
+          environments: [
+            {
+              id: "environment-id",
+              kind: "PREPROD",
+              name: "Préproduction",
+              baseUrl: "https://preprod.justdoeat.org",
+            },
+          ],
+          steps: [
+            {
+              id: "step-id",
+              environmentId: "environment-id",
+              title: "Vérifier le healthcheck",
+              description: "Contrôler que l'API répond correctement.",
+              type: "HTTP_REQUEST",
+              command: null,
+              url: "/api/health",
+              httpMethod: "GET",
+              expectedResult: "La route retourne un statut ok.",
+            },
+            {
+              id: "step-id-2",
+              environmentId: null,
+              title: "Contrôler les conteneurs",
+              description: null,
+              type: "COMMAND",
+              command: "docker compose ps",
+              url: null,
+              httpMethod: null,
+              expectedResult: null,
+            },
+          ],
+        },
+      ],
       media: [
         {
           id: "media-id",
@@ -106,6 +146,14 @@ describe("ProjectDetailsPage", () => {
       screen.getByRole("heading", { name: "Captures du projet" }),
     ).toBeInTheDocument();
     expect(
+      screen.getByRole("heading", { name: "Runbooks publics" }),
+    ).toBeInTheDocument();
+    expect(screen.getByText("Déploiement préproduction")).toBeInTheDocument();
+    expect(screen.getAllByText("Préproduction").length).toBeGreaterThan(0);
+    expect(screen.getByText("Vérifier le healthcheck")).toBeInTheDocument();
+    expect(screen.getByText("/api/health")).toBeInTheDocument();
+    expect(screen.getByText("docker compose ps")).toBeInTheDocument();
+    expect(
       screen.getAllByRole("img", { name: "Capture publique" })[0],
     ).toHaveAttribute("src", "data:image/png;base64,AQID");
     expect(screen.getByText("Capture 1 sur 2")).toBeInTheDocument();
@@ -161,6 +209,7 @@ describe("ProjectDetailsPage", () => {
       demoUrl: "https://portfolio.justdoeat.org",
       startedAt: new Date(Date.UTC(2026, 0, 1)),
       endedAt: null,
+      runbooks: [],
       media: [
         {
           id: "media-id",

@@ -78,6 +78,7 @@ describe("AdminProjectDetailsPage", () => {
           slug: "deploiement",
           description: "Procédure de déploiement.",
           isActive: true,
+          isPublic: true,
           sortOrder: 0,
           environments: [
             {
@@ -154,6 +155,7 @@ describe("AdminProjectDetailsPage", () => {
       screen.getByRole("button", { name: "Synchroniser avec GitHub" }),
     ).toBeInTheDocument();
     expect(screen.getByText("Déploiement")).toBeInTheDocument();
+    expect(screen.getAllByText("Public").length).toBeGreaterThan(0);
     expect(screen.getAllByText("Préproduction").length).toBeGreaterThan(0);
     expect(screen.getByText("Vérifier le healthcheck")).toBeInTheDocument();
     expect(screen.getAllByText(/GitHub/).length).toBeGreaterThan(2);

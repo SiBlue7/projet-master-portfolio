@@ -110,6 +110,7 @@ export default async function AdminProjectDetailsPage({
           slug: true,
           description: true,
           isActive: true,
+          isPublic: true,
           sortOrder: true,
           environments: {
             orderBy: [
@@ -232,6 +233,7 @@ export default async function AdminProjectDetailsPage({
     slug: runbook.slug,
     description: runbook.description ?? "",
     isActive: runbook.isActive,
+    isPublic: runbook.isPublic,
     sortOrder: runbook.sortOrder,
     environments: runbook.environments.map((environment) => ({
       id: environment.id,
