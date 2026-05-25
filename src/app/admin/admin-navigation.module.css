@@ -1,0 +1,169 @@
+.adminNavigation {
+  position: sticky;
+  top: 12px;
+  z-index: 20;
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+  padding: 10px;
+  border: 1px solid var(--glass-border);
+  border-radius: 8px;
+  background: var(--glass-background);
+  box-shadow: var(--glass-shadow);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+}
+
+.brand {
+  display: inline-flex;
+  min-height: 38px;
+  flex: 0 0 auto;
+  align-items: center;
+  padding: 0 12px;
+  border: 1px solid var(--glass-border);
+  border-radius: 8px;
+  background: var(--glass-background-strong);
+  color: var(--foreground);
+  font-weight: 900;
+}
+
+.brand:hover {
+  border-color: var(--accent);
+  color: var(--accent-strong);
+}
+
+.navLinks {
+  display: flex;
+  min-width: 0;
+  flex: 1 1 auto;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.navLink {
+  display: inline-flex;
+  min-height: 36px;
+  align-items: center;
+  justify-content: center;
+  padding: 0 11px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  color: var(--muted-strong);
+  font-size: 0.9rem;
+  font-weight: 800;
+}
+
+.navLink:hover {
+  border-color: var(--glass-border);
+  background: var(--glass-background-strong);
+  color: var(--foreground);
+}
+
+.navLink[aria-current="page"] {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--accent-foreground);
+}
+
+.controls {
+  display: flex;
+  flex: 0 0 auto;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.themeToggle {
+  display: inline-grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid var(--glass-border);
+  border-radius: 8px;
+  background: var(--glass-background-strong);
+}
+
+.themeToggleButton {
+  min-height: 32px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--muted-strong);
+  cursor: pointer;
+  font-weight: 800;
+}
+
+.themeToggleButton[data-selected="true"] {
+  background: var(--surface);
+  color: var(--foreground);
+  box-shadow: var(--shadow-subtle);
+}
+
+.logoutButton {
+  min-height: 40px;
+  padding: 0 13px;
+  border: 1px solid var(--glass-border);
+  border-radius: 8px;
+  background: var(--glass-background-strong);
+  color: var(--foreground);
+  cursor: pointer;
+  font-weight: 800;
+}
+
+.logoutButton:hover {
+  border-color: var(--accent);
+  color: var(--accent-strong);
+}
+
+.logoutButton:disabled {
+  cursor: wait;
+  opacity: 0.72;
+}
+
+.brand:focus-visible,
+.navLink:focus-visible,
+.themeToggleButton:focus-visible,
+.logoutButton:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+@media (max-width: 980px) {
+  .adminNavigation {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .brand,
+  .controls {
+    width: fit-content;
+  }
+}
+
+@media (max-width: 640px) {
+  .adminNavigation {
+    position: static;
+  }
+
+  .brand,
+  .controls,
+  .themeToggle,
+  .logoutButton {
+    width: 100%;
+  }
+
+  .navLinks {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .controls {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+}

@@ -32,7 +32,8 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          ref: dev
+          ref: ${{ github.event.workflow_run.head_sha }}
+          token: ${{ github.token }}
 
       - name: Deploy on preprod VM
         run: bash scripts/deploy-preprod.sh

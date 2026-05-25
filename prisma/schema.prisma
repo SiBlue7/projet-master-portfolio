@@ -11,14 +11,294 @@ enum UserRole {
   ADMIN
 }
 
+enum ProjectStatus {
+  DRAFT
+  IN_PROGRESS
+  COMPLETED
+  ARCHIVED
+}
+
+enum ProjectVisibility {
+  PRIVATE
+  PUBLIC
+}
+
+enum ProfileTimelineItemType {
+  FORMATION
+  EXPERIENCE
+  CERTIFICATION
+}
+
+enum RunbookEnvironmentKind {
+  LOCAL
+  PREPROD
+  PRODUCTION
+  OTHER
+}
+
+enum RunbookStepType {
+  MANUAL
+  COMMAND
+  HTTP_REQUEST
+}
+
+enum AuditLogAction {
+  LOGIN_SUCCESS
+  LOGIN_FAILURE
+  CREATE
+  UPDATE
+  DELETE
+  UPLOAD
+  EXECUTE
+}
+
+enum AuditLogStatus {
+  SUCCESS
+  FAILURE
+}
+
 model User {
-  id           String   @id @default(cuid())
-  email        String   @unique
+  id           String     @id @default(cuid())
+  email        String     @unique
+  pseudo       String     @unique
   name         String?
   passwordHash String
-  role         UserRole @default(ADMIN)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  role         UserRole   @default(ADMIN)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  auditLogs    AuditLog[]
 
   @@map("users")
+}
+
+model Project {
+  id                String                  @id @default(cuid())
+  title             String
+  slug              String                  @unique
+  shortDescription  String
+  description       String
+  status            ProjectStatus           @default(DRAFT)
+  visibility        ProjectVisibility       @default(PRIVATE)
+  showDetails       Boolean                 @default(true)
+  showTechnologies  Boolean                 @default(true)
+  showExternalLinks Boolean                 @default(true)
+  showMedia         Boolean                 @default(true)
+  showMetadata      Boolean                 @default(true)
+  repositoryUrl     String?
+  demoUrl           String?
+  startedAt         DateTime?
+  endedAt           DateTime?
+  githubPushedAt    DateTime?
+  githubVisibility  String?
+  githubIsPrivate   Boolean?
+  githubReadme      String?
+  createdAt         DateTime                @default(now())
+  updatedAt         DateTime                @updatedAt
+  media             ProjectMedia[]
+  runbooks          Runbook[]
+  stacks            ProjectStackOnProject[]
+  tags              ProjectTagOnProject[]
+
+  @@index([status])
+  @@index([visibility])
+  @@index([startedAt])
+  @@index([githubPushedAt])
+  @@index([githubVisibility])
+  @@map("projects")
+}
+
+model ProjectTag {
+  id        String                @id @default(cuid())
+  label     String
+  slug      String                @unique
+  createdAt DateTime              @default(now())
+  updatedAt DateTime              @updatedAt
+  projects  ProjectTagOnProject[]
+
+  @@index([label])
+  @@map("project_tags")
+}
+
+model ProjectTagOnProject {
+  projectId  String
+  tagId      String
+  assignedAt DateTime   @default(now())
+  project    Project    @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  tag        ProjectTag @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([projectId, tagId])
+  @@index([tagId])
+  @@map("project_tags_on_projects")
+}
+
+model ProjectStack {
+  id        String                  @id @default(cuid())
+  label     String
+  slug      String                  @unique
+  createdAt DateTime                @default(now())
+  updatedAt DateTime                @updatedAt
+  projects  ProjectStackOnProject[]
+
+  @@index([label])
+  @@map("project_stacks")
+}
+
+model ProjectStackOnProject {
+  projectId  String
+  stackId    String
+  assignedAt DateTime     @default(now())
+  project    Project      @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  stack      ProjectStack @relation(fields: [stackId], references: [id], onDelete: Cascade)
+
+  @@id([projectId, stackId])
+  @@index([stackId])
+  @@map("project_stacks_on_projects")
+}
+
+model ProjectMedia {
+  id        String   @id @default(cuid())
+  projectId String
+  fileName  String
+  mimeType  String
+  imageData Bytes
+  altText   String?
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+  @@index([sortOrder])
+  @@map("project_media")
+}
+
+model Runbook {
+  id           String               @id @default(cuid())
+  projectId    String
+  title        String
+  slug         String
+  description  String?
+  isActive     Boolean              @default(true)
+  isPublic     Boolean              @default(false)
+  sortOrder    Int                  @default(0)
+  createdAt    DateTime             @default(now())
+  updatedAt    DateTime             @updatedAt
+  project      Project              @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  environments RunbookEnvironment[]
+  steps        RunbookStep[]
+
+  @@unique([projectId, slug])
+  @@index([projectId])
+  @@index([isPublic])
+  @@index([sortOrder])
+  @@map("runbooks")
+}
+
+model RunbookEnvironment {
+  id        String                 @id @default(cuid())
+  runbookId String
+  kind      RunbookEnvironmentKind @default(OTHER)
+  name      String
+  slug      String
+  baseUrl   String?
+  variables Json?
+  sortOrder Int                    @default(0)
+  createdAt DateTime               @default(now())
+  updatedAt DateTime               @updatedAt
+  runbook   Runbook                @relation(fields: [runbookId], references: [id], onDelete: Cascade)
+  steps     RunbookStep[]
+
+  @@unique([runbookId, slug])
+  @@index([runbookId])
+  @@index([kind])
+  @@index([sortOrder])
+  @@map("runbook_environments")
+}
+
+model RunbookStep {
+  id             String              @id @default(cuid())
+  runbookId      String
+  environmentId  String?
+  title          String
+  description    String?
+  type           RunbookStepType     @default(MANUAL)
+  command        String?
+  url            String?
+  httpMethod     String?
+  payload        Json?
+  expectedResult String?
+  isExecutable   Boolean             @default(false)
+  sortOrder      Int                 @default(0)
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+  runbook        Runbook             @relation(fields: [runbookId], references: [id], onDelete: Cascade)
+  environment    RunbookEnvironment? @relation(fields: [environmentId], references: [id], onDelete: SetNull)
+
+  @@index([runbookId])
+  @@index([environmentId])
+  @@index([type])
+  @@index([sortOrder])
+  @@map("runbook_steps")
+}
+
+model PublicProfile {
+  id              String    @id @default("public-profile")
+  displayName     String
+  headline        String
+  bio             String
+  contactEmail    String
+  githubUrl       String?
+  linkedinUrl     String?
+  avatarData      Bytes?
+  avatarMimeType  String?
+  avatarUpdatedAt DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@map("public_profiles")
+}
+
+model ProfileTimelineItem {
+  id           String                  @id @default(cuid())
+  type         ProfileTimelineItemType
+  title        String
+  organization String
+  location     String?
+  description  String?
+  startDate    DateTime?
+  endDate      DateTime?
+  isCurrent    Boolean                 @default(false)
+  sortOrder    Int                     @default(0)
+  createdAt    DateTime                @default(now())
+  updatedAt    DateTime                @updatedAt
+
+  @@index([type])
+  @@index([sortOrder])
+  @@index([startDate])
+  @@map("profile_timeline_items")
+}
+
+model AuditLog {
+  id          String         @id @default(cuid())
+  actorId     String?
+  actorEmail  String?
+  actorPseudo String?
+  action      AuditLogAction
+  status      AuditLogStatus @default(SUCCESS)
+  entityType  String
+  entityId    String?
+  summary     String
+  metadata    Json?
+  ipAddress   String?
+  userAgent   String?
+  createdAt   DateTime       @default(now())
+  actor       User?          @relation(fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([actorId])
+  @@index([action])
+  @@index([status])
+  @@index([entityType])
+  @@index([entityId])
+  @@index([createdAt])
+  @@map("audit_logs")
 }
