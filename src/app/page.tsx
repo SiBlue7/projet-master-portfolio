@@ -366,7 +366,7 @@ export default async function Home() {
         aria-label="Navigation de la page d'accueil"
       >
         <a href="#accueil">Accueil</a>
-        {publicProjects.length > 0 ? <a href="#projets">Projets</a> : null}
+        <a href="#projets">Projets</a>
         {hasTimelineItems ? <a href="#parcours">Parcours</a> : null}
         <a href="#socle">Socle</a>
         <a href="#contact">Contact</a>
@@ -537,9 +537,7 @@ export default async function Home() {
         ))}
       </section>
 
-      {publicProjects.length > 0 ? (
-        <PublicProjectShowcase projects={publicProjects} sectionId="projets" />
-      ) : null}
+      <PublicProjectShowcase projects={publicProjects} sectionId="projets" />
 
       {hasTimelineItems ? (
         <section

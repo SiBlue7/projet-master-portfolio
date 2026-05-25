@@ -201,9 +201,14 @@ describe("Home", () => {
       "href",
       "#socle",
     );
+    expect(screen.getByRole("link", { name: "Projets" })).toHaveAttribute(
+      "href",
+      "#projets",
+    );
     expect(
-      screen.queryByRole("link", { name: "Projets" }),
-    ).not.toBeInTheDocument();
+      screen.getByText("Aucun projet public pour le moment"),
+    ).toBeInTheDocument();
+    expect(screen.getByText("0 projets publics")).toBeInTheDocument();
     expect(screen.getByText("PostgreSQL + Prisma")).toBeInTheDocument();
     expect(
       screen.queryByRole("heading", { name: "Parcours" }),
@@ -357,8 +362,9 @@ describe("Home", () => {
       "data:image/png;base64,BAUG",
     );
     expect(
-      screen.getAllByRole("link", { name: "Voir les détails" })[0],
+      screen.getAllByRole("link", { name: "Détails publics" })[0],
     ).toHaveAttribute("href", "/projects/portfolio-master");
+    expect(screen.getAllByText("Média à venir").length).toBeGreaterThan(0);
     expect(
       screen.getByRole("button", { name: "Voir les projets précédents" }),
     ).toBeInTheDocument();
