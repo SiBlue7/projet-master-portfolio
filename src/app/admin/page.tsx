@@ -8,7 +8,7 @@ import {
   PROJECT_VISIBILITY_LABELS,
 } from "@/lib/projects";
 import { PUBLIC_PROFILE_ID } from "@/lib/public-profile";
-import { LogoutButton } from "./logout-button";
+import { AdminNavigation } from "./admin-navigation";
 import styles from "./page.module.css";
 
 const adminDateFormatter = new Intl.DateTimeFormat("fr-FR", {
@@ -209,6 +209,8 @@ export default async function AdminPage() {
 
   return (
     <main className={styles.page}>
+      <AdminNavigation activeItem="dashboard" />
+
       <section className={styles.main} aria-labelledby="admin-title">
         <div className={styles.header}>
           <div>
@@ -220,8 +222,6 @@ export default async function AdminPage() {
               Connecté en tant que {session.user.pseudo}.
             </p>
           </div>
-
-          <LogoutButton />
         </div>
 
         <section className={styles.statsGrid} aria-label="Indicateurs rapides">

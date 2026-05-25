@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { ThemeToggle } from "@/app/theme-toggle";
 import { LoginForm } from "./login-form";
 import styles from "./page.module.css";
 
@@ -10,6 +11,13 @@ export const metadata: Metadata = {
 export default function AdminLoginPage() {
   return (
     <main className={styles.page}>
+      <div className={styles.loginToolbar}>
+        <ThemeToggle
+          buttonClassName={styles.themeToggleButton}
+          className={styles.themeToggle}
+        />
+      </div>
+
       <section className={styles.shell} aria-labelledby="admin-login-title">
         <div>
           <p className={styles.eyebrow}>Administration</p>

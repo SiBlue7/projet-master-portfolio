@@ -2,6 +2,7 @@ import Link from "next/link";
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import type { AuditLogAction, AuditLogStatus } from "@/generated/prisma/client";
+import { AdminNavigation } from "@/app/admin/admin-navigation";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import styles from "./page.module.css";
@@ -83,6 +84,8 @@ export default async function AdminLogsPage() {
 
   return (
     <main className={styles.page}>
+      <AdminNavigation activeItem="logs" />
+
       <section className={styles.main} aria-labelledby="admin-logs-title">
         <Link className={styles.backLink} href="/admin">
           Retour à l&apos;administration

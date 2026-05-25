@@ -2,6 +2,7 @@ import { Buffer } from "node:buffer";
 import Link from "next/link";
 import { getServerSession } from "next-auth";
 import { notFound, redirect } from "next/navigation";
+import { AdminNavigation } from "@/app/admin/admin-navigation";
 import { authOptions } from "@/lib/auth";
 import { isDefinedProjectTag } from "@/lib/projects";
 import { prisma } from "@/lib/prisma";
@@ -260,6 +261,8 @@ export default async function AdminProjectDetailsPage({
 
   return (
     <main className={styles.page}>
+      <AdminNavigation activeItem="project-list" />
+
       <section className={styles.main} aria-labelledby="project-detail-title">
         <Link className={styles.backLink} href="/admin/projects/list">
           Retour à la liste des projets

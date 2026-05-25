@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import styles from "./page.module.css";
+import { GitHubIcon } from "./social-icons";
 
 const projectMediaAutoplayDelay = 5000;
 
@@ -357,6 +358,7 @@ export function PublicProjectShowcase({
                       rel="noreferrer"
                       target="_blank"
                     >
+                      <GitHubIcon className={styles.linkIcon} />
                       GitHub
                     </a>
                   ) : null}

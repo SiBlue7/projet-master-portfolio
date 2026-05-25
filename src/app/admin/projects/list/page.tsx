@@ -7,6 +7,7 @@ import {
   PROJECT_STATUS_LABELS,
   PROJECT_VISIBILITY_LABELS,
 } from "@/lib/projects";
+import { AdminNavigation } from "@/app/admin/admin-navigation";
 import { prisma } from "@/lib/prisma";
 import styles from "../page.module.css";
 
@@ -60,9 +61,11 @@ export default async function AdminProjectsListPage() {
 
   return (
     <main className={styles.page}>
+      <AdminNavigation activeItem="project-list" />
+
       <section className={styles.main} aria-labelledby="projects-list-title">
-        <Link className={styles.backLink} href="/admin/projects">
-          Retour à la création de projet
+        <Link className={styles.backLink} href="/admin">
+          Retour au dashboard admin
         </Link>
 
         <p className={styles.eyebrow}>Projets existants</p>

@@ -1,11 +1,55 @@
 :root {
-  --background: #f7f8fa;
-  --foreground: #17202a;
-  --muted: #657080;
+  color-scheme: light;
+  --background: #f6fbff;
+  --foreground: #18242d;
+  --muted: #536b78;
+  --muted-strong: #637081;
   --surface: #ffffff;
-  --border: #d8dee8;
-  --accent: #146ef5;
+  --surface-soft: #f0f7fb;
+  --surface-strong: #e4f0f7;
+  --border: #accbe1;
+  --border-soft: rgba(172, 203, 225, 0.48);
+  --accent: #536b78;
+  --accent-strong: #3f5968;
+  --accent-soft: #cee5f2;
+  --accent-secondary: #7c98b3;
+  --accent-tertiary: #c880b7;
   --accent-foreground: #ffffff;
+  --shadow-soft: 0 18px 48px rgba(83, 107, 120, 0.12);
+  --shadow-subtle: 0 10px 28px rgba(83, 107, 120, 0.08);
+  --focus-ring: rgba(83, 107, 120, 0.32);
+  --glass-background: rgba(255, 255, 255, 0.2);
+  --glass-background-strong: rgba(255, 255, 255, 0.3);
+  --glass-border: rgba(83, 107, 120, 0.28);
+  --glass-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  --glass-blur: blur(5px);
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --background: #120912;
+  --foreground: #fff6fc;
+  --muted: #d9b4cf;
+  --muted-strong: #f5cce8;
+  --surface: #1d101c;
+  --surface-soft: #281525;
+  --surface-strong: #361b31;
+  --border: #5c3152;
+  --border-soft: rgba(245, 204, 232, 0.16);
+  --accent: #f5cce8;
+  --accent-strong: #ec9ded;
+  --accent-soft: #4a2040;
+  --accent-secondary: #c880b7;
+  --accent-tertiary: #accbe1;
+  --accent-foreground: #21101e;
+  --shadow-soft: 0 18px 48px rgba(0, 0, 0, 0.34);
+  --shadow-subtle: 0 10px 28px rgba(0, 0, 0, 0.22);
+  --focus-ring: rgba(245, 204, 232, 0.34);
+  --glass-background: rgba(255, 255, 255, 0.08);
+  --glass-background-strong: rgba(255, 255, 255, 0.12);
+  --glass-border: rgba(245, 204, 232, 0.24);
+  --glass-shadow: 0 4px 30px rgba(0, 0, 0, 0.24);
+  --glass-blur: blur(5px);
 }
 
 * {
@@ -23,6 +67,7 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+  text-rendering: geometricPrecision;
 }
 
 a {
@@ -35,6 +80,11 @@ input,
 textarea,
 select {
   font: inherit;
+}
+
+::selection {
+  background: var(--accent-soft);
+  color: var(--foreground);
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -1,24 +1,74 @@
 .page {
+  --page-gutter: clamp(16px, 2.4vw, 44px);
+
+  position: relative;
   display: grid;
-  min-height: 100vh;
+  min-height: 100dvh;
+  width: 100%;
   place-items: center;
-  padding: 40px 20px;
-  background: var(--background);
+  padding: 18px var(--page-gutter) 44px;
+  border: 1px solid var(--glass-border);
+  background:
+    linear-gradient(90deg, var(--border-soft) 1px, transparent 1px),
+    linear-gradient(0deg, var(--border-soft) 1px, transparent 1px),
+    linear-gradient(180deg, var(--background), var(--surface-soft));
+  background-clip: padding-box;
+  background-size:
+    72px 72px,
+    72px 72px,
+    auto;
+}
+
+.loginToolbar {
+  position: absolute;
+  top: 18px;
+  right: var(--page-gutter);
+  z-index: 2;
+}
+
+.themeToggle {
+  display: inline-grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid var(--glass-border);
+  border-radius: 8px;
+  background: var(--glass-background);
+  box-shadow: var(--shadow-subtle);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+}
+
+.themeToggleButton {
+  min-height: 32px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--muted-strong);
+  cursor: pointer;
+  font-weight: 800;
+}
+
+.themeToggleButton[data-selected="true"] {
+  background: var(--surface);
+  color: var(--foreground);
+  box-shadow: var(--shadow-subtle);
 }
 
 .shell {
-  width: min(100%, 880px);
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(280px, 360px);
-  gap: 48px;
+  width: min(100%, 1120px);
+  grid-template-columns: minmax(0, 1fr) minmax(300px, 420px);
+  gap: clamp(28px, 4vw, 56px);
   align-items: center;
 }
 
 .eyebrow {
-  margin: 0 0 12px;
+  margin: 0 0 14px;
   color: var(--accent);
   font-size: 0.875rem;
-  font-weight: 700;
+  font-weight: 900;
   letter-spacing: 0;
   text-transform: uppercase;
 }
@@ -26,14 +76,14 @@
 .title {
   margin: 0;
   color: var(--foreground);
-  font-size: clamp(2.25rem, 6vw, 4rem);
-  line-height: 1;
+  font-size: clamp(2.6rem, 6vw, 5.5rem);
+  line-height: 0.92;
 }
 
 .description {
-  max-width: 560px;
+  max-width: 620px;
   margin: 24px 0 0;
-  color: var(--muted);
+  color: var(--muted-strong);
   font-size: 1.05rem;
   line-height: 1.65;
 }
@@ -41,9 +91,12 @@
 .panel {
   min-height: 320px;
   padding: 28px;
-  border: 1px solid var(--border);
+  border: 1px solid var(--glass-border);
   border-radius: 8px;
-  background: var(--surface);
+  background: var(--glass-background);
+  box-shadow: var(--glass-shadow);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
 }
 
 .panelTitle {
@@ -54,7 +107,7 @@
 
 .panelText {
   margin: 16px 0 0;
-  color: var(--muted);
+  color: var(--muted-strong);
   line-height: 1.6;
 }
 
@@ -72,18 +125,20 @@
 .label {
   color: var(--foreground);
   font-size: 0.925rem;
-  font-weight: 700;
+  font-weight: 800;
 }
 
 .input {
   width: 100%;
   min-height: 46px;
   padding: 0 14px;
-  border: 1px solid var(--border);
+  border: 1px solid var(--glass-border);
   border-radius: 8px;
-  background: var(--background);
+  background: var(--glass-background-strong);
   color: var(--foreground);
   outline: none;
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
 }
 
 .input::placeholder {
@@ -92,7 +147,7 @@
 
 .input:focus {
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(20, 110, 245, 0.16);
+  box-shadow: 0 0 0 3px var(--focus-ring);
 }
 
 .input:disabled {
@@ -118,11 +173,13 @@
   place-items: center;
   padding: 0;
   transform: translateY(-50%);
-  border: 1px solid var(--border);
+  border: 1px solid var(--glass-border);
   border-radius: 8px;
-  background: var(--surface);
+  background: var(--glass-background);
   color: var(--foreground);
   cursor: pointer;
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
 }
 
 .togglePassword:disabled {
@@ -136,8 +193,9 @@
 }
 
 .togglePassword:focus-visible,
+.themeToggleButton:focus-visible,
 .submitButton:focus-visible {
-  outline: 3px solid rgba(20, 110, 245, 0.28);
+  outline: 3px solid var(--focus-ring);
   outline-offset: 2px;
 }
 
@@ -148,7 +206,7 @@
   background: var(--accent);
   color: var(--accent-foreground);
   cursor: pointer;
-  font-weight: 700;
+  font-weight: 800;
 }
 
 .submitButton:disabled {
@@ -159,10 +217,10 @@
 .errorMessage {
   margin: 0;
   padding: 12px 14px;
-  border: 1px solid #f2b8b5;
+  border: 1px solid rgba(153, 27, 27, 0.24);
   border-radius: 8px;
-  background: #fff1f0;
-  color: #8a1f17;
+  background: rgba(248, 113, 113, 0.12);
+  color: #991b1b;
   font-size: 0.925rem;
   line-height: 1.4;
 }
@@ -170,10 +228,16 @@
 @media (max-width: 760px) {
   .page {
     place-items: start;
+    padding: 18px 16px 44px;
   }
 
   .shell {
     grid-template-columns: 1fr;
     gap: 32px;
+    padding-top: 58px;
+  }
+
+  .title {
+    font-size: clamp(2.4rem, 14vw, 4rem);
   }
 }
