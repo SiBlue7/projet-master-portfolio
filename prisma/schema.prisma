@@ -179,6 +179,7 @@ model Runbook {
   slug         String
   description  String?
   isActive     Boolean              @default(true)
+  isPublic     Boolean              @default(false)
   sortOrder    Int                  @default(0)
   createdAt    DateTime             @default(now())
   updatedAt    DateTime             @updatedAt
@@ -188,6 +189,7 @@ model Runbook {
 
   @@unique([projectId, slug])
   @@index([projectId])
+  @@index([isPublic])
   @@index([sortOrder])
   @@map("runbooks")
 }

@@ -21,6 +21,7 @@ describe("runbook validation", () => {
       createFormData({
         description: "Procédure de déploiement.",
         isActive: "on",
+        isPublic: "on",
         slug: "Déploiement applicatif",
         sortOrder: "2",
         title: "Déploiement applicatif",
@@ -33,6 +34,7 @@ describe("runbook validation", () => {
       expect(result.data).toEqual({
         description: "Procédure de déploiement.",
         isActive: true,
+        isPublic: true,
         slug: "deploiement-applicatif",
         sortOrder: 2,
         title: "Déploiement applicatif",

@@ -149,6 +149,7 @@ describe("runbook actions", () => {
       data: {
         description: "Procédure de déploiement.",
         isActive: true,
+        isPublic: false,
         projectId: "project-id",
         slug: "deploiement",
         sortOrder: 0,

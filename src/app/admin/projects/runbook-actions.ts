@@ -39,11 +39,24 @@ function isSessionError(
   return "status" in value;
 }
 
-function revalidateRunbookPages(projectId: string | null) {
+async function revalidateRunbookPages(projectId: string | null) {
   revalidatePath("/admin/projects/[projectId]", "page");
 
   if (projectId) {
     revalidatePath(`/admin/projects/${projectId}`);
+
+    const project = await prisma.project.findUnique({
+      where: {
+        id: projectId,
+      },
+      select: {
+        slug: true,
+      },
+    });
+
+    if (project?.slug) {
+      revalidatePath(`/projects/${project.slug}`);
+    }
   }
 }
 
@@ -169,7 +182,7 @@ export async function createRunbook(
     throw error;
   }
 
-  revalidateRunbookPages(projectId);
+  await revalidateRunbookPages(projectId);
 
   return {
     status: "success",
@@ -238,7 +251,7 @@ export async function updateRunbook(
     throw error;
   }
 
-  revalidateRunbookPages(projectId);
+  await revalidateRunbookPages(projectId);
 
   return {
     status: "success",
@@ -286,7 +299,7 @@ export async function deleteRunbook(
     summary: "Suppression d'un runbook.",
   });
 
-  revalidateRunbookPages(projectId);
+  await revalidateRunbookPages(projectId);
 
   return {
     status: "success",
@@ -357,7 +370,7 @@ export async function createRunbookEnvironment(
     throw error;
   }
 
-  revalidateRunbookPages(projectId);
+  await revalidateRunbookPages(projectId);
 
   return {
     status: "success",
@@ -438,7 +451,7 @@ export async function updateRunbookEnvironment(
     throw error;
   }
 
-  revalidateRunbookPages(environment.runbook.projectId);
+  await revalidateRunbookPages(environment.runbook.projectId);
 
   return {
     status: "success",
@@ -497,7 +510,7 @@ export async function deleteRunbookEnvironment(
     summary: "Suppression d'un environnement de runbook.",
   });
 
-  revalidateRunbookPages(environment.runbook.projectId);
+  await revalidateRunbookPages(environment.runbook.projectId);
 
   return {
     status: "success",
@@ -573,7 +586,7 @@ export async function createRunbookStep(
     summary: "Création d'une étape de runbook.",
   });
 
-  revalidateRunbookPages(projectId);
+  await revalidateRunbookPages(projectId);
 
   return {
     status: "success",
@@ -660,7 +673,7 @@ export async function updateRunbookStep(
     summary: "Mise à jour d'une étape de runbook.",
   });
 
-  revalidateRunbookPages(step.runbook.projectId);
+  await revalidateRunbookPages(step.runbook.projectId);
 
   return {
     status: "success",
@@ -719,7 +732,7 @@ export async function deleteRunbookStep(
     summary: "Suppression d'une étape de runbook.",
   });
 
-  revalidateRunbookPages(step.runbook.projectId);
+  await revalidateRunbookPages(step.runbook.projectId);
 
   return {
     status: "success",
