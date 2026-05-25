@@ -6,7 +6,11 @@ import styles from "./page.module.css";
 
 const loginRedirectPath = "/admin/login";
 
-export function LogoutButton() {
+type LogoutButtonProps = {
+  className?: string;
+};
+
+export function LogoutButton({ className }: LogoutButtonProps) {
   const [isSigningOut, setIsSigningOut] = useState(false);
 
   async function handleSignOut() {
@@ -23,7 +27,7 @@ export function LogoutButton() {
 
   return (
     <button
-      className={styles.logoutButton}
+      className={className ?? styles.logoutButton}
       type="button"
       disabled={isSigningOut}
       onClick={handleSignOut}

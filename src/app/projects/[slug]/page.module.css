@@ -1,15 +1,26 @@
 .page {
-  min-height: 100vh;
-  padding: 48px 24px;
+  --page-gutter: clamp(16px, 2.4vw, 44px);
+
+  min-height: 100dvh;
+  width: 100%;
+  overflow-x: hidden;
+  padding: 18px var(--page-gutter) 44px;
+  border: 1px solid var(--glass-border);
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(247, 248, 250, 1)),
-    var(--background);
+    linear-gradient(90deg, var(--border-soft) 1px, transparent 1px),
+    linear-gradient(0deg, var(--border-soft) 1px, transparent 1px),
+    linear-gradient(180deg, var(--background), var(--surface-soft));
+  background-clip: padding-box;
+  background-size:
+    72px 72px,
+    72px 72px,
+    auto;
 }
 
 .hero,
 .details {
-  width: min(100%, 1120px);
-  margin: 0 auto;
+  width: 100%;
+  margin: 0;
 }
 
 .hero {
@@ -17,7 +28,7 @@
   grid-template-columns: minmax(0, 1fr) minmax(320px, 0.78fr);
   gap: 54px;
   align-items: center;
-  padding: 10px 0 64px;
+  padding: 18px 0 64px;
 }
 
 .content {
@@ -26,16 +37,29 @@
 
 .backLink {
   display: inline-flex;
+  min-height: 38px;
+  align-items: center;
   margin-bottom: 30px;
-  color: var(--accent);
+  padding: 0 12px;
+  border: 1px solid var(--glass-border);
+  border-radius: 8px;
+  background: var(--glass-background);
+  color: var(--accent-strong);
   font-weight: 800;
+  box-shadow: var(--shadow-subtle);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+}
+
+.backLink:hover {
+  border-color: var(--accent);
 }
 
 .eyebrow {
   margin: 0 0 14px;
   color: var(--accent);
   font-size: 0.875rem;
-  font-weight: 800;
+  font-weight: 900;
   letter-spacing: 0;
   text-transform: uppercase;
 }
@@ -51,7 +75,7 @@
 .shortDescription {
   max-width: 720px;
   margin: 24px 0 0;
-  color: var(--muted);
+  color: var(--muted-strong);
   font-size: clamp(1.15rem, 2.4vw, 1.55rem);
   line-height: 1.55;
 }
@@ -68,11 +92,13 @@
   min-height: 34px;
   align-items: center;
   padding: 0 14px;
-  border: 1px solid rgba(20, 110, 245, 0.14);
+  border: 1px solid var(--glass-border);
   border-radius: 999px;
-  background: rgba(20, 110, 245, 0.08);
-  color: var(--accent);
+  background: var(--glass-background-strong);
+  color: var(--accent-strong);
   font-weight: 800;
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
 }
 
 .actions {
@@ -100,15 +126,23 @@
 }
 
 .secondaryAction {
-  border: 1px solid var(--border);
-  background: var(--surface);
+  border: 1px solid var(--glass-border);
+  background: var(--glass-background);
   color: var(--foreground);
+  box-shadow: var(--shadow-subtle);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+}
+
+.primaryAction:hover,
+.secondaryAction:hover {
+  transform: translateY(-1px);
 }
 
 .backLink:focus-visible,
 .primaryAction:focus-visible,
 .secondaryAction:focus-visible {
-  outline: 3px solid rgba(20, 110, 245, 0.28);
+  outline: 3px solid var(--focus-ring);
   outline-offset: 3px;
 }
 
@@ -116,11 +150,14 @@
   display: grid;
   min-height: 360px;
   overflow: hidden;
-  border: 1px solid var(--border);
+  border: 1px solid var(--glass-border);
   border-radius: 8px;
   background:
-    linear-gradient(135deg, rgba(20, 110, 245, 0.14), transparent 42%),
-    linear-gradient(315deg, rgba(15, 118, 110, 0.14), transparent 40%), #f8fbff;
+    linear-gradient(135deg, rgba(200, 128, 183, 0.16), transparent 46%),
+    var(--glass-background);
+  box-shadow: var(--glass-shadow);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
 }
 
 .previewImage {
@@ -135,15 +172,15 @@
   gap: 8px;
   align-self: start;
   padding: 16px;
-  border-bottom: 1px solid rgba(216, 222, 232, 0.72);
-  background: rgba(255, 255, 255, 0.76);
+  border-bottom: 1px solid var(--glass-border);
+  background: var(--glass-background-strong);
 }
 
 .previewTopbar span {
   width: 10px;
   height: 10px;
   border-radius: 999px;
-  background: rgba(101, 112, 128, 0.55);
+  background: var(--accent-secondary);
 }
 
 .previewBody {
@@ -159,10 +196,10 @@
   width: 92px;
   height: 92px;
   place-items: center;
-  border: 1px solid rgba(20, 110, 245, 0.2);
+  border: 1px solid var(--glass-border);
   border-radius: 8px;
-  background: var(--surface);
-  color: var(--accent);
+  background: var(--glass-background-strong);
+  color: var(--accent-strong);
   font-size: 2.7rem;
   font-weight: 900;
 }
@@ -171,7 +208,7 @@
   width: min(100%, 280px);
   height: 13px;
   border-radius: 999px;
-  background: rgba(101, 112, 128, 0.14);
+  background: var(--glass-background-strong);
 }
 
 .previewLine:last-child {
@@ -192,9 +229,12 @@
 
 .metaItem,
 .descriptionPanel {
-  border: 1px solid var(--border);
+  border: 1px solid var(--glass-border);
   border-radius: 8px;
-  background: var(--surface);
+  background: var(--glass-background);
+  box-shadow: var(--glass-shadow);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
 }
 
 .metaItem {
@@ -204,7 +244,7 @@
 
 .metaLabel {
   display: block;
-  color: var(--muted);
+  color: var(--muted-strong);
   font-size: 0.875rem;
   font-weight: 800;
   text-transform: uppercase;
@@ -233,7 +273,7 @@
 
 .fullDescription {
   margin: 22px 0 0;
-  color: var(--muted);
+  color: var(--muted-strong);
   font-size: 1.05rem;
   line-height: 1.75;
   white-space: pre-wrap;
@@ -251,9 +291,9 @@
   min-height: 34px;
   align-items: center;
   padding: 0 14px;
-  border: 1px solid rgba(18, 140, 95, 0.16);
+  border: 1px solid var(--glass-border);
   border-radius: 999px;
-  background: rgba(18, 140, 95, 0.08);
+  background: var(--glass-background-strong);
   color: #0f6b49;
   font-weight: 800;
 }
@@ -266,9 +306,9 @@
 
 .mediaCarouselViewport {
   overflow: hidden;
-  border: 1px solid var(--border);
+  border: 1px solid var(--glass-border);
   border-radius: 8px;
-  background: var(--background);
+  background: var(--glass-background-strong);
 }
 
 .mediaCarouselTrack {
@@ -309,18 +349,20 @@
   width: 42px;
   height: 42px;
   place-items: center;
-  border: 1px solid rgba(20, 110, 245, 0.18);
+  border: 1px solid var(--glass-border);
   border-radius: 999px;
-  background: var(--surface);
-  color: var(--accent);
+  background: var(--glass-background);
+  color: var(--accent-strong);
   cursor: pointer;
   font-size: 1rem;
   font-weight: 900;
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
 }
 
 .mediaCarouselButton:focus-visible,
 .mediaCarouselDot:focus-visible {
-  outline: 3px solid rgba(20, 110, 245, 0.28);
+  outline: 3px solid var(--focus-ring);
   outline-offset: 2px;
 }
 
@@ -336,9 +378,9 @@
   width: 10px;
   height: 10px;
   padding: 0;
-  border: 1px solid rgba(20, 110, 245, 0.22);
+  border: 1px solid var(--glass-border);
   border-radius: 999px;
-  background: rgba(20, 110, 245, 0.12);
+  background: var(--glass-background-strong);
   cursor: pointer;
 }
 
@@ -349,7 +391,7 @@
 
 .mediaCarouselStatus {
   margin: 0;
-  color: var(--muted);
+  color: var(--muted-strong);
   font-size: 0.875rem;
   font-weight: 800;
   text-align: center;
@@ -358,7 +400,7 @@
 .runbookIntro {
   max-width: 760px;
   margin: 18px 0 0;
-  color: var(--muted);
+  color: var(--muted-strong);
   line-height: 1.65;
 }
 
@@ -372,11 +414,11 @@
   display: grid;
   gap: 18px;
   padding: 20px;
-  border: 1px solid rgba(20, 110, 245, 0.16);
+  border: 1px solid var(--glass-border);
   border-radius: 8px;
   background:
-    linear-gradient(135deg, rgba(20, 110, 245, 0.08), transparent 48%),
-    var(--surface);
+    linear-gradient(135deg, rgba(200, 128, 183, 0.12), transparent 48%),
+    var(--glass-background-strong);
 }
 
 .runbookHeader {
@@ -403,7 +445,7 @@
 
 .runbookDescription {
   margin: 12px 0 0;
-  color: var(--muted);
+  color: var(--muted-strong);
   line-height: 1.6;
 }
 
@@ -413,9 +455,10 @@
   flex: 0 0 auto;
   align-items: center;
   padding: 0 10px;
+  border: 1px solid var(--glass-border);
   border-radius: 999px;
-  background: rgba(20, 110, 245, 0.08);
-  color: var(--accent);
+  background: var(--glass-background);
+  color: var(--accent-strong);
   font-size: 0.8rem;
   font-weight: 900;
 }
@@ -431,9 +474,9 @@
   gap: 3px;
   min-width: min(100%, 190px);
   padding: 12px;
-  border: 1px solid rgba(18, 140, 95, 0.16);
+  border: 1px solid var(--glass-border);
   border-radius: 8px;
-  background: rgba(18, 140, 95, 0.08);
+  background: var(--glass-background);
 }
 
 .runbookEnvironment strong {
@@ -460,9 +503,9 @@
 .runbookStep {
   counter-increment: runbook-step;
   padding: 16px;
-  border: 1px solid var(--border);
+  border: 1px solid var(--glass-border);
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.78);
+  background: var(--glass-background);
 }
 
 .runbookStep::before {
@@ -493,18 +536,19 @@
   min-height: 26px;
   align-items: center;
   padding: 0 9px;
+  border: 1px solid var(--glass-border);
   border-radius: 999px;
   font-size: 0.76rem;
   font-weight: 900;
 }
 
 .runbookStepType {
-  background: rgba(20, 110, 245, 0.08);
-  color: var(--accent);
+  background: var(--glass-background-strong);
+  color: var(--accent-strong);
 }
 
 .runbookStepEnv {
-  background: #ecfdf5;
+  background: rgba(45, 212, 191, 0.1);
   color: #0f766e;
 }
 
@@ -518,7 +562,7 @@
 .runbookStepText,
 .runbookExpected {
   margin: 10px 0 0;
-  color: var(--muted);
+  color: var(--muted-strong);
   line-height: 1.6;
 }
 
@@ -560,7 +604,7 @@
 .runbookEndpoint code {
   max-width: 100%;
   overflow-wrap: anywhere;
-  background: rgba(101, 112, 128, 0.12);
+  background: var(--glass-background-strong);
   color: var(--foreground);
 }
 
@@ -592,7 +636,7 @@
 
 @media (max-width: 640px) {
   .page {
-    padding: 34px 18px;
+    padding: 18px 16px 44px;
   }
 
   .actions {

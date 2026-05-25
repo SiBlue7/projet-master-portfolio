@@ -197,10 +197,6 @@ describe("Home", () => {
     expect(
       screen.getByRole("heading", { name: "Portfolio technique" }),
     ).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Socle" })).toHaveAttribute(
-      "href",
-      "#socle",
-    );
     expect(screen.getByRole("link", { name: "Projets" })).toHaveAttribute(
       "href",
       "#projets",
@@ -209,7 +205,6 @@ describe("Home", () => {
       screen.getByText("Aucun projet public pour le moment"),
     ).toBeInTheDocument();
     expect(screen.getByText("0 projets publics")).toBeInTheDocument();
-    expect(screen.getByText("PostgreSQL + Prisma")).toBeInTheDocument();
     expect(
       screen.queryByRole("heading", { name: "Parcours" }),
     ).not.toBeInTheDocument();

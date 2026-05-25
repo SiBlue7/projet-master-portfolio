@@ -2,6 +2,7 @@ import Link from "next/link";
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import { authOptions } from "@/lib/auth";
+import { AdminNavigation } from "@/app/admin/admin-navigation";
 import { CreateProjectForm, GithubImportProjectForm } from "./project-form";
 import styles from "./page.module.css";
 
@@ -14,6 +15,8 @@ export default async function AdminProjectsPage() {
 
   return (
     <main className={styles.page}>
+      <AdminNavigation activeItem="project-create" />
+
       <section className={styles.main} aria-labelledby="projects-title">
         <Link className={styles.backLink} href="/admin">
           Retour au tableau de bord admin

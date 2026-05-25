@@ -16,4 +16,43 @@ describe("GET /api/health", () => {
     expect(body.timestamp).toEqual(expect.any(String));
     expect(body.uptime).toEqual(expect.any(Number));
   });
+
+  it("renders a human-readable health page for browser requests", async () => {
+    vi.stubEnv("APP_ENV", "preprod");
+
+    const response = await GET(
+      new Request("http://localhost:3000/api/health", {
+        headers: {
+          accept: "text/html",
+        },
+      }),
+    );
+    const body = await response.text();
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get("content-type")).toContain("text/html");
+    expect(body).toContain("Application disponible");
+    expect(body).toContain("preprod");
+    expect(body).toContain('localStorage.getItem("portfolio-theme")');
+    expect(body).toContain(':root[data-theme="dark"]');
+  });
+
+  it("keeps JSON available through the format query parameter", async () => {
+    vi.stubEnv("APP_ENV", "prod");
+
+    const response = await GET(
+      new Request("http://localhost:3000/api/health?format=json", {
+        headers: {
+          accept: "text/html",
+        },
+      }),
+    );
+    const body = await response.json();
+
+    expect(response.headers.get("content-type")).toContain("application/json");
+    expect(body).toMatchObject({
+      environment: "prod",
+      status: "ok",
+    });
+  });
 });

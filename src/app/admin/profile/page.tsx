@@ -2,6 +2,7 @@ import { Buffer } from "node:buffer";
 import Link from "next/link";
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
+import { AdminNavigation } from "@/app/admin/admin-navigation";
 import { authOptions } from "@/lib/auth";
 import { PUBLIC_PROFILE_ID } from "@/lib/public-profile";
 import { prisma } from "@/lib/prisma";
@@ -49,6 +50,8 @@ export default async function AdminProfilePage() {
 
   return (
     <main className={styles.page}>
+      <AdminNavigation activeItem="profile" />
+
       <section className={styles.main} aria-labelledby="profile-title">
         <Link className={styles.backLink} href="/admin">
           Retour au tableau de bord admin

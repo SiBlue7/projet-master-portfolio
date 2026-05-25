@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
+import { AdminNavigation } from "@/app/admin/admin-navigation";
 import { authOptions } from "@/lib/auth";
 import { dateToMonthValue } from "@/lib/profile-timeline";
 import { prisma } from "@/lib/prisma";
@@ -71,6 +72,8 @@ export default async function AdminProfileTimelinePage() {
 
   return (
     <main className={styles.page}>
+      <AdminNavigation activeItem="timeline" />
+
       <section className={styles.main} aria-labelledby="timeline-title">
         <div className={styles.navLinks}>
           <Link className={styles.backLink} href="/admin">

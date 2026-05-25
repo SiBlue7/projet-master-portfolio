@@ -1,23 +1,49 @@
 .page {
-  min-height: 100vh;
-  padding: 48px 24px;
-  background: var(--background);
+  --page-gutter: clamp(16px, 2.4vw, 44px);
+
+  min-height: 100dvh;
+  width: 100%;
+  overflow-x: hidden;
+  padding: 18px var(--page-gutter) 44px;
+  border: 1px solid var(--glass-border);
+  background:
+    linear-gradient(90deg, var(--border-soft) 1px, transparent 1px),
+    linear-gradient(0deg, var(--border-soft) 1px, transparent 1px),
+    linear-gradient(180deg, var(--background), var(--surface-soft));
+  background-clip: padding-box;
+  background-size:
+    72px 72px,
+    72px 72px,
+    auto;
 }
 
 .main {
-  width: min(100%, 1120px);
-  margin: 0 auto;
+  width: 100%;
+  margin: 0;
 }
 
 .backLink {
   display: inline-flex;
-  margin-bottom: 28px;
-  color: var(--accent);
-  font-weight: 700;
+  min-height: 38px;
+  align-items: center;
+  margin-bottom: 22px;
+  padding: 0 12px;
+  border: 1px solid var(--glass-border);
+  border-radius: 8px;
+  background: var(--glass-background);
+  color: var(--accent-strong);
+  font-weight: 800;
+  box-shadow: var(--shadow-subtle);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+}
+
+.backLink:hover {
+  border-color: var(--accent);
 }
 
 .backLink:focus-visible {
-  outline: 3px solid rgba(20, 110, 245, 0.28);
+  outline: 3px solid var(--focus-ring);
   outline-offset: 2px;
 }
 
@@ -25,7 +51,7 @@
   margin: 0 0 12px;
   color: var(--accent);
   font-size: 0.875rem;
-  font-weight: 700;
+  font-weight: 900;
   letter-spacing: 0;
   text-transform: uppercase;
 }
@@ -33,14 +59,14 @@
 .title {
   margin: 0;
   color: var(--foreground);
-  font-size: clamp(2rem, 5vw, 3.5rem);
-  line-height: 1;
+  font-size: clamp(2.2rem, 4vw, 4rem);
+  line-height: 0.98;
 }
 
 .description {
   max-width: 720px;
   margin: 20px 0 0;
-  color: var(--muted);
+  color: var(--muted-strong);
   font-size: 1rem;
   line-height: 1.65;
 }
@@ -54,13 +80,16 @@
 
 .statCard {
   padding: 18px;
-  border: 1px solid var(--border);
+  border: 1px solid var(--glass-border);
   border-radius: 8px;
-  background: var(--surface);
+  background: var(--glass-background);
+  box-shadow: var(--glass-shadow);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
 }
 
 .statCard dt {
-  color: var(--muted);
+  color: var(--muted-strong);
   font-size: 0.875rem;
   font-weight: 800;
 }
@@ -76,9 +105,12 @@
 .panel {
   margin-top: 24px;
   padding: 24px;
-  border: 1px solid var(--border);
+  border: 1px solid var(--glass-border);
   border-radius: 8px;
-  background: var(--surface);
+  background: var(--glass-background);
+  box-shadow: var(--glass-shadow);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
 }
 
 .panelHeader {
@@ -97,7 +129,7 @@
 
 .panelDescription {
   margin: 8px 0 0;
-  color: var(--muted);
+  color: var(--muted-strong);
   line-height: 1.6;
 }
 
@@ -112,9 +144,11 @@
   gap: 18px;
   align-items: center;
   padding: 16px 18px;
-  border: 1px solid var(--border);
+  border: 1px solid var(--glass-border);
   border-radius: 8px;
-  background: var(--background);
+  background: var(--glass-background-strong);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
 }
 
 .logMain {
@@ -142,21 +176,21 @@
 }
 
 .actionBadge {
-  border: 1px solid rgba(20, 110, 245, 0.18);
-  background: #eef5ff;
-  color: var(--accent);
+  border: 1px solid var(--glass-border);
+  background: var(--glass-background);
+  color: var(--accent-strong);
 }
 
 .successBadge {
-  border: 1px solid rgba(18, 140, 95, 0.18);
-  background: rgba(18, 140, 95, 0.08);
-  color: #0f6b49;
+  border: 1px solid rgba(15, 118, 110, 0.22);
+  background: rgba(45, 212, 191, 0.1);
+  color: #0f766e;
 }
 
 .failureBadge {
-  border: 1px solid #f2b8b5;
-  background: #fff1f0;
-  color: #8a1f17;
+  border: 1px solid rgba(153, 27, 27, 0.24);
+  background: rgba(248, 113, 113, 0.12);
+  color: #991b1b;
 }
 
 .logSummary {
@@ -169,7 +203,7 @@
 .logMeta {
   margin: 0;
   overflow-wrap: anywhere;
-  color: var(--muted);
+  color: var(--muted-strong);
   font-size: 0.875rem;
   font-weight: 700;
   line-height: 1.45;
@@ -178,7 +212,7 @@
 .logAside {
   display: grid;
   gap: 6px;
-  color: var(--muted);
+  color: var(--muted-strong);
   font-size: 0.875rem;
   font-weight: 700;
   text-align: right;
@@ -186,7 +220,7 @@
 
 .emptyState {
   margin: 0;
-  color: var(--muted);
+  color: var(--muted-strong);
   line-height: 1.6;
 }
 
@@ -203,7 +237,7 @@
 
 @media (max-width: 640px) {
   .page {
-    padding: 40px 20px;
+    padding: 18px 16px 44px;
   }
 
   .panel {

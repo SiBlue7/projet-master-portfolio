@@ -1,14 +1,25 @@
 .page {
-  min-height: 100vh;
-  padding: 48px 24px;
+  --page-gutter: clamp(16px, 2.4vw, 44px);
+
+  min-height: 100dvh;
+  width: 100%;
+  overflow-x: hidden;
+  padding: 18px var(--page-gutter) 44px;
+  border: 1px solid var(--glass-border);
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(247, 248, 250, 1)),
-    var(--background);
+    linear-gradient(90deg, var(--border-soft) 1px, transparent 1px),
+    linear-gradient(0deg, var(--border-soft) 1px, transparent 1px),
+    linear-gradient(180deg, var(--background), var(--surface-soft));
+  background-clip: padding-box;
+  background-size:
+    72px 72px,
+    72px 72px,
+    auto;
 }
 
 .main {
-  width: min(100%, 1120px);
-  margin: 0 auto;
+  width: 100%;
+  margin: 0;
 }
 
 .hero {
@@ -17,20 +28,30 @@
   gap: 48px;
   align-items: end;
   padding: 40px 0 46px;
-  border-bottom: 1px solid var(--border);
 }
 
 .backLink {
   display: inline-flex;
-  min-height: 36px;
+  min-height: 38px;
   align-items: center;
   margin-bottom: 28px;
-  color: var(--accent);
+  padding: 0 12px;
+  border: 1px solid var(--glass-border);
+  border-radius: 8px;
+  background: var(--glass-background);
+  color: var(--accent-strong);
   font-weight: 800;
+  box-shadow: var(--shadow-subtle);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+}
+
+.backLink:hover {
+  border-color: var(--accent);
 }
 
 .backLink:focus-visible {
-  outline: 3px solid rgba(20, 110, 245, 0.28);
+  outline: 3px solid var(--focus-ring);
   outline-offset: 3px;
 }
 
@@ -39,7 +60,7 @@
   margin: 0 0 14px;
   color: var(--accent);
   font-size: 0.875rem;
-  font-weight: 800;
+  font-weight: 900;
   letter-spacing: 0;
   text-transform: uppercase;
 }
@@ -55,7 +76,7 @@
 .description {
   max-width: 720px;
   margin: 22px 0 0;
-  color: var(--muted);
+  color: var(--muted-strong);
   font-size: 1.08rem;
   line-height: 1.75;
 }
@@ -64,14 +85,17 @@
   display: grid;
   gap: 10px;
   padding: 22px;
-  border: 1px solid var(--border);
+  border: 1px solid var(--glass-border);
   border-radius: 8px;
-  background: var(--surface);
+  background: var(--glass-background);
+  box-shadow: var(--glass-shadow);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
 }
 
 .summaryLabel {
   margin: 0;
-  color: var(--muted);
+  color: var(--muted-strong);
   font-size: 0.8rem;
   font-weight: 800;
   text-transform: uppercase;
@@ -87,30 +111,31 @@
 
 .summaryHint {
   margin: 0;
-  color: var(--muted);
+  color: var(--muted-strong);
   line-height: 1.55;
 }
 
 .metricsGrid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 1px;
-  overflow: hidden;
-  margin: 34px 0 0;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  background: var(--border);
+  gap: 14px;
+  margin: 18px 0 0;
 }
 
 .metric {
   min-height: 148px;
   padding: 22px;
-  background: var(--surface);
+  border: 1px solid var(--glass-border);
+  border-radius: 8px;
+  background: var(--glass-background);
+  box-shadow: var(--glass-shadow);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
 }
 
 .metricLabel {
   display: block;
-  color: var(--muted);
+  color: var(--muted-strong);
   font-size: 0.86rem;
   font-weight: 800;
 }
@@ -127,7 +152,7 @@
 .metricHelp {
   display: block;
   margin-top: 14px;
-  color: var(--muted);
+  color: var(--muted-strong);
   font-size: 0.92rem;
   line-height: 1.45;
 }
@@ -155,7 +180,7 @@
 .sectionDescription {
   max-width: 680px;
   margin: 16px 0 0;
-  color: var(--muted);
+  color: var(--muted-strong);
   font-size: 1rem;
   line-height: 1.7;
 }
@@ -168,9 +193,12 @@
 
 .panel {
   padding: 24px;
-  border: 1px solid var(--border);
+  border: 1px solid var(--glass-border);
   border-radius: 8px;
-  background: var(--surface);
+  background: var(--glass-background);
+  box-shadow: var(--glass-shadow);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
 }
 
 .panelTitle {
@@ -200,7 +228,7 @@
 }
 
 .barMeta {
-  color: var(--muted);
+  color: var(--muted-strong);
   font-size: 0.9rem;
   font-weight: 800;
 }
@@ -209,14 +237,14 @@
   height: 10px;
   overflow: hidden;
   border-radius: 999px;
-  background: rgba(101, 112, 128, 0.14);
+  background: var(--glass-background-strong);
 }
 
 .barFill {
   display: block;
   height: 100%;
   border-radius: inherit;
-  background: linear-gradient(90deg, var(--accent), #0f766e);
+  background: linear-gradient(90deg, var(--accent), var(--accent-tertiary));
 }
 
 .tagCloud {
@@ -230,27 +258,26 @@
   min-height: 34px;
   align-items: center;
   padding: 0 13px;
-  border: 1px solid rgba(216, 222, 232, 0.82);
+  border: 1px solid var(--glass-border);
   border-radius: 999px;
-  background: #eef5ff;
-  color: var(--accent);
+  background: var(--glass-background-strong);
+  color: var(--accent-strong);
   font-size: 0.9rem;
   font-weight: 850;
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
 }
 
 .tag:nth-child(4n + 2) {
-  background: #ecfdf5;
   color: #0f766e;
 }
 
 .tag:nth-child(4n + 3) {
-  background: #fff7ed;
   color: #9a3412;
 }
 
 .tag:nth-child(4n + 4) {
-  background: #f5f3ff;
-  color: #6d28d9;
+  color: var(--accent-tertiary);
 }
 
 .coverageGrid {
@@ -264,13 +291,16 @@
   gap: 10px;
   min-height: 122px;
   padding: 18px;
-  border: 1px solid var(--border);
+  border: 1px solid var(--glass-border);
   border-radius: 8px;
-  background: var(--surface);
+  background: var(--glass-background);
+  box-shadow: var(--glass-shadow);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
 }
 
 .coverageLabel {
-  color: var(--muted);
+  color: var(--muted-strong);
   font-size: 0.86rem;
   font-weight: 800;
 }
@@ -283,14 +313,14 @@
 }
 
 .coverageHelp {
-  color: var(--muted);
+  color: var(--muted-strong);
   font-size: 0.9rem;
   line-height: 1.45;
 }
 
 .emptyState {
   margin: 0;
-  color: var(--muted);
+  color: var(--muted-strong);
   line-height: 1.65;
 }
 
@@ -309,7 +339,7 @@
 
 @media (max-width: 640px) {
   .page {
-    padding: 32px 18px;
+    padding: 18px 16px 44px;
   }
 
   .hero {

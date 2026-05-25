@@ -17,6 +17,8 @@ import {
   type PublicProjectCardViewModel,
 } from "./public-project-showcase";
 import { PublicTimelineGroup } from "./public-timeline-group";
+import { GitHubIcon, LinkedInIcon } from "./social-icons";
+import { ThemeToggle } from "./theme-toggle";
 
 export const dynamic = "force-dynamic";
 
@@ -35,12 +37,6 @@ const highlights = [
   { label: "Domaine", value: "Cybersécurité" },
   { label: "Approche", value: "Fullstack" },
   { label: "Déploiement", value: "CI/CD" },
-];
-
-const foundations = [
-  { label: "Frontend", value: "Next.js + React" },
-  { label: "Données", value: "PostgreSQL + Prisma" },
-  { label: "Sécurité", value: "NextAuth" },
 ];
 
 const identityTags = ["Next.js", "Prisma", "Docker", "Cloudflare"];
@@ -353,7 +349,7 @@ export default async function Home() {
       detail: "étapes",
     },
     {
-      label: "Socle",
+      label: "Focus",
       value: "Fullstack",
       detail: "sécurité",
     },
@@ -365,11 +361,13 @@ export default async function Home() {
         className={styles.anchorNav}
         aria-label="Navigation de la page d'accueil"
       >
-        <a href="#accueil">Accueil</a>
-        <a href="#projets">Projets</a>
-        {hasTimelineItems ? <a href="#parcours">Parcours</a> : null}
-        <a href="#socle">Socle</a>
-        <a href="#contact">Contact</a>
+        <div className={styles.anchorLinks}>
+          <a href="#accueil">Accueil</a>
+          <a href="#projets">Projets</a>
+          {hasTimelineItems ? <a href="#parcours">Parcours</a> : null}
+          <a href="#contact">Contact</a>
+        </div>
+        <ThemeToggle />
       </nav>
 
       <section
@@ -407,6 +405,7 @@ export default async function Home() {
                 rel="noreferrer"
                 target="_blank"
               >
+                <GitHubIcon className={styles.linkIcon} />
                 GitHub
               </a>
             ) : null}
@@ -417,6 +416,7 @@ export default async function Home() {
                 rel="noreferrer"
                 target="_blank"
               >
+                <LinkedInIcon className={styles.linkIcon} />
                 LinkedIn
               </a>
             ) : null}
@@ -573,74 +573,63 @@ export default async function Home() {
         </section>
       ) : null}
 
-      <section
-        id="socle"
-        className={styles.foundationSection}
-        aria-labelledby="stack-title"
-      >
-        <div>
-          <p className={styles.sectionEyebrow}>Socle applicatif</p>
-          <h2 id="stack-title" className={styles.sectionTitle}>
-            Une base technique prête pour les projets
-          </h2>
-        </div>
-
-        <div className={styles.statusGrid}>
-          {foundations.map((item) => (
-            <div className={styles.statusItem} key={item.label}>
-              <span className={styles.statusLabel}>{item.label}</span>
-              <span className={styles.statusValue}>{item.value}</span>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <section
+      <footer
         id="contact"
         className={styles.contactSection}
         aria-labelledby="contact-title"
       >
-        <div className={styles.contactContent}>
-          <p className={styles.sectionEyebrow}>Contact</p>
-          <h2 id="contact-title" className={styles.contactTitle}>
-            Échanger autour d&apos;une opportunité, d&apos;un projet ou
-            d&apos;un retour technique
-          </h2>
-          <p className={styles.contactDescription}>
-            Le moyen le plus direct reste l&apos;e-mail. Les profils GitHub et
-            LinkedIn permettent aussi de retrouver mon travail et mon parcours.
-          </p>
+        <div className={styles.contactMain}>
+          <div className={styles.contactContent}>
+            <p className={styles.footerEyebrow}>Contact</p>
+            <h2 id="contact-title" className={styles.contactTitle}>
+              Échanger autour d&apos;une opportunité, d&apos;un projet ou
+              d&apos;un retour technique
+            </h2>
+            <p className={styles.contactDescription}>
+              Le moyen le plus direct reste l&apos;e-mail. Les profils GitHub et
+              LinkedIn permettent aussi de retrouver mon travail et mon
+              parcours.
+            </p>
+          </div>
+
+          <div className={styles.contactActions}>
+            <a
+              className={styles.contactPrimary}
+              href={`mailto:${publicProfile.contactEmail}`}
+            >
+              {publicProfile.contactEmail}
+            </a>
+            {publicProfile.githubUrl ? (
+              <a
+                className={styles.contactSecondary}
+                href={publicProfile.githubUrl}
+                rel="noreferrer"
+                target="_blank"
+              >
+                <GitHubIcon className={styles.linkIcon} />
+                GitHub
+              </a>
+            ) : null}
+            {publicProfile.linkedinUrl ? (
+              <a
+                className={styles.contactSecondary}
+                href={publicProfile.linkedinUrl}
+                rel="noreferrer"
+                target="_blank"
+              >
+                <LinkedInIcon className={styles.linkIcon} />
+                LinkedIn
+              </a>
+            ) : null}
+          </div>
         </div>
 
-        <div className={styles.contactActions}>
-          <a
-            className={styles.contactPrimary}
-            href={`mailto:${publicProfile.contactEmail}`}
-          >
-            {publicProfile.contactEmail}
-          </a>
-          {publicProfile.githubUrl ? (
-            <a
-              className={styles.contactSecondary}
-              href={publicProfile.githubUrl}
-              rel="noreferrer"
-              target="_blank"
-            >
-              GitHub
-            </a>
-          ) : null}
-          {publicProfile.linkedinUrl ? (
-            <a
-              className={styles.contactSecondary}
-              href={publicProfile.linkedinUrl}
-              rel="noreferrer"
-              target="_blank"
-            >
-              LinkedIn
-            </a>
-          ) : null}
+        <div className={styles.footerMeta}>
+          <span>{publicProfile.displayName}</span>
+          <span>Portfolio technique M2 Cyber</span>
+          <span>2026</span>
         </div>
-      </section>
+      </footer>
     </main>
   );
 }
