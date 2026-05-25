@@ -228,6 +228,7 @@
 .projectSecondaryLink:focus-visible,
 .projectFilterButton:focus-visible,
 .projectMediaButton:focus-visible,
+.projectsEmptyLink:focus-visible,
 .projectsArrow:focus-visible {
   outline: 3px solid rgba(20, 110, 245, 0.28);
   outline-offset: 3px;
@@ -483,6 +484,64 @@
   line-height: 1.7;
 }
 
+.projectsCounter {
+  display: inline-flex;
+  min-height: 30px;
+  align-items: center;
+  margin: 18px 0 0;
+  padding: 0 11px;
+  border: 1px solid rgba(20, 110, 245, 0.18);
+  border-radius: 999px;
+  background: rgba(20, 110, 245, 0.08);
+  color: var(--accent);
+  font-size: 0.84rem;
+  font-weight: 900;
+}
+
+.projectsEmpty {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 24px;
+  align-items: center;
+  min-height: 220px;
+  padding: 28px;
+  border: 1px dashed rgba(20, 110, 245, 0.32);
+  border-radius: 8px;
+  background:
+    linear-gradient(135deg, rgba(20, 110, 245, 0.08), transparent 42%),
+    linear-gradient(315deg, rgba(15, 118, 110, 0.1), transparent 38%),
+    rgba(255, 255, 255, 0.82);
+}
+
+.projectsEmptyTitle {
+  margin: 0;
+  color: var(--foreground);
+  font-size: 1.45rem;
+  font-weight: 900;
+  line-height: 1.12;
+}
+
+.projectsEmptyText {
+  max-width: 680px;
+  margin: 12px 0 0;
+  color: var(--muted);
+  line-height: 1.65;
+}
+
+.projectsEmptyLink {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+  padding: 0 16px;
+  border: 1px solid var(--accent);
+  border-radius: 8px;
+  background: var(--accent);
+  color: var(--accent-foreground);
+  font-weight: 900;
+  text-align: center;
+}
+
 .projectFilters {
   display: flex;
   flex-wrap: wrap;
@@ -556,18 +615,27 @@
 .projectCard {
   flex: 0 0 calc((100% - 20px) / 2);
   display: grid;
+  grid-template-rows: auto 1fr auto;
   min-width: 0;
   overflow: hidden;
-  border: 1px solid var(--border);
+  border: 1px solid rgba(216, 222, 232, 0.9);
   border-radius: 8px;
   background: var(--surface);
   scroll-snap-align: start;
+  transition:
+    border-color 180ms ease,
+    transform 180ms ease;
+}
+
+.projectCard:hover {
+  border-color: rgba(20, 110, 245, 0.32);
+  transform: translateY(-2px);
 }
 
 .projectPreview {
   position: relative;
   display: grid;
-  min-height: 210px;
+  min-height: 228px;
   overflow: hidden;
   border-bottom: 1px solid var(--border);
   background:
@@ -575,10 +643,22 @@
     linear-gradient(315deg, rgba(15, 118, 110, 0.12), transparent 38%), #f8fbff;
 }
 
+.projectPreviewEmpty {
+  background:
+    linear-gradient(90deg, rgba(20, 110, 245, 0.06) 1px, transparent 1px),
+    linear-gradient(0deg, rgba(15, 118, 110, 0.05) 1px, transparent 1px),
+    linear-gradient(135deg, rgba(20, 110, 245, 0.12), transparent 45%), #f8fbff;
+  background-size:
+    34px 34px,
+    34px 34px,
+    auto,
+    auto;
+}
+
 .projectMediaTrack {
   display: flex;
   height: 100%;
-  min-height: 210px;
+  min-height: 228px;
   transition: transform 620ms cubic-bezier(0.22, 1, 0.36, 1);
   will-change: transform;
 }
@@ -587,7 +667,7 @@
   flex: 0 0 100%;
   width: 100%;
   height: 100%;
-  min-height: 210px;
+  min-height: 228px;
   object-fit: cover;
   transform: scale(1.01);
 }
@@ -646,34 +726,38 @@
 
 .projectPreviewBody {
   display: grid;
-  gap: 12px;
+  gap: 10px;
   align-content: center;
   justify-items: center;
+  min-height: 176px;
   padding: 26px;
+  text-align: center;
 }
 
 .projectPreviewMark {
   display: grid;
-  width: 68px;
-  height: 68px;
+  width: 76px;
+  height: 76px;
   place-items: center;
   border: 1px solid rgba(20, 110, 245, 0.2);
   border-radius: 8px;
   background: var(--surface);
   color: var(--accent);
-  font-size: 2rem;
+  font-size: 1.8rem;
   font-weight: 900;
 }
 
-.projectPreviewLine {
-  width: min(100%, 260px);
-  height: 12px;
-  border-radius: 999px;
-  background: rgba(101, 112, 128, 0.14);
+.projectPreviewLabel {
+  color: var(--foreground);
+  font-size: 1rem;
+  font-weight: 900;
 }
 
-.projectPreviewLine:last-child {
-  width: min(72%, 190px);
+.projectPreviewHint {
+  max-width: 260px;
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.45;
 }
 
 .projectCardBody {
@@ -713,7 +797,7 @@
 .projectTitle {
   margin: 0;
   color: var(--foreground);
-  font-size: 1.45rem;
+  font-size: 1.5rem;
   line-height: 1.12;
 }
 
@@ -747,6 +831,16 @@
   flex-wrap: wrap;
   gap: 8px;
   margin-top: 2px;
+}
+
+.projectStackLabel {
+  display: inline-flex;
+  min-height: 26px;
+  align-items: center;
+  color: var(--muted);
+  font-size: 0.76rem;
+  font-weight: 900;
+  text-transform: uppercase;
 }
 
 .projectStack {
@@ -1253,6 +1347,15 @@
   .projectActions {
     flex-direction: column;
     align-items: stretch;
+  }
+
+  .projectsEmpty {
+    grid-template-columns: 1fr;
+    padding: 22px;
+  }
+
+  .projectsEmptyLink {
+    width: 100%;
   }
 
   .projectPrimaryLink,

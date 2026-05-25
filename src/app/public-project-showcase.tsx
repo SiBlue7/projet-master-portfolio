@@ -35,6 +35,17 @@ type PublicProjectShowcaseProps = {
   sectionId?: string;
 };
 
+function getProjectInitials(title: string) {
+  const initials = title
+    .split(" ")
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part.at(0))
+    .join("");
+
+  return initials || "PR";
+}
+
 function ProjectCardMediaPreview({
   project,
 }: {
@@ -72,7 +83,10 @@ function ProjectCardMediaPreview({
 
   if (!hasMedia) {
     return (
-      <div className={styles.projectPreview} aria-hidden="true">
+      <div
+        className={`${styles.projectPreview} ${styles.projectPreviewEmpty}`}
+        aria-label={`Aucun média public pour le projet ${project.title}`}
+      >
         <div className={styles.projectPreviewTopbar}>
           <span />
           <span />
@@ -80,10 +94,12 @@ function ProjectCardMediaPreview({
         </div>
         <div className={styles.projectPreviewBody}>
           <span className={styles.projectPreviewMark}>
-            {project.title.at(0)}
+            {getProjectInitials(project.title)}
           </span>
-          <span className={styles.projectPreviewLine} />
-          <span className={styles.projectPreviewLine} />
+          <span className={styles.projectPreviewLabel}>Média à venir</span>
+          <span className={styles.projectPreviewHint}>
+            Les captures du projet seront affichées ici.
+          </span>
         </div>
       </div>
     );
@@ -163,6 +179,10 @@ export function PublicProjectShowcase({
           project.tags.some((tag) => tag.slug === selectedTag),
         );
   const hasOverflowControls = filteredProjects.length > 2;
+  const projectCountLabel =
+    projects.length === 1
+      ? "1 projet public"
+      : `${projects.length} projets publics`;
 
   function selectTag(tagSlug: string) {
     setSelectedTag(tagSlug);
@@ -206,8 +226,27 @@ export function PublicProjectShowcase({
             Une sélection de projets publics avec leur contexte, leur statut et
             leurs liens utiles.
           </p>
+          <p className={styles.projectsCounter}>{projectCountLabel}</p>
         </div>
       </div>
+
+      {projects.length === 0 ? (
+        <div className={styles.projectsEmpty}>
+          <div>
+            <p className={styles.projectsEmptyTitle}>
+              Aucun projet public pour le moment
+            </p>
+            <p className={styles.projectsEmptyText}>
+              Les projets publiés depuis l&apos;administration apparaîtront ici
+              avec leurs technologies, leurs captures et leurs liens de
+              consultation.
+            </p>
+          </div>
+          <Link className={styles.projectsEmptyLink} href="#contact">
+            Me contacter
+          </Link>
+        </div>
+      ) : null}
 
       {projectTags.length > 0 ? (
         <div className={styles.projectFilters} aria-label="Filtrer les projets">
@@ -235,116 +274,119 @@ export function PublicProjectShowcase({
         </div>
       ) : null}
 
-      <div className={styles.projectsCarousel}>
-        {hasOverflowControls ? (
-          <button
-            className={`${styles.projectsArrow} ${styles.projectsArrowPrevious}`}
-            type="button"
-            aria-label="Voir les projets précédents"
-            onClick={() => scrollProjects("previous")}
+      {projects.length > 0 ? (
+        <div className={styles.projectsCarousel}>
+          {hasOverflowControls ? (
+            <button
+              className={`${styles.projectsArrow} ${styles.projectsArrowPrevious}`}
+              type="button"
+              aria-label="Voir les projets précédents"
+              onClick={() => scrollProjects("previous")}
+            >
+              <span aria-hidden="true">&lt;</span>
+            </button>
+          ) : null}
+
+          <div
+            className={styles.projectsList}
+            data-scrollable={hasOverflowControls}
+            ref={listRef}
+            tabIndex={hasOverflowControls ? 0 : undefined}
           >
-            <span aria-hidden="true">&lt;</span>
-          </button>
-        ) : null}
+            {filteredProjects.map((project) => (
+              <article className={styles.projectCard} key={project.id}>
+                <ProjectCardMediaPreview project={project} />
 
-        <div
-          className={styles.projectsList}
-          data-scrollable={hasOverflowControls}
-          ref={listRef}
-          tabIndex={hasOverflowControls ? 0 : undefined}
-        >
-          {filteredProjects.map((project) => (
-            <article className={styles.projectCard} key={project.id}>
-              <ProjectCardMediaPreview project={project} />
+                <div className={styles.projectCardBody}>
+                  {project.statusLabel || project.period ? (
+                    <div className={styles.projectCardHeader}>
+                      {project.statusLabel ? (
+                        <span className={styles.projectStatus}>
+                          {project.statusLabel}
+                        </span>
+                      ) : null}
+                      {project.period ? (
+                        <span className={styles.projectPeriod}>
+                          {project.period}
+                        </span>
+                      ) : null}
+                    </div>
+                  ) : null}
+                  <h3 className={styles.projectTitle}>{project.title}</h3>
+                  <p className={styles.projectDescription}>
+                    {project.shortDescription}
+                  </p>
+                  {project.tags.length > 0 ? (
+                    <div
+                      className={styles.projectTagList}
+                      aria-label={`Tags du projet ${project.title}`}
+                    >
+                      {project.tags.map((tag) => (
+                        <span className={styles.projectTag} key={tag.slug}>
+                          {tag.label}
+                        </span>
+                      ))}
+                    </div>
+                  ) : null}
+                  {project.stacks.length > 0 ? (
+                    <div
+                      className={styles.projectStackList}
+                      aria-label={`Technologies du projet ${project.title}`}
+                    >
+                      <span className={styles.projectStackLabel}>Stack</span>
+                      {project.stacks.map((stack) => (
+                        <span className={styles.projectStack} key={stack.slug}>
+                          {stack.label}
+                        </span>
+                      ))}
+                    </div>
+                  ) : null}
+                </div>
 
-              <div className={styles.projectCardBody}>
-                {project.statusLabel || project.period ? (
-                  <div className={styles.projectCardHeader}>
-                    {project.statusLabel ? (
-                      <span className={styles.projectStatus}>
-                        {project.statusLabel}
-                      </span>
-                    ) : null}
-                    {project.period ? (
-                      <span className={styles.projectPeriod}>
-                        {project.period}
-                      </span>
-                    ) : null}
-                  </div>
-                ) : null}
-                <h3 className={styles.projectTitle}>{project.title}</h3>
-                <p className={styles.projectDescription}>
-                  {project.shortDescription}
-                </p>
-                {project.tags.length > 0 ? (
-                  <div
-                    className={styles.projectTagList}
-                    aria-label={`Tags du projet ${project.title}`}
+                <div className={styles.projectActions}>
+                  <Link
+                    className={styles.projectPrimaryLink}
+                    href={`/projects/${project.slug}`}
                   >
-                    {project.tags.map((tag) => (
-                      <span className={styles.projectTag} key={tag.slug}>
-                        {tag.label}
-                      </span>
-                    ))}
-                  </div>
-                ) : null}
-                {project.stacks.length > 0 ? (
-                  <div
-                    className={styles.projectStackList}
-                    aria-label={`Technologies du projet ${project.title}`}
-                  >
-                    {project.stacks.map((stack) => (
-                      <span className={styles.projectStack} key={stack.slug}>
-                        {stack.label}
-                      </span>
-                    ))}
-                  </div>
-                ) : null}
-              </div>
+                    Détails publics
+                  </Link>
+                  {project.repositoryUrl ? (
+                    <a
+                      className={styles.projectSecondaryLink}
+                      href={project.repositoryUrl}
+                      rel="noreferrer"
+                      target="_blank"
+                    >
+                      GitHub
+                    </a>
+                  ) : null}
+                  {project.demoUrl ? (
+                    <a
+                      className={styles.projectSecondaryLink}
+                      href={project.demoUrl}
+                      rel="noreferrer"
+                      target="_blank"
+                    >
+                      Démo
+                    </a>
+                  ) : null}
+                </div>
+              </article>
+            ))}
+          </div>
 
-              <div className={styles.projectActions}>
-                <Link
-                  className={styles.projectPrimaryLink}
-                  href={`/projects/${project.slug}`}
-                >
-                  Voir les détails
-                </Link>
-                {project.repositoryUrl ? (
-                  <a
-                    className={styles.projectSecondaryLink}
-                    href={project.repositoryUrl}
-                    rel="noreferrer"
-                    target="_blank"
-                  >
-                    GitHub
-                  </a>
-                ) : null}
-                {project.demoUrl ? (
-                  <a
-                    className={styles.projectSecondaryLink}
-                    href={project.demoUrl}
-                    rel="noreferrer"
-                    target="_blank"
-                  >
-                    Démo
-                  </a>
-                ) : null}
-              </div>
-            </article>
-          ))}
+          {hasOverflowControls ? (
+            <button
+              className={`${styles.projectsArrow} ${styles.projectsArrowNext}`}
+              type="button"
+              aria-label="Voir les projets suivants"
+              onClick={() => scrollProjects("next")}
+            >
+              <span aria-hidden="true">&gt;</span>
+            </button>
+          ) : null}
         </div>
-
-        {hasOverflowControls ? (
-          <button
-            className={`${styles.projectsArrow} ${styles.projectsArrowNext}`}
-            type="button"
-            aria-label="Voir les projets suivants"
-            onClick={() => scrollProjects("next")}
-          >
-            <span aria-hidden="true">&gt;</span>
-          </button>
-        ) : null}
-      </div>
+      ) : null}
     </section>
   );
 }
