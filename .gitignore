@@ -21,6 +21,9 @@ tsconfig.tsbuildinfo
 .env
 .env*.local
 
+# Runtime blue/green switch generated on the production VM.
+nginx/active-upstream.conf
+
 # prisma
 prisma/*.db
 prisma/*.db-journal
