@@ -51,6 +51,9 @@ describe("Home", () => {
       "href",
       "#contact",
     );
+    expect(
+      screen.getAllByRole("link", { name: "Statistiques" })[0],
+    ).toHaveAttribute("href", "/statistics");
     expect(screen.getByText("Portfolio M2 Cyber")).toBeInTheDocument();
     expect(screen.getByText("Fullstack & sécurité")).toBeInTheDocument();
     expect(

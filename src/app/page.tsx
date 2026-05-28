@@ -365,6 +365,7 @@ export default async function Home() {
           <a href="#accueil">Accueil</a>
           <a href="#projets">Projets</a>
           {hasTimelineItems ? <a href="#parcours">Parcours</a> : null}
+          <a href="/statistics">Statistiques</a>
           <a href="#contact">Contact</a>
         </div>
         <ThemeToggle />
