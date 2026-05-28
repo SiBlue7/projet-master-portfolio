@@ -58,10 +58,9 @@ test.describe("admin project management", () => {
     await expect(page).toHaveURL(/\/admin\/projects\/[^/]+$/);
     await expect(page.getByRole("heading", { name: title })).toBeVisible();
 
-    const projectEditor = page.locator("section").filter({
-      has: page.getByRole("heading", { name: "Modifier le projet" }),
-    });
-    await expect(projectEditor.locator('input[name="slug"]')).toHaveValue(slug);
+    await expect(
+      page.locator('input[name="slug"][placeholder="portfolio-master"]'),
+    ).toHaveValue(slug);
 
     await page.goto(`/projects/${slug}`);
     await expect(page.getByRole("heading", { name: title })).toBeVisible();
