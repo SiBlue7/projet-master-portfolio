@@ -21,6 +21,7 @@ env:
   DATABASE_URL: postgresql://portfolio:portfolio_password@localhost:5432/portfolio?schema=public
   NEXTAUTH_URL: http://localhost:3000
   NEXTAUTH_SECRET: ci-nextauth-secret-change-me-in-real-env
+  ADMIN_PSEUDO: admin
   ADMIN_EMAIL: admin@example.com
   ADMIN_PASSWORD: ci-admin-password
 
@@ -87,6 +88,21 @@ jobs:
 
       - name: Build application
         run: pnpm build
+
+      - name: Prepare E2E database
+        run: |
+          pnpm prisma migrate deploy
+          pnpm db:seed:admin
+
+      - name: Install Playwright browser
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Run E2E tests
+        run: pnpm test:e2e
+        env:
+          PLAYWRIGHT_WEB_SERVER_COMMAND: pnpm start
+          PLAYWRIGHT_ADMIN_IDENTIFIER: ${{ env.ADMIN_EMAIL }}
+          PLAYWRIGHT_ADMIN_PASSWORD: ${{ env.ADMIN_PASSWORD }}
 
   container:
     name: Docker image
