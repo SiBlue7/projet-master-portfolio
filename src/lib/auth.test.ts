@@ -13,11 +13,27 @@ import {
 } from "./auth";
 
 const mocks = vi.hoisted(() => ({
+  comparePassword: vi.fn(),
+  findFirstUser: vi.fn(),
   tryWriteAuditLog: vi.fn(),
 }));
 
 vi.mock("@/lib/audit", () => ({
   tryWriteAuditLog: mocks.tryWriteAuditLog,
+}));
+
+vi.mock("@/lib/prisma", () => ({
+  prisma: {
+    user: {
+      findFirst: mocks.findFirstUser,
+    },
+  },
+}));
+
+vi.mock("bcryptjs", () => ({
+  default: {
+    compare: mocks.comparePassword,
+  },
 }));
 
 const adminUser = {
@@ -31,27 +47,33 @@ const adminUser = {
 describe("verifyAdminCredentials", () => {
   beforeEach(() => {
     resetAdminLoginRateLimit();
+    mocks.comparePassword.mockReset();
+    mocks.findFirstUser.mockReset();
+    mocks.tryWriteAuditLog.mockReset();
     mocks.tryWriteAuditLog.mockResolvedValue(undefined);
     vi.useRealTimers();
   });
 
-  it("returns the authenticated admin with email and password", async () => {
-    const findUserByLogin = vi.fn().mockResolvedValue(adminUser);
-    const comparePassword = vi.fn().mockResolvedValue(true);
+  it("returns the authenticated admin with an email identifier", async () => {
+    mocks.findFirstUser.mockResolvedValue(adminUser);
+    mocks.comparePassword.mockResolvedValue(true);
 
-    const result = await verifyAdminCredentials(
-      {
-        email: "ADMIN@example.com",
-        password: "plain-password",
-      },
-      {
-        findUserByLogin,
-        comparePassword,
-      },
+    const result = await verifyAdminCredentials({
+      identifier: "ADMIN@example.com",
+      password: "plain-password",
+    });
+
+    expect(mocks.findFirstUser).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: {
+          email: {
+            equals: "admin@example.com",
+            mode: "insensitive",
+          },
+        },
+      }),
     );
-
-    expect(findUserByLogin).toHaveBeenCalledWith("admin@example.com");
-    expect(comparePassword).toHaveBeenCalledWith(
+    expect(mocks.comparePassword).toHaveBeenCalledWith(
       "plain-password",
       "hashed-password",
     );
@@ -64,149 +86,102 @@ describe("verifyAdminCredentials", () => {
     });
   });
 
-  it("returns the authenticated admin with pseudo and password", async () => {
-    const findUserByLogin = vi.fn().mockResolvedValue(adminUser);
-    const comparePassword = vi.fn().mockResolvedValue(true);
+  it("returns the authenticated admin with a pseudo identifier", async () => {
+    mocks.findFirstUser.mockResolvedValue(adminUser);
+    mocks.comparePassword.mockResolvedValue(true);
 
-    const result = await verifyAdminCredentials(
-      {
-        pseudo: "admin",
-        password: "plain-password",
-      },
-      {
-        findUserByLogin,
-        comparePassword,
-      },
-    );
+    const result = await verifyAdminCredentials({
+      identifier: "Admin",
+      password: "plain-password",
+    });
 
-    expect(findUserByLogin).toHaveBeenCalledWith("admin");
-    expect(comparePassword).toHaveBeenCalledWith(
-      "plain-password",
-      "hashed-password",
+    expect(mocks.findFirstUser).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: {
+          pseudo: {
+            equals: "Admin",
+            mode: "insensitive",
+          },
+        },
+      }),
     );
-    expect(result?.id).toBe(adminUser.id);
+    expect(result?.pseudo).toBe(adminUser.pseudo);
   });
 
-  it("returns the authenticated admin with a generic identifier and password", async () => {
-    const findUserByLogin = vi.fn().mockResolvedValue(adminUser);
+  it("falls back to an email lookup when the pseudo is unknown", async () => {
+    mocks.findFirstUser
+      .mockResolvedValueOnce(null)
+      .mockResolvedValueOnce(adminUser);
+    mocks.comparePassword.mockResolvedValue(true);
 
-    const result = await verifyAdminCredentials(
-      {
-        identifier: "Admin",
-        password: "plain-password",
-      },
-      {
-        findUserByLogin,
-        comparePassword: vi.fn().mockResolvedValue(true),
-      },
-    );
+    const result = await verifyAdminCredentials({
+      identifier: "Admin",
+      password: "plain-password",
+    });
 
-    expect(findUserByLogin).toHaveBeenCalledWith("Admin");
-    expect(result?.pseudo).toBe(adminUser.pseudo);
+    expect(mocks.findFirstUser).toHaveBeenCalledTimes(2);
+    expect(result?.id).toBe(adminUser.id);
   });
 
   it("rejects invalid payloads", async () => {
     const result = await verifyAdminCredentials({
-      pseudo: "",
+      identifier: "",
       password: "",
+    });
+
+    expect(result).toBeNull();
+    expect(mocks.findFirstUser).not.toHaveBeenCalled();
+  });
+
+  it("rejects unknown users", async () => {
+    mocks.findFirstUser.mockResolvedValue(null);
+
+    const result = await verifyAdminCredentials({
+      identifier: "admin@example.com",
+      password: "plain-password",
+    });
+
+    expect(result).toBeNull();
+    expect(mocks.comparePassword).not.toHaveBeenCalled();
+  });
+
+  it("rejects invalid passwords", async () => {
+    mocks.findFirstUser.mockResolvedValue(adminUser);
+    mocks.comparePassword.mockResolvedValue(false);
+
+    const result = await verifyAdminCredentials({
+      identifier: "admin@example.com",
+      password: "plain-password",
     });
 
     expect(result).toBeNull();
   });
 
-  it("rejects unknown users", async () => {
-    const result = await verifyAdminCredentials(
-      {
-        pseudo: "admin",
-        email: "admin@example.com",
-        password: "plain-password",
-      },
-      {
-        findUserByLogin: vi.fn().mockResolvedValue(null),
-        comparePassword: vi.fn(),
-      },
-    );
-
-    expect(result).toBeNull();
-  });
-
-  it("rejects invalid passwords", async () => {
-    const result = await verifyAdminCredentials(
-      {
-        pseudo: "admin",
-        email: "admin@example.com",
-        password: "plain-password",
-      },
-      {
-        findUserByLogin: vi.fn().mockResolvedValue(adminUser),
-        comparePassword: vi.fn().mockResolvedValue(false),
-      },
-    );
-
-    expect(result).toBeNull();
-  });
-
   it("limits repeated failed admin login attempts", async () => {
-    const dependencies = {
-      comparePassword: vi.fn().mockResolvedValue(false),
-      findUserByLogin: vi.fn().mockResolvedValue(adminUser),
-    };
+    mocks.findFirstUser.mockResolvedValue(adminUser);
+    mocks.comparePassword.mockResolvedValue(false);
+
     const request = {
       headers: {
         "x-forwarded-for": "203.0.113.10",
       },
     };
+    const credentials = {
+      identifier: "admin@example.com",
+      password: "wrong-password",
+    };
+
+    for (let attempt = 0; attempt < 4; attempt += 1) {
+      await expect(
+        authorizeAdminCredentials(credentials, request),
+      ).resolves.toBeNull();
+    }
 
     await expect(
-      authorizeAdminCredentials(
-        {
-          identifier: "admin@example.com",
-          password: "wrong-password",
-        },
-        request,
-        dependencies,
-      ),
-    ).resolves.toBeNull();
-    await expect(
-      authorizeAdminCredentials(
-        {
-          identifier: "admin@example.com",
-          password: "wrong-password",
-        },
-        request,
-        dependencies,
-      ),
-    ).resolves.toBeNull();
-    await expect(
-      authorizeAdminCredentials(
-        {
-          identifier: "admin@example.com",
-          password: "wrong-password",
-        },
-        request,
-        dependencies,
-      ),
-    ).resolves.toBeNull();
-    await expect(
-      authorizeAdminCredentials(
-        {
-          identifier: "admin@example.com",
-          password: "wrong-password",
-        },
-        request,
-        dependencies,
-      ),
-    ).resolves.toBeNull();
-    await expect(
-      authorizeAdminCredentials(
-        {
-          identifier: "admin@example.com",
-          password: "wrong-password",
-        },
-        request,
-        dependencies,
-      ),
+      authorizeAdminCredentials(credentials, request),
     ).rejects.toThrow(adminLoginRateLimitErrorCode);
+
+    mocks.comparePassword.mockResolvedValue(true);
 
     await expect(
       authorizeAdminCredentials(
@@ -215,49 +190,43 @@ describe("verifyAdminCredentials", () => {
           password: "plain-password",
         },
         request,
-        {
-          comparePassword: vi.fn().mockResolvedValue(true),
-          findUserByLogin: vi.fn().mockResolvedValue(adminUser),
-        },
       ),
     ).rejects.toThrow(adminLoginRateLimitErrorCode);
   });
 
   it("clears failed login attempts after a successful authentication", async () => {
+    mocks.findFirstUser.mockResolvedValue(adminUser);
+
     const request = {
       headers: {
         "x-forwarded-for": "203.0.113.20",
       },
     };
 
+    mocks.comparePassword.mockResolvedValue(false);
     await authorizeAdminCredentials(
       {
         identifier: "admin@example.com",
         password: "wrong-password",
       },
       request,
-      {
-        comparePassword: vi.fn().mockResolvedValue(false),
-        findUserByLogin: vi.fn().mockResolvedValue(adminUser),
-      },
     );
 
+    mocks.comparePassword.mockResolvedValue(true);
     const result = await authorizeAdminCredentials(
       {
         identifier: "admin@example.com",
         password: "plain-password",
       },
       request,
-      {
-        comparePassword: vi.fn().mockResolvedValue(true),
-        findUserByLogin: vi.fn().mockResolvedValue(adminUser),
-      },
     );
 
     expect(result?.id).toBe(adminUser.id);
   });
 
   it("writes audit logs for failed and successful authentications", async () => {
+    mocks.findFirstUser.mockResolvedValue(adminUser);
+
     const request = {
       headers: {
         "user-agent": "Vitest",
@@ -265,16 +234,13 @@ describe("verifyAdminCredentials", () => {
       },
     };
 
+    mocks.comparePassword.mockResolvedValue(false);
     await authorizeAdminCredentials(
       {
         identifier: "admin@example.com",
         password: "wrong-password",
       },
       request,
-      {
-        comparePassword: vi.fn().mockResolvedValue(false),
-        findUserByLogin: vi.fn().mockResolvedValue(adminUser),
-      },
     );
 
     expect(mocks.tryWriteAuditLog).toHaveBeenCalledWith(
@@ -293,16 +259,13 @@ describe("verifyAdminCredentials", () => {
 
     mocks.tryWriteAuditLog.mockClear();
 
+    mocks.comparePassword.mockResolvedValue(true);
     await authorizeAdminCredentials(
       {
         identifier: "admin@example.com",
         password: "plain-password",
       },
       request,
-      {
-        comparePassword: vi.fn().mockResolvedValue(true),
-        findUserByLogin: vi.fn().mockResolvedValue(adminUser),
-      },
     );
 
     expect(mocks.tryWriteAuditLog).toHaveBeenCalledWith(

@@ -265,12 +265,13 @@ export default async function AdminProjectDetailsPage({
 
       <section className={styles.main} aria-labelledby="project-detail-title">
         <Link className={styles.backLink} href="/admin/projects/list">
-          Retour à la liste des projets
+          ← retour à la liste — {project.slug}
         </Link>
 
-        <p className={styles.eyebrow}>Détail admin</p>
+        <p className={styles.eyebrow}>~/admin/projects/{project.slug}</p>
         <h1 id="project-detail-title" className={styles.title}>
           {project.title}
+          <span className={styles.titleDot}>.</span>
         </h1>
         <p className={styles.description}>
           Modifiez les informations publiques, les technologies, les liens et

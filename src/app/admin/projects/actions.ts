@@ -2,10 +2,9 @@
 
 import { Buffer } from "node:buffer";
 import { revalidatePath } from "next/cache";
-import { getServerSession, type Session } from "next-auth";
 import { Prisma } from "@/generated/prisma/client";
 import { writeAdminAuditLog } from "@/lib/admin-audit";
-import { authOptions } from "@/lib/auth";
+import { getAdminSession, sessionExpiredError } from "@/lib/admin-session";
 import {
   GithubImportError,
   importGithubRepositoryProject,
@@ -24,11 +23,6 @@ export type ProjectMediaFormState = {
   status: "idle" | "success" | "error";
   message?: string;
   errors?: Partial<Record<ProjectMediaFormField, string[]>>;
-};
-
-type SessionErrorState = {
-  status: "error";
-  message: string;
 };
 
 const allowedProjectMediaMimeTypes = new Set([
@@ -57,25 +51,6 @@ function githubImportError(message: string): ProjectFormState {
       repositoryUrl: [message],
     },
   };
-}
-
-async function ensureAdminSession(): Promise<Session | SessionErrorState> {
-  const session = await getServerSession(authOptions);
-
-  if (session) {
-    return session;
-  }
-
-  return {
-    status: "error",
-    message: "Votre session a expiré. Reconnectez-vous pour continuer.",
-  };
-}
-
-function isSessionError(
-  value: Session | SessionErrorState,
-): value is SessionErrorState {
-  return "status" in value;
 }
 
 function revalidateProjectPages() {
@@ -193,10 +168,10 @@ export async function createProject(
   _previousState: ProjectFormState,
   formData: FormData,
 ): Promise<ProjectFormState> {
-  const session = await ensureAdminSession();
+  const session = await getAdminSession();
 
-  if (isSessionError(session)) {
-    return session;
+  if (!session) {
+    return sessionExpiredError;
   }
 
   const parsedProject = parseProjectFormData(formData);
@@ -258,10 +233,10 @@ export async function importProjectFromGithub(
   _previousState: ProjectFormState,
   formData: FormData,
 ): Promise<ProjectFormState> {
-  const session = await ensureAdminSession();
+  const session = await getAdminSession();
 
-  if (isSessionError(session)) {
-    return session;
+  if (!session) {
+    return sessionExpiredError;
   }
 
   const repositoryUrl = formData.get("githubUrl");
@@ -334,10 +309,10 @@ export async function syncProjectWithGithub(
   void _previousState;
   void _formData;
 
-  const session = await ensureAdminSession();
+  const session = await getAdminSession();
 
-  if (isSessionError(session)) {
-    return session;
+  if (!session) {
+    return sessionExpiredError;
   }
 
   const project = await prisma.project.findUnique({
@@ -429,10 +404,10 @@ export async function updateProject(
   _previousState: ProjectFormState,
   formData: FormData,
 ): Promise<ProjectFormState> {
-  const session = await ensureAdminSession();
+  const session = await getAdminSession();
 
-  if (isSessionError(session)) {
-    return session;
+  if (!session) {
+    return sessionExpiredError;
   }
 
   const parsedProject = parseProjectFormData(formData);
@@ -503,10 +478,10 @@ export async function deleteProject(
   void _previousState;
   void _formData;
 
-  const session = await ensureAdminSession();
+  const session = await getAdminSession();
 
-  if (isSessionError(session)) {
-    return session;
+  if (!session) {
+    return sessionExpiredError;
   }
 
   await prisma.project.delete({
@@ -536,10 +511,10 @@ export async function addProjectMedia(
   _previousState: ProjectMediaFormState,
   formData: FormData,
 ): Promise<ProjectMediaFormState> {
-  const session = await ensureAdminSession();
+  const session = await getAdminSession();
 
-  if (isSessionError(session)) {
-    return session;
+  if (!session) {
+    return sessionExpiredError;
   }
 
   const parsedMedia = parseProjectMediaFormData(formData);
@@ -605,10 +580,10 @@ export async function deleteProjectMedia(
   void _previousState;
   void _formData;
 
-  const session = await ensureAdminSession();
+  const session = await getAdminSession();
 
-  if (isSessionError(session)) {
-    return session;
+  if (!session) {
+    return sessionExpiredError;
   }
 
   const media = await prisma.projectMedia.findUnique({

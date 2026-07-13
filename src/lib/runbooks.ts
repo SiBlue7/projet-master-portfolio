@@ -1,4 +1,11 @@
 import { z } from "zod";
+import {
+  checkboxField,
+  emptyToNull,
+  optionalText,
+  optionalUrl,
+  requiredText,
+} from "@/lib/form-fields";
 import { normalizeProjectSlug } from "@/lib/projects";
 
 export const RUNBOOK_ENVIRONMENT_KINDS = [
@@ -40,65 +47,6 @@ export type RunbookStepType = (typeof RUNBOOK_STEP_TYPES)[number];
 
 const slugPattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
-const requiredText = (label: string, maxLength: number) =>
-  z
-    .string()
-    .trim()
-    .min(1, `${label} est obligatoire.`)
-    .max(maxLength, `${label} doit contenir ${maxLength} caractères maximum.`);
-
-const optionalText = (label: string, maxLength: number) =>
-  z.preprocess(
-    (value) => {
-      if (typeof value !== "string") {
-        return null;
-      }
-
-      const trimmedValue = value.trim();
-
-      return trimmedValue.length > 0 ? trimmedValue : null;
-    },
-    z
-      .string()
-      .max(maxLength, `${label} doit contenir ${maxLength} caractères maximum.`)
-      .nullable(),
-  );
-
-const optionalUrl = (label: string) =>
-  z.preprocess(
-    (value) => {
-      if (typeof value !== "string") {
-        return null;
-      }
-
-      const trimmedValue = value.trim();
-
-      return trimmedValue.length > 0 ? trimmedValue : null;
-    },
-    z
-      .string()
-      .url(`${label} doit être une URL valide.`)
-      .max(300, `${label} doit contenir 300 caractères maximum.`)
-      .nullable(),
-  );
-
-const optionalRunbookUrl = (label: string) =>
-  z.preprocess(
-    (value) => {
-      if (typeof value !== "string") {
-        return null;
-      }
-
-      const trimmedValue = value.trim();
-
-      return trimmedValue.length > 0 ? trimmedValue : null;
-    },
-    z
-      .string()
-      .max(500, `${label} doit contenir 500 caractères maximum.`)
-      .nullable(),
-  );
-
 const slugField = (label: string, maxLength = 120) =>
   z
     .string()
@@ -129,8 +77,6 @@ const sortOrderField = z.preprocess(
     .max(999, "L'ordre doit être inférieur ou égal à 999."),
 );
 
-const checkboxField = z.preprocess((value) => value === "on", z.boolean());
-
 export const runbookSchema = z.object({
   description: optionalText("La description", 1000),
   isActive: checkboxField,
@@ -154,72 +100,47 @@ export const runbookStepSchema = z
   .object({
     command: optionalText("La commande", 2000),
     description: optionalText("La description", 1000),
-    environmentId: z.preprocess((value) => {
-      if (typeof value !== "string") {
-        return null;
-      }
-
-      const trimmedValue = value.trim();
-
-      return trimmedValue.length > 0 ? trimmedValue : null;
-    }, z.string().nullable()),
+    environmentId: z.preprocess(emptyToNull, z.string().nullable()),
     expectedResult: optionalText("Le résultat attendu", 1000),
-    httpMethod: z.preprocess((value) => {
-      if (typeof value !== "string") {
-        return null;
-      }
-
-      const trimmedValue = value.trim();
-
-      return trimmedValue.length > 0 ? trimmedValue : null;
-    }, z.enum(RUNBOOK_HTTP_METHODS).nullable()),
+    httpMethod: z.preprocess(
+      emptyToNull,
+      z.enum(RUNBOOK_HTTP_METHODS).nullable(),
+    ),
     isExecutable: checkboxField,
     sortOrder: sortOrderField,
     title: requiredText("Le titre", 140),
     type: z.enum(RUNBOOK_STEP_TYPES, {
       message: "Le type d'étape est obligatoire.",
     }),
-    url: optionalRunbookUrl("L'URL"),
+    url: optionalText("L'URL", 500),
   })
-  .refine(
-    ({ command, type }) => {
-      if (type !== "COMMAND") {
-        return true;
+  .superRefine((step, context) => {
+    if (step.type === "COMMAND" && !step.command) {
+      context.addIssue({
+        code: "custom",
+        message: "La commande est obligatoire pour une étape de type commande.",
+        path: ["command"],
+      });
+    }
+
+    if (step.type === "HTTP_REQUEST") {
+      if (!step.url) {
+        context.addIssue({
+          code: "custom",
+          message: "L'URL est obligatoire pour une requête HTTP.",
+          path: ["url"],
+        });
       }
 
-      return Boolean(command);
-    },
-    {
-      message: "La commande est obligatoire pour une étape de type commande.",
-      path: ["command"],
-    },
-  )
-  .refine(
-    ({ type, url }) => {
-      if (type !== "HTTP_REQUEST") {
-        return true;
+      if (!step.httpMethod) {
+        context.addIssue({
+          code: "custom",
+          message: "La méthode HTTP est obligatoire pour une requête HTTP.",
+          path: ["httpMethod"],
+        });
       }
-
-      return Boolean(url);
-    },
-    {
-      message: "L'URL est obligatoire pour une requête HTTP.",
-      path: ["url"],
-    },
-  )
-  .refine(
-    ({ httpMethod, type }) => {
-      if (type !== "HTTP_REQUEST") {
-        return true;
-      }
-
-      return Boolean(httpMethod);
-    },
-    {
-      message: "La méthode HTTP est obligatoire pour une requête HTTP.",
-      path: ["httpMethod"],
-    },
-  )
+    }
+  })
   .transform((step) => {
     if (step.type === "COMMAND") {
       return {

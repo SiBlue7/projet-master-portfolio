@@ -32,7 +32,7 @@ export function LogoutButton({ className }: LogoutButtonProps) {
       disabled={isSigningOut}
       onClick={handleSignOut}
     >
-      {isSigningOut ? "Déconnexion..." : "Se déconnecter"}
+      {isSigningOut ? "exit…" : "exit"}
     </button>
   );
 }

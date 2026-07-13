@@ -129,7 +129,7 @@ describe("AdminPage", () => {
     render(await AdminPage());
 
     expect(
-      screen.getByRole("heading", { name: "Administration" }),
+      screen.getByRole("heading", { name: /Administration/ }),
     ).toBeInTheDocument();
     expect(screen.getByText("Connecté en tant que admin.")).toBeInTheDocument();
     expect(
@@ -144,7 +144,7 @@ describe("AdminPage", () => {
     expect(screen.getByText("admin@example.com")).toBeInTheDocument();
     expect(screen.getByText("ADMIN")).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: "Se déconnecter" }),
+      screen.getByRole("button", { name: "exit" }),
     ).toBeInTheDocument();
     expect(
       screen
@@ -182,7 +182,7 @@ describe("AdminPage", () => {
 
     render(await AdminPage());
 
-    fireEvent.click(screen.getByRole("button", { name: "Se déconnecter" }));
+    fireEvent.click(screen.getByRole("button", { name: "exit" }));
 
     await waitFor(() => {
       expect(mocks.signOut).toHaveBeenCalledWith({

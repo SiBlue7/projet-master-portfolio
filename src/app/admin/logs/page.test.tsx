@@ -65,11 +65,11 @@ describe("AdminLogsPage", () => {
     render(await AdminLogsPage());
 
     expect(
-      screen.getByRole("heading", { name: "Logs d'activité" }),
+      screen.getByRole("heading", { name: /Logs d'activité/ }),
     ).toBeInTheDocument();
     expect(screen.getByText("2")).toBeInTheDocument();
     expect(screen.getAllByText("Succès").length).toBeGreaterThan(0);
-    expect(screen.getByText("Échecs")).toBeInTheDocument();
+    expect(screen.getByText("échecs")).toBeInTheDocument();
     expect(screen.getByText("Modification")).toBeInTheDocument();
     expect(screen.getByText("Connexion échouée")).toBeInTheDocument();
     expect(screen.getByText("Mise à jour d'un projet.")).toBeInTheDocument();

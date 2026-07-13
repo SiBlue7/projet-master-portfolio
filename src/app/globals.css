@@ -1,53 +1,65 @@
+/* Palette « Console » (2a sombre / 2b claire).
+   :root = clair, :root[data-theme="dark"] = sombre — le ThemeToggle
+   existant fonctionne sans modification. */
+
 :root {
   color-scheme: light;
-  --background: #f6fbff;
-  --foreground: #18242d;
-  --muted: #536b78;
-  --muted-strong: #637081;
-  --surface: #ffffff;
-  --surface-soft: #f0f7fb;
-  --surface-strong: #e4f0f7;
-  --border: #accbe1;
-  --border-soft: rgba(172, 203, 225, 0.48);
-  --accent: #536b78;
-  --accent-strong: #3f5968;
-  --accent-soft: #cee5f2;
-  --accent-secondary: #7c98b3;
-  --accent-tertiary: #c880b7;
-  --accent-foreground: #ffffff;
-  --shadow-soft: 0 18px 48px rgba(83, 107, 120, 0.12);
-  --shadow-subtle: 0 10px 28px rgba(83, 107, 120, 0.08);
-  --focus-ring: rgba(83, 107, 120, 0.32);
-  --glass-background: rgba(255, 255, 255, 0.2);
-  --glass-background-strong: rgba(255, 255, 255, 0.3);
-  --glass-border: rgba(83, 107, 120, 0.28);
+  --background: #faf5ec;
+  --foreground: #241d14;
+  --muted: #7a6c54;
+  --muted-strong: #6b5d46;
+  --faint: #a4977f;
+  --surface: #f2ead9;
+  --surface-soft: #efe6d3;
+  --surface-strong: #e9dfca;
+  --border: #ddd0b8;
+  --border-soft: #e6dbc8;
+  --accent: #b0731c;
+  --accent-strong: #96600f;
+  --accent-foreground: #faf5ec;
+  --success: #4f8a3d;
+  --danger: #c05a3f;
+  --focus-ring: rgba(176, 115, 28, 0.35);
+  --shadow-soft: 0 18px 48px rgba(36, 29, 20, 0.1);
+  /* Équivalents chauds des anciennes variables, encore utilisées
+     par les pages admin / statistics / projets. */
+  --accent-soft: #f0e0c4;
+  --accent-secondary: #8a7a5c;
+  --accent-tertiary: #4f8a3d;
+  --shadow-subtle: 0 10px 28px rgba(36, 29, 20, 0.08);
+  --glass-background: rgba(255, 252, 245, 0.2);
+  --glass-background-strong: rgba(255, 252, 245, 0.3);
+  --glass-border: rgba(176, 115, 28, 0.28);
   --glass-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
   --glass-blur: blur(5px);
 }
 
 :root[data-theme="dark"] {
   color-scheme: dark;
-  --background: #120912;
-  --foreground: #fff6fc;
-  --muted: #d9b4cf;
-  --muted-strong: #f5cce8;
-  --surface: #1d101c;
-  --surface-soft: #281525;
-  --surface-strong: #361b31;
-  --border: #5c3152;
-  --border-soft: rgba(245, 204, 232, 0.16);
-  --accent: #f5cce8;
-  --accent-strong: #ec9ded;
-  --accent-soft: #4a2040;
-  --accent-secondary: #c880b7;
-  --accent-tertiary: #accbe1;
-  --accent-foreground: #21101e;
-  --shadow-soft: 0 18px 48px rgba(0, 0, 0, 0.34);
+  --background: #17130e;
+  --foreground: #f0e8dc;
+  --muted: #b8ada0;
+  --muted-strong: #cabfae;
+  --faint: #6e6252;
+  --surface: #1f1a13;
+  --surface-soft: #241d15;
+  --surface-strong: #2a2219;
+  --border: #3a3226;
+  --border-soft: #2d261d;
+  --accent: #e8b05c;
+  --accent-strong: #f0c179;
+  --accent-foreground: #1c1712;
+  --success: #7fb069;
+  --danger: #e07a5f;
+  --focus-ring: rgba(232, 176, 92, 0.35);
+  --shadow-soft: 0 18px 48px rgba(0, 0, 0, 0.4);
+  --accent-soft: #3a2d1a;
+  --accent-secondary: #cabfae;
+  --accent-tertiary: #7fb069;
   --shadow-subtle: 0 10px 28px rgba(0, 0, 0, 0.22);
-  --focus-ring: rgba(245, 204, 232, 0.34);
   --glass-background: rgba(255, 255, 255, 0.08);
   --glass-background-strong: rgba(255, 255, 255, 0.12);
-  --glass-border: rgba(245, 204, 232, 0.24);
+  --glass-border: rgba(232, 176, 92, 0.24);
   --glass-shadow: 0 4px 30px rgba(0, 0, 0, 0.24);
   --glass-blur: blur(5px);
 }
@@ -66,7 +78,7 @@ body {
   margin: 0;
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), "Segoe UI", sans-serif;
   text-rendering: geometricPrecision;
 }
 
@@ -83,12 +95,32 @@ select {
 }
 
 ::selection {
-  background: var(--accent-soft);
-  color: var(--foreground);
+  background: var(--accent);
+  color: var(--accent-foreground);
+}
+
+/* Reveal au scroll (attribut posé par ScrollReveal) */
+[data-reveal] {
+  opacity: 0;
+  transform: translateY(24px);
+  transition:
+    opacity 600ms ease,
+    transform 600ms ease;
+}
+
+[data-reveal="visible"] {
+  opacity: 1;
+  transform: none;
 }
 
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
+  }
+
+  [data-reveal] {
+    opacity: 1;
+    transform: none;
+    transition: none;
   }
 }

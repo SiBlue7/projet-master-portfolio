@@ -1,7 +1,12 @@
-import "dotenv/config";
 import bcrypt from "bcryptjs";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient, UserRole } from "../src/generated/prisma/client.js";
+
+try {
+  process.loadEnvFile();
+} catch {
+  // Pas de fichier .env : les variables viennent de l'environnement.
+}
 
 const requiredVariables = [
   "DATABASE_URL",

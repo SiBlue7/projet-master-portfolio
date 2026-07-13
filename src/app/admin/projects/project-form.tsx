@@ -710,7 +710,7 @@ export function ProjectMediaManager({
       <div className={styles.mediaHeader}>
         <div>
           <h3 id={`media-${project.id}`} className={styles.mediaTitle}>
-            Captures du projet
+            03 — captures
           </h3>
           <p className={styles.mediaDescription}>
             Ajoutez des screenshots ou photos qui seront affichés sur le

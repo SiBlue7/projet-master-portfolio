@@ -51,7 +51,7 @@ describe("AdminProfilePage", () => {
     render(await AdminProfilePage());
 
     expect(
-      screen.getByRole("heading", { name: "Informations du profil" }),
+      screen.getByRole("heading", { name: /Profil public/ }),
     ).toBeInTheDocument();
     expect(screen.getByDisplayValue("Enzo Chevalier")).toBeInTheDocument();
     expect(screen.getByDisplayValue("enzo@example.com")).toBeInTheDocument();

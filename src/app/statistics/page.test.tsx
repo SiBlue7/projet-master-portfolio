@@ -130,7 +130,7 @@ describe("StatisticsPage", () => {
     render(await StatisticsPage());
 
     expect(
-      screen.getByRole("heading", { name: "Lecture chiffrée du portfolio" }),
+      screen.getByRole("heading", { name: /Lecture chiffrée/ }),
     ).toBeInTheDocument();
     expect(screen.getByText("Projets publics")).toBeInTheDocument();
     expect(screen.getByText("Technologies visibles")).toBeInTheDocument();
@@ -141,12 +141,12 @@ describe("StatisticsPage", () => {
     expect(screen.getByText("Docker")).toBeInTheDocument();
     expect(screen.getByText("En cours · 1")).toBeInTheDocument();
     expect(screen.getByText("Terminé · 1")).toBeInTheDocument();
-    expect(screen.getByText("Lien démo")).toBeInTheDocument();
+    expect(screen.getByText("lien démo")).toBeInTheDocument();
     expect(screen.getAllByText("50%").length).toBeGreaterThan(0);
     expect(screen.getByText("Formation")).toBeInTheDocument();
     expect(screen.getByText("Expérience")).toBeInTheDocument();
     expect(
-      screen.getByRole("link", { name: "Retour au portfolio" }),
+      screen.getByRole("link", { name: /enzo@portfolio/ }),
     ).toHaveAttribute("href", "/");
     expect(mocks.findManyProjects).toHaveBeenCalledWith(
       expect.objectContaining({

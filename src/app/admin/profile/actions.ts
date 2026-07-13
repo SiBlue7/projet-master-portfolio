@@ -1,9 +1,8 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { getServerSession } from "next-auth";
 import { writeAdminAuditLog } from "@/lib/admin-audit";
-import { authOptions } from "@/lib/auth";
+import { getAdminSession, sessionExpiredError } from "@/lib/admin-session";
 import {
   PUBLIC_PROFILE_ID,
   getPublicProfileAvatarFile,
@@ -18,13 +17,10 @@ export async function savePublicProfile(
   _previousState: PublicProfileFormState,
   formData: FormData,
 ): Promise<PublicProfileFormState> {
-  const session = await getServerSession(authOptions);
+  const session = await getAdminSession();
 
   if (!session) {
-    return {
-      status: "error",
-      message: "Votre session a expiré. Reconnectez-vous pour continuer.",
-    };
+    return sessionExpiredError;
   }
 
   const parsedProfile = parsePublicProfileFormData(formData);

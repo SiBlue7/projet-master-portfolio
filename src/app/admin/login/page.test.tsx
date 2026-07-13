@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+﻿import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { adminLoginRateLimitErrorCode } from "@/lib/auth-security";
 import AdminLoginPage from "./page";
@@ -29,7 +29,7 @@ describe("AdminLoginPage", () => {
     render(<AdminLoginPage />);
 
     expect(
-      screen.getByRole("heading", { name: "Connexion administrateur" }),
+      screen.getByRole("heading", { name: /administrateur\./ }),
     ).toBeInTheDocument();
     expect(
       screen.getByRole("form", { name: "Connexion administrateur" }),
@@ -39,7 +39,7 @@ describe("AdminLoginPage", () => {
     ).toBeInTheDocument();
     expect(screen.getByLabelText("Mot de passe")).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: "Se connecter" }),
+      screen.getByRole("button", { name: "Se connecter →" }),
     ).toBeInTheDocument();
   });
 
@@ -77,7 +77,7 @@ describe("AdminLoginPage", () => {
     fireEvent.change(screen.getByLabelText("Mot de passe"), {
       target: { value: "password" },
     });
-    fireEvent.click(screen.getByRole("button", { name: "Se connecter" }));
+    fireEvent.click(screen.getByRole("button", { name: "Se connecter →" }));
 
     await waitFor(() => {
       expect(mocks.signIn).toHaveBeenCalledWith("credentials", {
@@ -107,7 +107,7 @@ describe("AdminLoginPage", () => {
     fireEvent.change(screen.getByLabelText("Mot de passe"), {
       target: { value: "wrong-password" },
     });
-    fireEvent.click(screen.getByRole("button", { name: "Se connecter" }));
+    fireEvent.click(screen.getByRole("button", { name: "Se connecter →" }));
 
     expect(await screen.findByRole("alert")).toHaveTextContent(
       "Identifiants invalides.",
@@ -131,7 +131,7 @@ describe("AdminLoginPage", () => {
     fireEvent.change(screen.getByLabelText("Mot de passe"), {
       target: { value: "wrong-password" },
     });
-    fireEvent.click(screen.getByRole("button", { name: "Se connecter" }));
+    fireEvent.click(screen.getByRole("button", { name: "Se connecter →" }));
 
     expect(await screen.findByRole("alert")).toHaveTextContent(
       "Trop de tentatives de connexion. Réessayez dans quelques minutes.",

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { optionalUrl, requiredText } from "@/lib/form-fields";
 
 export const PUBLIC_PROFILE_ID = "public-profile";
 export const AVATAR_MAX_SIZE_IN_BYTES = 2 * 1024 * 1024;
@@ -10,31 +11,6 @@ export const ACCEPTED_AVATAR_MIME_TYPES = [
 
 export type PublicProfileAvatarMimeType =
   (typeof ACCEPTED_AVATAR_MIME_TYPES)[number];
-
-const requiredText = (label: string, maxLength: number) =>
-  z
-    .string()
-    .trim()
-    .min(1, `${label} est obligatoire.`)
-    .max(maxLength, `${label} doit contenir ${maxLength} caractères maximum.`);
-
-const optionalUrl = (label: string) =>
-  z.preprocess(
-    (value) => {
-      if (typeof value !== "string") {
-        return null;
-      }
-
-      const trimmedValue = value.trim();
-
-      return trimmedValue.length > 0 ? trimmedValue : null;
-    },
-    z
-      .string()
-      .url(`${label} doit être une URL valide.`)
-      .max(300, `${label} doit contenir 300 caractères maximum.`)
-      .nullable(),
-  );
 
 export const publicProfileSchema = z.object({
   displayName: requiredText("Le nom affiché", 120),

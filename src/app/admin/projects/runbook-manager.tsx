@@ -1110,7 +1110,7 @@ export function RunbookManager({
       <div className={styles.panelHeader}>
         <div>
           <h2 id="runbooks-title" className={styles.panelTitle}>
-            Runbooks
+            04 — runbooks
           </h2>
           <p className={styles.panelDescription}>
             Documentez les procédures utiles au projet : déploiement,

@@ -168,7 +168,15 @@ function getTimelineStats(items: TimelineItem[]) {
   })).filter((item) => item.count > 0);
 }
 
-function BarList({ items, total }: { items: CountItem[]; total: number }) {
+function BarList({
+  items,
+  total,
+  variant = "accent",
+}: {
+  items: CountItem[];
+  total: number;
+  variant?: "accent" | "success";
+}) {
   if (items.length === 0) {
     return (
       <p className={styles.emptyState}>
@@ -190,6 +198,7 @@ function BarList({ items, total }: { items: CountItem[]; total: number }) {
           <div className={styles.barTrack} aria-hidden="true">
             <span
               className={styles.barFill}
+              data-variant={variant}
               style={{
                 width: getBarWidth(item.count, total),
               }}
@@ -283,15 +292,28 @@ export default async function StatisticsPage() {
 
   return (
     <main className={styles.page}>
+      <nav className={styles.nav} aria-label="Navigation principale">
+        <Link className={styles.brand} href="/">
+          enzo<span>@portfolio:~$</span>
+        </Link>
+        <div className={styles.navLinks}>
+          <Link href="/#projets">./projets</Link>
+          <Link href="/#parcours">./parcours</Link>
+          <a className={styles.navLinkActive} href="/statistics">
+            ./stats
+          </a>
+          <Link href="/#contact">./contact</Link>
+        </div>
+      </nav>
+
       <div className={styles.main}>
         <section className={styles.hero} aria-labelledby="statistics-title">
           <div>
-            <Link className={styles.backLink} href="/">
-              Retour au portfolio
-            </Link>
-            <p className={styles.eyebrow}>Statistiques publiques</p>
+            <p className={styles.eyebrow}>~/statistics — données publiques</p>
             <h1 id="statistics-title" className={styles.title}>
-              Lecture chiffrée du portfolio
+              Lecture chiffrée
+              <br />
+              <span className={styles.titleAccent}>du portfolio.</span>
             </h1>
             <p className={styles.description}>
               Cette page synthétise les projets publics, les technologies
@@ -301,7 +323,7 @@ export default async function StatisticsPage() {
           </div>
 
           <aside className={styles.summaryPanel}>
-            <p className={styles.summaryLabel}>Dernière mise à jour</p>
+            <p className={styles.summaryLabel}>dernière mise à jour</p>
             <p className={styles.summaryValue}>
               {latestUpdate
                 ? dateTimeFormatter.format(latestUpdate)
@@ -313,6 +335,7 @@ export default async function StatisticsPage() {
           </aside>
         </section>
 
+        <p className={styles.sectionLabel}>01 — indicateurs / overview</p>
         <section className={styles.metricsGrid} aria-label="Indicateurs clés">
           <div className={styles.metric}>
             <span className={styles.metricLabel}>Projets publics</span>
@@ -352,147 +375,105 @@ export default async function StatisticsPage() {
           </div>
         </section>
 
-        <section className={styles.section} aria-labelledby="projects-title">
-          <div className={styles.sectionHeader}>
-            <p className={styles.sectionEyebrow}>Projets</p>
-            <div>
-              <h2 id="projects-title" className={styles.sectionTitle}>
-                Répartition des projets publiés
-              </h2>
-              <p className={styles.sectionDescription}>
-                Les statuts tiennent compte uniquement des projets dont les
-                métadonnées sont visibles publiquement.
+        <div className={styles.twoColumnGrid}>
+          <article className={styles.panel} aria-labelledby="statuses-title">
+            <p className={styles.sectionLabel} id="statuses-title">
+              02 — statuts / status
+            </p>
+            <BarList items={statusStats.items} total={statusStats.total} />
+          </article>
+          <article className={styles.panel} aria-labelledby="tags-title">
+            <p className={styles.sectionLabel} id="tags-title">
+              03 — tags / labels
+            </p>
+            {tagStats.length > 0 ? (
+              <div className={styles.tagCloud}>
+                {tagStats.map((tag) => (
+                  <span className={styles.tag} key={tag.label}>
+                    {tag.label} · {formatNumber(tag.count)}
+                  </span>
+                ))}
+              </div>
+            ) : (
+              <p className={styles.emptyState}>
+                Aucun tag public n’est encore associé aux projets.
               </p>
+            )}
+          </article>
+        </div>
+
+        <article className={styles.panel} aria-labelledby="technologies-title">
+          <p className={styles.sectionLabel} id="technologies-title">
+            04 — technologies / stacks
+          </p>
+          <BarList
+            items={technologyStats.slice(0, 8)}
+            total={projects.length}
+          />
+        </article>
+
+        <div className={styles.twoColumnGrid}>
+          <article className={styles.panel} aria-labelledby="coverage-title">
+            <p className={styles.sectionLabel} id="coverage-title">
+              05 — complétude / coverage
+            </p>
+            <div className={styles.coverageGrid}>
+              <div className={styles.coverageItem}>
+                <span className={styles.coverageLabel}>lien démo</span>
+                <span className={styles.coverageValue}>
+                  {formatPercent(demoProjects, projects.length)}
+                </span>
+                <span className={styles.coverageHelp}>
+                  {formatNumber(demoProjects)} projet
+                  {demoProjects > 1 ? "s" : ""} avec démo.
+                </span>
+              </div>
+              <div className={styles.coverageItem}>
+                <span className={styles.coverageLabel}>lien github</span>
+                <span className={styles.coverageValue}>
+                  {formatPercent(githubProjects, projects.length)}
+                </span>
+                <span className={styles.coverageHelp}>
+                  {formatNumber(githubProjects)} projet
+                  {githubProjects > 1 ? "s" : ""} avec dépôt.
+                </span>
+              </div>
+              <div className={styles.coverageItem}>
+                <span className={styles.coverageLabel}>captures</span>
+                <span className={styles.coverageValue}>
+                  {formatPercent(projectsWithMedia, projects.length)}
+                </span>
+                <span className={styles.coverageHelp}>
+                  {formatNumber(projectsWithMedia)} projet
+                  {projectsWithMedia > 1 ? "s" : ""} illustré
+                  {projectsWithMedia > 1 ? "s" : ""}.
+                </span>
+              </div>
+              <div className={styles.coverageItem}>
+                <span className={styles.coverageLabel}>période</span>
+                <span className={styles.coverageValue}>
+                  {formatPercent(projectsWithPeriod, projects.length)}
+                </span>
+                <span className={styles.coverageHelp}>
+                  {formatNumber(projectsWithPeriod)} projet
+                  {projectsWithPeriod > 1 ? "s" : ""} daté
+                  {projectsWithPeriod > 1 ? "s" : ""}.
+                </span>
+              </div>
             </div>
-          </div>
+          </article>
 
-          <div className={styles.twoColumnGrid}>
-            <article className={styles.panel}>
-              <h3 className={styles.panelTitle}>Statuts</h3>
-              <BarList items={statusStats.items} total={statusStats.total} />
-            </article>
-            <article className={styles.panel}>
-              <h3 className={styles.panelTitle}>Tags de tri</h3>
-              {tagStats.length > 0 ? (
-                <div className={styles.tagCloud}>
-                  {tagStats.map((tag) => (
-                    <span className={styles.tag} key={tag.label}>
-                      {tag.label} · {formatNumber(tag.count)}
-                    </span>
-                  ))}
-                </div>
-              ) : (
-                <p className={styles.emptyState}>
-                  Aucun tag public n’est encore associé aux projets.
-                </p>
-              )}
-            </article>
-          </div>
-        </section>
-
-        <section
-          className={styles.section}
-          aria-labelledby="technologies-title"
-        >
-          <div className={styles.sectionHeader}>
-            <p className={styles.sectionEyebrow}>Technologies</p>
-            <div>
-              <h2 id="technologies-title" className={styles.sectionTitle}>
-                Technologies les plus représentées
-              </h2>
-              <p className={styles.sectionDescription}>
-                Ce classement additionne les technologies visibles sur les
-                projets publics.
-              </p>
-            </div>
-          </div>
-
-          <article className={styles.panel}>
+          <article className={styles.panel} aria-labelledby="timeline-title">
+            <p className={styles.sectionLabel} id="timeline-title">
+              06 — parcours / timeline
+            </p>
             <BarList
-              items={technologyStats.slice(0, 8)}
-              total={projects.length}
+              items={timelineStats}
+              total={timelineItems.length}
+              variant="success"
             />
           </article>
-        </section>
-
-        <section className={styles.section} aria-labelledby="coverage-title">
-          <div className={styles.sectionHeader}>
-            <p className={styles.sectionEyebrow}>Couverture</p>
-            <div>
-              <h2 id="coverage-title" className={styles.sectionTitle}>
-                Niveau de complétude public
-              </h2>
-              <p className={styles.sectionDescription}>
-                Ces indicateurs montrent les projets enrichis avec des liens,
-                des captures ou une période renseignée.
-              </p>
-            </div>
-          </div>
-
-          <div className={styles.coverageGrid}>
-            <div className={styles.coverageItem}>
-              <span className={styles.coverageLabel}>Lien démo</span>
-              <span className={styles.coverageValue}>
-                {formatPercent(demoProjects, projects.length)}
-              </span>
-              <span className={styles.coverageHelp}>
-                {formatNumber(demoProjects)} projet
-                {demoProjects > 1 ? "s" : ""} avec démo.
-              </span>
-            </div>
-            <div className={styles.coverageItem}>
-              <span className={styles.coverageLabel}>Lien GitHub</span>
-              <span className={styles.coverageValue}>
-                {formatPercent(githubProjects, projects.length)}
-              </span>
-              <span className={styles.coverageHelp}>
-                {formatNumber(githubProjects)} projet
-                {githubProjects > 1 ? "s" : ""} avec dépôt.
-              </span>
-            </div>
-            <div className={styles.coverageItem}>
-              <span className={styles.coverageLabel}>Captures</span>
-              <span className={styles.coverageValue}>
-                {formatPercent(projectsWithMedia, projects.length)}
-              </span>
-              <span className={styles.coverageHelp}>
-                {formatNumber(projectsWithMedia)} projet
-                {projectsWithMedia > 1 ? "s" : ""} illustré
-                {projectsWithMedia > 1 ? "s" : ""}.
-              </span>
-            </div>
-            <div className={styles.coverageItem}>
-              <span className={styles.coverageLabel}>Période</span>
-              <span className={styles.coverageValue}>
-                {formatPercent(projectsWithPeriod, projects.length)}
-              </span>
-              <span className={styles.coverageHelp}>
-                {formatNumber(projectsWithPeriod)} projet
-                {projectsWithPeriod > 1 ? "s" : ""} daté
-                {projectsWithPeriod > 1 ? "s" : ""}.
-              </span>
-            </div>
-          </div>
-        </section>
-
-        <section className={styles.section} aria-labelledby="timeline-title">
-          <div className={styles.sectionHeader}>
-            <p className={styles.sectionEyebrow}>Parcours</p>
-            <div>
-              <h2 id="timeline-title" className={styles.sectionTitle}>
-                Répartition du parcours
-              </h2>
-              <p className={styles.sectionDescription}>
-                Les éléments de parcours sont regroupés par formation,
-                expérience et certification.
-              </p>
-            </div>
-          </div>
-
-          <article className={styles.panel}>
-            <BarList items={timelineStats} total={timelineItems.length} />
-          </article>
-        </section>
+        </div>
       </div>
     </main>
   );

@@ -19,12 +19,12 @@ export default async function AdminProjectsPage() {
 
       <section className={styles.main} aria-labelledby="projects-title">
         <Link className={styles.backLink} href="/admin">
-          Retour au tableau de bord admin
+          ← retour au dashboard
         </Link>
 
-        <p className={styles.eyebrow}>Projets</p>
+        <p className={styles.eyebrow}>~/admin/projects — nouveau projet</p>
         <h1 id="projects-title" className={styles.title}>
-          Gestion des projets
+          Nouveau projet<span className={styles.titleDot}>.</span>
         </h1>
         <p className={styles.description}>
           Importez un dépôt GitHub ou créez manuellement un projet, puis
@@ -34,7 +34,7 @@ export default async function AdminProjectsPage() {
 
         <div className={styles.pageActions}>
           <Link className={styles.secondaryLink} href="/admin/projects/list">
-            Voir les projets existants
+            voir les projets →
           </Link>
         </div>
 
@@ -44,14 +44,14 @@ export default async function AdminProjectsPage() {
             aria-labelledby="github-import-title"
           >
             <h2 id="github-import-title" className={styles.panelTitle}>
-              Importer depuis GitHub
+              01 — import github
             </h2>
             <GithubImportProjectForm />
           </section>
 
           <section className={styles.panel} aria-labelledby="create-title">
             <h2 id="create-title" className={styles.panelTitle}>
-              Créer un projet
+              02 — création manuelle
             </h2>
             <CreateProjectForm />
           </section>

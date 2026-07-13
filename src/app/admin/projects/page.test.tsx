@@ -32,16 +32,16 @@ describe("AdminProjectsPage", () => {
     render(await AdminProjectsPage());
 
     expect(
-      screen.getByRole("heading", { name: "Gestion des projets" }),
+      screen.getByRole("heading", { name: /Nouveau projet/ }),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("heading", { name: "Créer un projet" }),
+      screen.getByRole("heading", { name: "02 — création manuelle" }),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("heading", { name: "Importer depuis GitHub" }),
+      screen.getByRole("heading", { name: "01 — import github" }),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("link", { name: "Voir les projets existants" }),
+      screen.getByRole("link", { name: "voir les projets →" }),
     ).toHaveAttribute("href", "/admin/projects/list");
     expect(
       screen.queryByRole("heading", { name: "Projets existants" }),

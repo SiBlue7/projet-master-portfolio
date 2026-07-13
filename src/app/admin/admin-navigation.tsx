@@ -16,48 +16,55 @@ type AdminNavigationProps = {
   activeItem: AdminNavigationItem;
 };
 
+const commands: Record<AdminNavigationItem, string> = {
+  dashboard: "cd /admin",
+  logs: "tail -f audit.log",
+  profile: "whoami --edit",
+  "project-create": "touch projet",
+  "project-list": "ls projets/",
+  site: "cd /",
+  timeline: "cat timeline.log",
+};
+
 const links: { href: string; id: AdminNavigationItem; label: string }[] = [
+  {
+    href: "/admin",
+    id: "dashboard",
+    label: "./dashboard",
+  },
   {
     href: "/admin/projects",
     id: "project-create",
-    label: "Nouveau projet",
+    label: "./nouveau",
   },
   {
     href: "/admin/projects/list",
     id: "project-list",
-    label: "Tous les projets",
+    label: "./projets",
   },
   {
     href: "/admin/profile",
     id: "profile",
-    label: "Profil",
+    label: "./profil",
   },
   {
     href: "/admin/profile/timeline",
     id: "timeline",
-    label: "Parcours",
+    label: "./parcours",
   },
   {
     href: "/admin/logs",
     id: "logs",
-    label: "Logs",
-  },
-  {
-    href: "/",
-    id: "site",
-    label: "Site public",
+    label: "./logs",
   },
 ];
 
 export function AdminNavigation({ activeItem }: AdminNavigationProps) {
   return (
     <nav className={styles.adminNavigation} aria-label="Navigation admin">
-      <Link
-        aria-current={activeItem === "dashboard" ? "page" : undefined}
-        className={styles.brand}
-        href="/admin"
-      >
-        Dashboard admin
+      <Link className={styles.brand} href="/admin">
+        enzo<span className={styles.brandHost}>@portfolio:~$</span>{" "}
+        <span className={styles.brandCommand}>{commands[activeItem]}</span>
       </Link>
 
       <div className={styles.navLinks}>
@@ -71,9 +78,9 @@ export function AdminNavigation({ activeItem }: AdminNavigationProps) {
             {link.label}
           </Link>
         ))}
-      </div>
-
-      <div className={styles.controls}>
+        <Link className={styles.sitePill} href="/">
+          site ↗
+        </Link>
         <ThemeToggle
           buttonClassName={styles.themeToggleButton}
           className={styles.themeToggle}

@@ -140,19 +140,19 @@ describe("AdminProjectDetailsPage", () => {
     );
 
     expect(
-      screen.getByRole("heading", { name: "Portfolio master" }),
+      screen.getByRole("heading", { name: /Portfolio master/ }),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("heading", { name: "Modifier le projet" }),
+      screen.getByRole("heading", { name: "01 — informations publiques" }),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("heading", { name: "Runbooks" }),
+      screen.getByRole("heading", { name: "04 — runbooks" }),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("heading", { name: "Synchronisation GitHub" }),
+      screen.getByRole("heading", { name: "02 — synchronisation github" }),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: "Synchroniser avec GitHub" }),
+      screen.getByRole("button", { name: "$ sync --github" }),
     ).toBeInTheDocument();
     expect(screen.getByText("Déploiement")).toBeInTheDocument();
     expect(screen.getAllByText("Public").length).toBeGreaterThan(0);
@@ -171,10 +171,13 @@ describe("AdminProjectDetailsPage", () => {
       "src",
       "data:image/png;base64,AQID",
     );
-    expect(screen.getAllByRole("button", { name: "Enregistrer" }).length).toBe(
-      3,
-    );
-    expect(screen.getAllByRole("button", { name: "Supprimer" }).length).toBe(2);
+    expect(
+      screen.getAllByRole("button", { name: /Enregistrer/ }).length,
+    ).toBeGreaterThanOrEqual(3);
+    expect(
+      screen.getByRole("button", { name: "rm projet" }),
+    ).toBeInTheDocument();
+    expect(screen.getAllByRole("button", { name: "Supprimer" }).length).toBe(1);
     expect(
       screen.getByRole("button", { name: "Supprimer le runbook" }),
     ).toBeInTheDocument();

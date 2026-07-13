@@ -1,35 +1,13 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { getServerSession, type Session } from "next-auth";
 import { writeAdminAuditLog } from "@/lib/admin-audit";
-import { authOptions } from "@/lib/auth";
+import { getAdminSession, sessionExpiredError } from "@/lib/admin-session";
 import {
   parseProfileTimelineItemFormData,
   type ProfileTimelineItemFormState,
 } from "@/lib/profile-timeline";
 import { prisma } from "@/lib/prisma";
-
-async function ensureAdminSession(): Promise<
-  Session | ProfileTimelineItemFormState
-> {
-  const session = await getServerSession(authOptions);
-
-  if (session) {
-    return session;
-  }
-
-  return {
-    status: "error",
-    message: "Votre session a expiré. Reconnectez-vous pour continuer.",
-  };
-}
-
-function isSessionError(
-  value: Session | ProfileTimelineItemFormState,
-): value is ProfileTimelineItemFormState {
-  return "status" in value;
-}
 
 function revalidateTimelinePages() {
   revalidatePath("/");
@@ -40,10 +18,10 @@ export async function createProfileTimelineItem(
   _previousState: ProfileTimelineItemFormState,
   formData: FormData,
 ): Promise<ProfileTimelineItemFormState> {
-  const session = await ensureAdminSession();
+  const session = await getAdminSession();
 
-  if (isSessionError(session)) {
-    return session;
+  if (!session) {
+    return sessionExpiredError;
   }
 
   const parsedTimelineItem = parseProfileTimelineItemFormData(formData);
@@ -85,10 +63,10 @@ export async function updateProfileTimelineItem(
   _previousState: ProfileTimelineItemFormState,
   formData: FormData,
 ): Promise<ProfileTimelineItemFormState> {
-  const session = await ensureAdminSession();
+  const session = await getAdminSession();
 
-  if (isSessionError(session)) {
-    return session;
+  if (!session) {
+    return sessionExpiredError;
   }
 
   const parsedTimelineItem = parseProfileTimelineItemFormData(formData);
@@ -136,10 +114,10 @@ export async function deleteProfileTimelineItem(
   void _previousState;
   void _formData;
 
-  const session = await ensureAdminSession();
+  const session = await getAdminSession();
 
-  if (isSessionError(session)) {
-    return session;
+  if (!session) {
+    return sessionExpiredError;
   }
 
   await prisma.profileTimelineItem.delete({

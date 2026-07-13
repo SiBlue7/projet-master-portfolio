@@ -54,12 +54,12 @@ export default async function AdminProfilePage() {
 
       <section className={styles.main} aria-labelledby="profile-title">
         <Link className={styles.backLink} href="/admin">
-          Retour au tableau de bord admin
+          ← retour au dashboard
         </Link>
 
-        <p className={styles.eyebrow}>Profil public</p>
+        <p className={styles.eyebrow}>~/admin/profile — whoami --edit</p>
         <h1 id="profile-title" className={styles.title}>
-          Informations du profil
+          Profil public<span className={styles.titleDot}>.</span>
         </h1>
         <p className={styles.description}>
           Ces informations serviront à alimenter la partie publique du

@@ -47,7 +47,7 @@ export function ProjectDetailEditor({
           <div>
             <span className={styles.projectSlug}>{project.slug}</span>
             <h2 id="edit-project-title" className={styles.panelTitle}>
-              Modifier le projet
+              01 — informations publiques
             </h2>
             <p className={styles.projectDescription}>
               {project.shortDescription}
@@ -81,7 +81,7 @@ export function ProjectDetailEditor({
               type="submit"
               disabled={isUpdating}
             >
-              {isUpdating ? "Enregistrement..." : "Enregistrer"}
+              {isUpdating ? "Enregistrement..." : "Enregistrer →"}
             </button>
           </div>
         </form>
@@ -91,7 +91,7 @@ export function ProjectDetailEditor({
         <div className={styles.panelHeader}>
           <div>
             <h2 id="github-sync-title" className={styles.panelTitle}>
-              Synchronisation GitHub
+              02 — synchronisation github
             </h2>
             <p className={styles.panelDescription}>
               Recharge la description, la page démo, la date de création GitHub
@@ -140,7 +140,7 @@ export function ProjectDetailEditor({
               type="submit"
               disabled={isSyncing || !project.repositoryUrl}
             >
-              {isSyncing ? "Synchronisation..." : "Synchroniser avec GitHub"}
+              {isSyncing ? "Synchronisation..." : "$ sync --github"}
             </button>
           </div>
           {!project.repositoryUrl ? (
@@ -160,7 +160,7 @@ export function ProjectDetailEditor({
 
       <section className={styles.panel} aria-labelledby="delete-project-title">
         <h2 id="delete-project-title" className={styles.panelTitle}>
-          Suppression
+          05 — suppression / rm projet
         </h2>
         <p className={styles.emptyState}>
           La suppression retire le projet, ses technologies, ses tags et ses
@@ -173,7 +173,7 @@ export function ProjectDetailEditor({
             type="submit"
             disabled={isDeleting}
           >
-            {isDeleting ? "Suppression..." : "Supprimer"}
+            {isDeleting ? "Suppression..." : "rm projet"}
           </button>
         </form>
       </section>

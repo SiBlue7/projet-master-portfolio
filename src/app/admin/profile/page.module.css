@@ -1,86 +1,66 @@
-.page {
-  --page-gutter: clamp(16px, 2.4vw, 44px);
+/* Profil admin — design « Console » */
 
+.page {
   min-height: 100dvh;
-  width: 100%;
-  overflow-x: hidden;
-  padding: 18px var(--page-gutter) 44px;
-  border: 1px solid var(--glass-border);
-  background:
-    linear-gradient(90deg, var(--border-soft) 1px, transparent 1px),
-    linear-gradient(0deg, var(--border-soft) 1px, transparent 1px),
-    linear-gradient(180deg, var(--background), var(--surface-soft));
-  background-clip: padding-box;
-  background-size:
-    72px 72px,
-    72px 72px,
-    auto;
 }
 
 .main {
-  width: 100%;
-  margin: 0;
+  padding: 0 48px 56px;
 }
 
 .backLink {
   display: inline-flex;
-  min-height: 38px;
   align-items: center;
-  margin-bottom: 22px;
-  padding: 0 12px;
-  border: 1px solid var(--glass-border);
-  border-radius: 8px;
-  background: var(--glass-background);
-  color: var(--accent-strong);
-  font-weight: 800;
-  box-shadow: var(--shadow-subtle);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
+  margin: 24px 0 0;
+  font-family: var(--font-mono), monospace;
+  font-size: 0.88rem;
+  color: var(--faint);
 }
 
 .backLink:hover {
-  border-color: var(--accent);
+  color: var(--accent);
 }
 
 .backLink:focus-visible,
 .submitButton:focus-visible {
-  outline: 3px solid var(--focus-ring);
+  outline: 2px solid var(--focus-ring);
   outline-offset: 2px;
 }
 
 .eyebrow {
-  margin: 0 0 12px;
-  color: var(--accent);
-  font-size: 0.875rem;
-  font-weight: 900;
-  letter-spacing: 0;
-  text-transform: uppercase;
+  margin: 32px 0 0;
+  font-family: var(--font-mono), monospace;
+  font-size: 0.88rem;
+  color: var(--faint);
 }
 
 .title {
-  margin: 0;
+  margin: 12px 0 0;
   color: var(--foreground);
-  font-size: clamp(2.2rem, 4vw, 4rem);
-  line-height: 0.98;
+  font-size: clamp(2.2rem, 4.5vw, 3.5rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+}
+
+.titleDot {
+  color: var(--accent);
 }
 
 .description {
-  max-width: 720px;
-  margin: 20px 0 0;
-  color: var(--muted-strong);
+  max-width: 640px;
+  margin: 16px 0 0;
+  color: var(--muted);
   font-size: 1rem;
   line-height: 1.65;
 }
 
 .panel {
-  margin-top: 28px;
-  padding: 24px;
-  border: 1px solid var(--glass-border);
-  border-radius: 8px;
-  background: var(--glass-background);
-  box-shadow: var(--glass-shadow);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
+  margin-top: 40px;
+  padding: 32px;
+  border: 1px solid var(--border-soft);
+  border-radius: 20px;
+  background: var(--surface);
 }
 
 .form {
@@ -88,30 +68,40 @@
   gap: 22px;
 }
 
+.sectionLabel {
+  margin: 0;
+  font-family: var(--font-mono), monospace;
+  font-size: 0.88rem;
+  color: var(--accent);
+}
+
 .avatarField {
   display: grid;
-  grid-template-columns: 128px minmax(0, 1fr);
-  gap: 18px;
+  grid-template-columns: 240px minmax(0, 1fr);
+  gap: 24px;
   align-items: start;
-  padding-bottom: 22px;
-  border-bottom: 1px solid var(--glass-border);
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--border-soft);
 }
 
 .avatarPreview {
   display: grid;
-  width: 128px;
-  height: 128px;
+  width: 240px;
+  aspect-ratio: 240 / 280;
   place-items: center;
   overflow: hidden;
-  border: 1px solid var(--glass-border);
-  border-radius: 8px;
-  background: var(--glass-background-strong);
-  color: var(--accent-strong);
-  font-size: 0.875rem;
-  font-weight: 800;
+  border-radius: 10px;
+  background: repeating-linear-gradient(
+    45deg,
+    var(--surface-strong),
+    var(--surface-strong) 10px,
+    var(--surface-soft) 10px,
+    var(--surface-soft) 20px
+  );
+  color: var(--faint);
+  font-family: var(--font-mono), monospace;
+  font-size: 0.82rem;
   text-align: center;
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
 }
 
 .avatarPreview img {
@@ -122,7 +112,7 @@
 
 .avatarControls {
   display: grid;
-  gap: 8px;
+  gap: 10px;
 }
 
 .fieldGrid {
@@ -137,73 +127,71 @@
 }
 
 .label {
-  color: var(--foreground);
-  font-size: 0.925rem;
-  font-weight: 800;
+  color: var(--faint);
+  font-family: var(--font-mono), monospace;
+  font-size: 0.82rem;
+  text-transform: lowercase;
 }
 
 .input {
   width: 100%;
   min-height: 46px;
-  padding: 0 14px;
-  border: 1px solid var(--glass-border);
-  border-radius: 8px;
-  background: var(--glass-background-strong);
+  padding: 0 16px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface-soft);
   color: var(--foreground);
   outline: none;
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
 }
 
 .textarea {
   min-height: 168px;
-  padding: 12px 14px;
+  padding: 13px 16px;
   resize: vertical;
   line-height: 1.55;
 }
 
 .input::placeholder {
-  color: var(--muted);
+  color: var(--faint);
 }
 
 .input:focus {
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px var(--focus-ring);
 }
 
 .input:disabled {
   cursor: not-allowed;
-  opacity: 0.7;
+  opacity: 0.6;
 }
 
 .input[aria-invalid="true"] {
-  border-color: #c7362f;
+  border-color: var(--danger);
 }
 
 .fileInput {
   width: 100%;
   min-height: 46px;
   padding: 10px 12px;
-  border: 1px solid var(--glass-border);
-  border-radius: 8px;
-  background: var(--glass-background-strong);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface-soft);
   color: var(--foreground);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
+  font-family: var(--font-mono), monospace;
+  font-size: 0.85rem;
 }
 
 .fileInput:disabled {
   cursor: not-allowed;
-  opacity: 0.7;
+  opacity: 0.6;
 }
 
 .fileInput[aria-invalid="true"] {
-  border-color: #c7362f;
+  border-color: var(--danger);
 }
 
 .helpText {
   margin: 0;
-  color: var(--muted-strong);
+  color: var(--muted);
   font-size: 0.875rem;
   line-height: 1.4;
 }
@@ -224,7 +212,7 @@
 
 .fieldError {
   margin: 0;
-  color: #991b1b;
+  color: var(--danger);
   font-size: 0.875rem;
   line-height: 1.4;
 }
@@ -232,22 +220,22 @@
 .successMessage,
 .errorMessage {
   margin: 0;
-  padding: 12px 14px;
-  border-radius: 8px;
+  padding: 12px 16px;
+  border-radius: 6px;
   font-size: 0.925rem;
   line-height: 1.4;
 }
 
 .successMessage {
-  border: 1px solid rgba(15, 118, 110, 0.22);
-  background: rgba(45, 212, 191, 0.1);
-  color: #0f766e;
+  border: 1px solid color-mix(in srgb, var(--success) 35%, transparent);
+  background: color-mix(in srgb, var(--success) 10%, transparent);
+  color: var(--success);
 }
 
 .errorMessage {
-  border: 1px solid rgba(153, 27, 27, 0.24);
-  background: rgba(248, 113, 113, 0.12);
-  color: #991b1b;
+  border: 1px solid color-mix(in srgb, var(--danger) 35%, transparent);
+  background: color-mix(in srgb, var(--danger) 10%, transparent);
+  color: var(--danger);
 }
 
 .actions {
@@ -257,23 +245,29 @@
 
 .submitButton {
   min-height: 46px;
-  padding: 0 18px;
+  padding: 0 28px;
   border: 0;
-  border-radius: 8px;
+  border-radius: 6px;
   background: var(--accent);
   color: var(--accent-foreground);
   cursor: pointer;
-  font-weight: 800;
+  font-weight: 600;
+  transition: transform 180ms ease;
+}
+
+.submitButton:hover {
+  transform: translateY(-1px);
 }
 
 .submitButton:disabled {
   cursor: wait;
-  opacity: 0.78;
+  opacity: 0.6;
+  transform: none;
 }
 
 @media (max-width: 760px) {
-  .page {
-    padding: 18px 16px 44px;
+  .main {
+    padding: 0 20px 40px;
   }
 
   .avatarField {

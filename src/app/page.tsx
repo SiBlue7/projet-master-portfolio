@@ -1,31 +1,17 @@
 import { Buffer } from "node:buffer";
-import {
-  isDefinedProjectTag,
-  PROJECT_STATUS_LABELS,
-  type ProjectStatus,
-} from "@/lib/projects";
-import {
-  PROFILE_TIMELINE_ITEM_TYPE_LABELS,
-  PROFILE_TIMELINE_ITEM_TYPES,
-  type ProfileTimelineItemType,
-} from "@/lib/profile-timeline";
+import Link from "next/link";
 import { PUBLIC_PROFILE_ID } from "@/lib/public-profile";
 import { prisma } from "@/lib/prisma";
 import styles from "./page.module.css";
-import {
-  PublicProjectShowcase,
-  type PublicProjectCardViewModel,
-} from "./public-project-showcase";
-import { PublicTimelineGroup } from "./public-timeline-group";
-import { GitHubIcon, LinkedInIcon } from "./social-icons";
+import { ScrollReveal } from "./scroll-reveal";
 import { ThemeToggle } from "./theme-toggle";
 
 export const dynamic = "force-dynamic";
 
 const fallbackProfile = {
-  displayName: "Portfolio technique",
-  headline: "Cybersécurité, développement fullstack et projets techniques",
-  bio: "Bienvenue sur mon portfolio. Cette page évoluera avec mes projets, mon parcours et les expériences que je souhaite mettre en avant.",
+  displayName: "Enzo Chevalier",
+  headline: "fullstack & cybersécurité.",
+  bio: "Je conçois des applications complètes et sécurisées — du schéma de base de données au déploiement CI/CD. Ce portfolio est lui-même piloté par un dashboard privé que j'ai développé.",
   contactEmail: "admin@example.com",
   githubUrl: null,
   linkedinUrl: null,
@@ -33,13 +19,17 @@ const fallbackProfile = {
   avatarMimeType: null,
 };
 
-const highlights = [
-  { label: "Domaine", value: "Cybersécurité" },
-  { label: "Approche", value: "Fullstack" },
-  { label: "Déploiement", value: "CI/CD" },
+// ponytail: liste en dur (cf. handoff) — brancher sur les stacks en base si besoin.
+const skills = [
+  "TypeScript",
+  "Next.js",
+  "Prisma",
+  "PostgreSQL",
+  "Docker",
+  "CI/CD",
+  "Sécurité applicative",
+  "Cloudflare",
 ];
-
-const identityTags = ["Next.js", "Prisma", "Docker", "Cloudflare"];
 
 const monthYearFormatter = new Intl.DateTimeFormat("fr-FR", {
   month: "long",
@@ -47,136 +37,51 @@ const monthYearFormatter = new Intl.DateTimeFormat("fr-FR", {
   year: "numeric",
 });
 
-type PublicTimelineItem = {
-  id: string;
-  type: ProfileTimelineItemType;
-  title: string;
-  organization: string;
-  location: string | null;
-  description: string | null;
-  startDate: Date | null;
-  endDate: Date | null;
-  isCurrent: boolean;
-};
-
-type PublicProject = {
-  id: string;
-  title: string;
-  slug: string;
-  shortDescription: string;
-  status: ProjectStatus;
-  showTechnologies: boolean;
-  showExternalLinks: boolean;
-  showMedia: boolean;
-  showMetadata: boolean;
-  repositoryUrl: string | null;
-  demoUrl: string | null;
-  startedAt: Date | null;
-  endedAt: Date | null;
-  media: {
-    id: string;
-    altText: string | null;
-    imageData: Uint8Array;
-    mimeType: string;
-  }[];
-  stacks: {
-    stack: {
-      label: string;
-      slug: string;
-    };
-  }[];
-  tags: {
-    tag: {
-      label: string;
-      slug: string;
-    };
-  }[];
-};
-
-function getInitials(displayName: string) {
-  const initials = displayName
-    .split(" ")
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part.at(0))
-    .join("");
-
-  return initials || "EC";
-}
-
-function createAvatarUrl(
-  avatarData: Uint8Array | null,
-  avatarMimeType: string | null,
-) {
-  if (!avatarData || !avatarMimeType) {
+function createDataUrl(data: Uint8Array | null, mimeType: string | null) {
+  if (!data || !mimeType) {
     return null;
   }
 
-  return `data:${avatarMimeType};base64,${Buffer.from(avatarData).toString(
-    "base64",
-  )}`;
+  return `data:${mimeType};base64,${Buffer.from(data).toString("base64")}`;
 }
 
-function createProjectMediaUrl(imageData: Uint8Array, mimeType: string) {
-  return `data:${mimeType};base64,${Buffer.from(imageData).toString("base64")}`;
-}
-
-function formatTimelineDate(date: Date | null) {
+function formatDate(date: Date | null) {
   if (!date) {
     return null;
   }
 
-  const formattedDate = monthYearFormatter.format(date);
+  const formatted = monthYearFormatter.format(date);
 
-  return formattedDate.charAt(0).toUpperCase() + formattedDate.slice(1);
+  return formatted.charAt(0).toUpperCase() + formatted.slice(1);
 }
 
-function formatPublicTimelinePeriod(item: PublicTimelineItem) {
-  const startDate = formatTimelineDate(item.startDate);
-  const endDate = item.isCurrent
-    ? "Aujourd'hui"
-    : formatTimelineDate(item.endDate);
+function formatPeriod(
+  startDate: Date | null,
+  endDate: Date | null,
+  isCurrent: boolean,
+) {
+  const start = formatDate(startDate);
+  const end = isCurrent ? "Aujourd'hui" : formatDate(endDate);
 
-  if (startDate && endDate) {
-    return `${startDate} - ${endDate}`;
+  if (start && end) {
+    return `${start} - ${end}`;
   }
 
-  if (startDate) {
-    return `Depuis ${startDate}`;
+  if (start) {
+    return `Depuis ${start}`;
   }
 
-  if (endDate) {
-    return endDate;
+  if (end) {
+    return end;
   }
 
   return "Période à préciser";
 }
 
-function formatPublicProjectPeriod(project: PublicProject) {
-  const startedAt = formatTimelineDate(project.startedAt);
-  const endedAt = formatTimelineDate(project.endedAt);
-
-  if (startedAt && endedAt) {
-    return `${startedAt} - ${endedAt}`;
-  }
-
-  if (startedAt) {
-    return `Depuis ${startedAt}`;
-  }
-
-  if (endedAt) {
-    return `Jusqu'à ${endedAt}`;
-  }
-
-  return "Dates à préciser";
-}
-
 export default async function Home() {
   const [profile, timelineItems, projects] = await Promise.all([
     prisma.publicProfile.findUnique({
-      where: {
-        id: PUBLIC_PROFILE_ID,
-      },
+      where: { id: PUBLIC_PROFILE_ID },
       select: {
         displayName: true,
         headline: true,
@@ -190,22 +95,14 @@ export default async function Home() {
     }),
     prisma.profileTimelineItem.findMany({
       orderBy: [
-        {
-          sortOrder: "asc",
-        },
-        {
-          startDate: "desc",
-        },
-        {
-          createdAt: "desc",
-        },
+        { sortOrder: "asc" },
+        { startDate: "desc" },
+        { createdAt: "desc" },
       ],
       select: {
         id: true,
-        type: true,
         title: true,
         organization: true,
-        location: true,
         description: true,
         startDate: true,
         endDate: true,
@@ -213,191 +110,74 @@ export default async function Home() {
       },
     }),
     prisma.project.findMany({
-      where: {
-        visibility: "PUBLIC",
-      },
-      orderBy: [
-        {
-          startedAt: "desc",
-        },
-        {
-          createdAt: "desc",
-        },
-      ],
+      where: { visibility: "PUBLIC" },
+      orderBy: [{ startedAt: "desc" }, { createdAt: "desc" }],
       select: {
         id: true,
         title: true,
         slug: true,
         shortDescription: true,
-        status: true,
         showTechnologies: true,
         showExternalLinks: true,
         showMedia: true,
-        showMetadata: true,
         repositoryUrl: true,
         demoUrl: true,
-        startedAt: true,
-        endedAt: true,
         media: {
-          orderBy: [
-            {
-              sortOrder: "asc",
-            },
-            {
-              createdAt: "asc",
-            },
-          ],
-          select: {
-            id: true,
-            altText: true,
-            imageData: true,
-            mimeType: true,
-          },
+          orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
+          take: 1,
+          select: { id: true, altText: true, imageData: true, mimeType: true },
         },
         stacks: {
-          orderBy: {
-            stack: {
-              label: "asc",
-            },
-          },
-          select: {
-            stack: {
-              select: {
-                label: true,
-                slug: true,
-              },
-            },
-          },
-        },
-        tags: {
-          orderBy: {
-            tag: {
-              label: "asc",
-            },
-          },
-          select: {
-            tag: {
-              select: {
-                label: true,
-                slug: true,
-              },
-            },
-          },
+          orderBy: { stack: { label: "asc" } },
+          select: { stack: { select: { label: true } } },
         },
       },
     }),
   ]);
-  const timelineGroups = PROFILE_TIMELINE_ITEM_TYPES.map((type) => ({
-    type,
-    items: timelineItems
-      .filter((item) => item.type === type)
-      .map((item) => ({
-        id: item.id,
-        title: item.title,
-        organization: item.organization,
-        location: item.location,
-        description: item.description,
-        period: formatPublicTimelinePeriod(item),
-      })),
-    label: PROFILE_TIMELINE_ITEM_TYPE_LABELS[type],
-  })).filter((group) => group.items.length > 0);
-  const hasTimelineItems = timelineGroups.length > 0;
+
   const publicProfile = profile ?? fallbackProfile;
-  const initials = getInitials(publicProfile.displayName);
-  const avatarUrl = createAvatarUrl(
+  const avatarUrl = createDataUrl(
     publicProfile.avatarData,
     publicProfile.avatarMimeType,
   );
-  const publicProjects: PublicProjectCardViewModel[] = projects.map(
-    (project) => {
-      return {
-        id: project.id,
-        title: project.title,
-        slug: project.slug,
-        shortDescription: project.shortDescription,
-        statusLabel: project.showMetadata
-          ? PROJECT_STATUS_LABELS[project.status]
-          : null,
-        period: project.showMetadata
-          ? formatPublicProjectPeriod(project)
-          : null,
-        repositoryUrl: project.showExternalLinks ? project.repositoryUrl : null,
-        demoUrl: project.showExternalLinks ? project.demoUrl : null,
-        media: project.showMedia
-          ? project.media.map((media) => ({
-              id: media.id,
-              altText: media.altText || `Capture du projet ${project.title}`,
-              src: createProjectMediaUrl(media.imageData, media.mimeType),
-            }))
-          : [],
-        stacks: project.showTechnologies
-          ? project.stacks.map(({ stack }) => stack)
-          : [],
-        tags: project.tags.map(({ tag }) => tag).filter(isDefinedProjectTag),
-      };
-    },
-  );
-  const heroStats = [
-    {
-      label: "Projets",
-      value: publicProjects.length.toString(),
-      detail: "publics",
-    },
-    {
-      label: "Parcours",
-      value: timelineItems.length.toString(),
-      detail: "étapes",
-    },
-    {
-      label: "Focus",
-      value: "Fullstack",
-      detail: "sécurité",
-    },
-  ];
 
   return (
     <main className={styles.page}>
-      <nav
-        className={styles.anchorNav}
-        aria-label="Navigation de la page d'accueil"
-      >
-        <div className={styles.anchorLinks}>
-          <a href="#accueil">Accueil</a>
-          <a href="#projets">Projets</a>
-          {hasTimelineItems ? <a href="#parcours">Parcours</a> : null}
-          <a href="/statistics">Statistiques</a>
-          <a href="#contact">Contact</a>
+      <ScrollReveal />
+      <nav className={styles.nav} aria-label="Navigation principale">
+        <Link className={styles.brand} href="/">
+          enzo<span>@portfolio:~$</span>
+        </Link>
+        <div className={styles.navLinks}>
+          <a href="#projets">./projets</a>
+          <a href="#parcours">./parcours</a>
+          <a href="/statistics">./stats</a>
+          <a href="#contact">./contact</a>
+          <ThemeToggle />
         </div>
-        <ThemeToggle />
       </nav>
 
       <section
-        id="accueil"
         className={styles.hero}
+        id="accueil"
         aria-labelledby="home-title"
       >
-        <div className={styles.content}>
-          <div className={styles.heroKicker}>
-            <span className={styles.kickerDot} aria-hidden="true" />
-            <span>Portfolio M2 Cyber</span>
-            <span className={styles.kickerSeparator} aria-hidden="true" />
-            <span>Fullstack & sécurité</span>
-          </div>
+        <div>
+          <p className={styles.heroStatus}>
+            <span className={styles.heroStatusDot} aria-hidden="true">
+              ●
+            </span>{" "}
+            M2 Cyber — open to work / à l&apos;écoute d&apos;opportunités
+          </p>
           <h1 id="home-title" className={styles.title}>
             {publicProfile.displayName}
+            <br />
+            <span className={styles.titleAccent}>{publicProfile.headline}</span>
           </h1>
-          <p className={styles.headline}>{publicProfile.headline}</p>
           <p className={styles.description}>{publicProfile.bio}</p>
-
-          <div className={styles.actions} aria-label="Liens de contact">
-            <a
-              className={styles.primaryAction}
-              href={`mailto:${publicProfile.contactEmail}`}
-            >
-              Me contacter
-            </a>
-            <a className={styles.secondaryAction} href="/statistics">
-              Statistiques
+          <div className={styles.actions}>
+            <a className={styles.primaryAction} href="#projets">
+              Voir mes projets ↓
             </a>
             {publicProfile.githubUrl ? (
               <a
@@ -406,230 +186,187 @@ export default async function Home() {
                 rel="noreferrer"
                 target="_blank"
               >
-                <GitHubIcon className={styles.linkIcon} />
-                GitHub
-              </a>
-            ) : null}
-            {publicProfile.linkedinUrl ? (
-              <a
-                className={styles.secondaryAction}
-                href={publicProfile.linkedinUrl}
-                rel="noreferrer"
-                target="_blank"
-              >
-                <LinkedInIcon className={styles.linkIcon} />
-                LinkedIn
+                github ↗
               </a>
             ) : null}
           </div>
-
-          <dl className={styles.heroStats} aria-label="Repères du portfolio">
-            {heroStats.map((stat) => (
-              <div className={styles.heroStat} key={stat.label}>
-                <dt>{stat.label}</dt>
-                <dd>
-                  <strong>{stat.value}</strong>
-                  <span>{stat.detail}</span>
-                </dd>
-              </div>
-            ))}
-          </dl>
         </div>
-
-        <aside className={styles.profileCard} aria-label="Résumé du profil">
-          <div className={styles.profileCardHeader}>
+        <div className={styles.heroPortrait}>
+          <div className={styles.portraitFrame}>
             {avatarUrl ? (
-              <div className={styles.avatar}>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  alt={`Avatar de ${publicProfile.displayName}`}
-                  src={avatarUrl}
-                />
-              </div>
-            ) : (
-              <div className={styles.avatar} aria-hidden="true">
-                {initials}
-              </div>
-            )}
-            <div>
-              <p className={styles.cardLabel}>Profil public</p>
-              <p className={styles.cardName}>{publicProfile.displayName}</p>
-              <p className={styles.cardHeadline}>{publicProfile.headline}</p>
-            </div>
-          </div>
-
-          <div
-            className={styles.identityScreen}
-            aria-label="Identité technique"
-          >
-            <div className={styles.identityScreenBar} aria-hidden="true">
-              <span />
-              <span />
-              <span />
-            </div>
-            <dl className={styles.identityLines}>
-              <div>
-                <dt>focus</dt>
-                <dd>cybersécurité applicative</dd>
-              </div>
-              <div>
-                <dt>build</dt>
-                <dd>interfaces admin & publiques</dd>
-              </div>
-              <div>
-                <dt>deploy</dt>
-                <dd>CI/CD, préprod, monitoring</dd>
-              </div>
-            </dl>
-            <div className={styles.identityTags} aria-label="Technologies clés">
-              {identityTags.map((tag) => (
-                <span key={tag}>{tag}</span>
-              ))}
-            </div>
-          </div>
-
-          <dl className={styles.contactList}>
-            <div>
-              <dt>E-mail</dt>
-              <dd>
-                <a href={`mailto:${publicProfile.contactEmail}`}>
-                  {publicProfile.contactEmail}
-                </a>
-              </dd>
-            </div>
-            {publicProfile.githubUrl ? (
-              <div>
-                <dt>GitHub</dt>
-                <dd>
-                  <a
-                    href={publicProfile.githubUrl}
-                    rel="noreferrer"
-                    target="_blank"
-                  >
-                    {publicProfile.githubUrl}
-                  </a>
-                </dd>
-              </div>
-            ) : null}
-            {publicProfile.linkedinUrl ? (
-              <div>
-                <dt>LinkedIn</dt>
-                <dd>
-                  <a
-                    href={publicProfile.linkedinUrl}
-                    rel="noreferrer"
-                    target="_blank"
-                  >
-                    {publicProfile.linkedinUrl}
-                  </a>
-                </dd>
-              </div>
-            ) : null}
-          </dl>
-        </aside>
-      </section>
-
-      <section className={styles.band} aria-label="Points forts">
-        {highlights.map((item) => (
-          <div className={styles.highlightItem} key={item.label}>
-            <span className={styles.highlightLabel}>{item.label}</span>
-            <span className={styles.highlightValue}>{item.value}</span>
-          </div>
-        ))}
-      </section>
-
-      <PublicProjectShowcase projects={publicProjects} sectionId="projets" />
-
-      {hasTimelineItems ? (
-        <section
-          id="parcours"
-          className={styles.timelineSection}
-          aria-labelledby="timeline-title"
-        >
-          <div className={styles.timelineSectionHeader}>
-            <p className={styles.sectionEyebrow}>Parcours</p>
-            <div>
-              <h2 id="timeline-title" className={styles.timelineSectionTitle}>
-                Un profil construit par l&apos;expérience, la formation et la
-                pratique
-              </h2>
-              <p className={styles.timelineSectionIntro}>
-                Les étapes clés sont organisées par type pour retrouver
-                rapidement le cursus, les expériences et les validations
-                techniques.
-              </p>
-            </div>
-          </div>
-
-          <div className={styles.timelineGroups}>
-            {timelineGroups.map((group) => (
-              <PublicTimelineGroup
-                items={group.items}
-                key={group.type}
-                label={group.label}
-                type={group.type}
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                alt={`Portrait de ${publicProfile.displayName}`}
+                src={avatarUrl}
               />
+            ) : null}
+          </div>
+          {avatarUrl ? null : (
+            <p className={styles.portraitCaption}>
+              {"// portrait — à renseigner depuis le dashboard"}
+            </p>
+          )}
+        </div>
+      </section>
+
+      <section
+        className={styles.section}
+        data-reveal=""
+        id="projets"
+        aria-labelledby="projects-label"
+      >
+        <p className={styles.sectionLabel} id="projects-label">
+          01 — projets / projects
+        </p>
+        <div className={styles.projectList}>
+          {projects.map((project, index) => {
+            const media = project.showMedia ? project.media.at(0) : undefined;
+            const mediaUrl = media
+              ? createDataUrl(media.imageData, media.mimeType)
+              : null;
+
+            return (
+              <article className={styles.projectCard} key={project.id}>
+                <span className={styles.projectIndex} aria-hidden="true">
+                  /{String(index + 1).padStart(2, "0")}
+                </span>
+                <div>
+                  <h2 className={styles.projectTitle}>{project.title}</h2>
+                  <p className={styles.projectDescription}>
+                    {project.shortDescription}
+                  </p>
+                  {project.showTechnologies && project.stacks.length > 0 ? (
+                    <p className={styles.projectStacks}>
+                      {project.stacks
+                        .map(({ stack }) => stack.label.toLowerCase())
+                        .join(" · ")}
+                    </p>
+                  ) : null}
+                  <div className={styles.projectLinks}>
+                    <Link href={`/projects/${project.slug}`}>
+                      voir le projet →
+                    </Link>
+                    {project.showExternalLinks && project.repositoryUrl ? (
+                      <a
+                        href={project.repositoryUrl}
+                        rel="noreferrer"
+                        target="_blank"
+                      >
+                        github ↗
+                      </a>
+                    ) : null}
+                    {project.showExternalLinks && project.demoUrl ? (
+                      <a href={project.demoUrl} rel="noreferrer" target="_blank">
+                        démo ↗
+                      </a>
+                    ) : null}
+                  </div>
+                </div>
+                {mediaUrl ? (
+                  <div className={styles.projectMedia}>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      alt={
+                        media?.altText || `Capture du projet ${project.title}`
+                      }
+                      src={mediaUrl}
+                    />
+                  </div>
+                ) : (
+                  <div className={styles.projectMediaEmpty} aria-hidden="true">
+                    capture d&apos;écran du projet
+                  </div>
+                )}
+              </article>
+            );
+          })}
+        </div>
+      </section>
+
+      <section
+        className={styles.section}
+        data-reveal=""
+        aria-labelledby="skills-label"
+      >
+        <p className={styles.sectionLabel} id="skills-label">
+          02 — compétences / skills
+        </p>
+        <div className={styles.skills}>
+          {skills.map((skill) => (
+            <span className={styles.skill} key={skill}>
+              {skill}
+            </span>
+          ))}
+        </div>
+      </section>
+
+      <div className={styles.split} id="parcours">
+        <section
+          className={styles.splitLeft}
+          data-reveal=""
+          aria-labelledby="timeline-label"
+        >
+          <p className={styles.sectionLabel} id="timeline-label">
+            03 — parcours / timeline
+          </p>
+          <div className={styles.timeline}>
+            {timelineItems.map((item) => (
+              <div className={styles.timelineItem} key={item.id}>
+                <span className={styles.timelinePeriod}>
+                  {formatPeriod(item.startDate, item.endDate, item.isCurrent)}
+                </span>
+                <div>
+                  <h3 className={styles.timelineTitle}>{item.title}</h3>
+                  <p className={styles.timelineMeta}>
+                    {item.organization}
+                    {item.description ? ` — ${item.description}` : null}
+                  </p>
+                </div>
+              </div>
             ))}
           </div>
         </section>
-      ) : null}
 
-      <footer
-        id="contact"
-        className={styles.contactSection}
-        aria-labelledby="contact-title"
-      >
-        <div className={styles.contactMain}>
-          <div className={styles.contactContent}>
-            <p className={styles.footerEyebrow}>Contact</p>
-            <h2 id="contact-title" className={styles.contactTitle}>
-              Échanger autour d&apos;une opportunité, d&apos;un projet ou
-              d&apos;un retour technique
-            </h2>
-            <p className={styles.contactDescription}>
-              Le moyen le plus direct reste l&apos;e-mail. Les profils GitHub et
-              LinkedIn permettent aussi de retrouver mon travail et mon
-              parcours.
+        <section
+          className={styles.splitRight}
+          data-reveal=""
+          id="contact"
+          aria-labelledby="contact-label"
+        >
+          <div>
+            <p className={styles.sectionLabel} id="contact-label">
+              04 — contact
             </p>
+            <h2 className={styles.contactTitle}>
+              Une opportunité, un projet, un retour technique&nbsp;?{" "}
+              <span className={styles.titleAccent}>Écris-moi.</span>
+            </h2>
           </div>
-
-          <div className={styles.contactActions}>
-            <a
-              className={styles.contactPrimary}
-              href={`mailto:${publicProfile.contactEmail}`}
-            >
-              {publicProfile.contactEmail}
+          <div className={styles.contactLinks}>
+            <a href={`mailto:${publicProfile.contactEmail}`}>
+              → {publicProfile.contactEmail}
             </a>
             {publicProfile.githubUrl ? (
-              <a
-                className={styles.contactSecondary}
-                href={publicProfile.githubUrl}
-                rel="noreferrer"
-                target="_blank"
-              >
-                <GitHubIcon className={styles.linkIcon} />
-                GitHub
+              <a href={publicProfile.githubUrl} rel="noreferrer" target="_blank">
+                → {publicProfile.githubUrl.replace("https://", "")}
               </a>
             ) : null}
             {publicProfile.linkedinUrl ? (
               <a
-                className={styles.contactSecondary}
                 href={publicProfile.linkedinUrl}
                 rel="noreferrer"
                 target="_blank"
               >
-                <LinkedInIcon className={styles.linkIcon} />
-                LinkedIn
+                → {publicProfile.linkedinUrl.replace("https://", "")}
               </a>
             ) : null}
           </div>
-        </div>
+        </section>
+      </div>
 
-        <div className={styles.footerMeta}>
-          <span>{publicProfile.displayName}</span>
-          <span>Portfolio technique M2 Cyber</span>
-          <span>2026</span>
-        </div>
+      <footer className={styles.footer}>
+        <span>© 2026 — {publicProfile.displayName} · M2 Cyber</span>
+        <span>next.js · typescript · prisma · docker</span>
       </footer>
     </main>
   );

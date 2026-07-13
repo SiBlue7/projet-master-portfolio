@@ -1,10 +1,9 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { getServerSession, type Session } from "next-auth";
 import { Prisma } from "@/generated/prisma/client";
 import { writeAdminAuditLog } from "@/lib/admin-audit";
-import { authOptions } from "@/lib/auth";
+import { getAdminSession, sessionExpiredError } from "@/lib/admin-session";
 import { prisma } from "@/lib/prisma";
 import {
   parseRunbookEnvironmentFormData,
@@ -14,30 +13,6 @@ import {
   type RunbookFormState,
   type RunbookStepFormState,
 } from "@/lib/runbooks";
-
-type SessionErrorState = {
-  status: "error";
-  message: string;
-};
-
-async function ensureAdminSession(): Promise<Session | SessionErrorState> {
-  const session = await getServerSession(authOptions);
-
-  if (session) {
-    return session;
-  }
-
-  return {
-    status: "error",
-    message: "Votre session a expiré. Reconnectez-vous pour continuer.",
-  };
-}
-
-function isSessionError(
-  value: Session | SessionErrorState,
-): value is SessionErrorState {
-  return "status" in value;
-}
 
 async function revalidateRunbookPages(projectId: string | null) {
   revalidatePath("/admin/projects/[projectId]", "page");
@@ -119,10 +94,10 @@ export async function createRunbook(
   _previousState: RunbookFormState,
   formData: FormData,
 ): Promise<RunbookFormState> {
-  const session = await ensureAdminSession();
+  const session = await getAdminSession();
 
-  if (isSessionError(session)) {
-    return session;
+  if (!session) {
+    return sessionExpiredError;
   }
 
   const parsedRunbook = parseRunbookFormData(formData);
@@ -195,10 +170,10 @@ export async function updateRunbook(
   _previousState: RunbookFormState,
   formData: FormData,
 ): Promise<RunbookFormState> {
-  const session = await ensureAdminSession();
+  const session = await getAdminSession();
 
-  if (isSessionError(session)) {
-    return session;
+  if (!session) {
+    return sessionExpiredError;
   }
 
   const parsedRunbook = parseRunbookFormData(formData);
@@ -267,10 +242,10 @@ export async function deleteRunbook(
   void _previousState;
   void _formData;
 
-  const session = await ensureAdminSession();
+  const session = await getAdminSession();
 
-  if (isSessionError(session)) {
-    return session;
+  if (!session) {
+    return sessionExpiredError;
   }
 
   const projectId = await getRunbookProjectId(runbookId);
@@ -312,10 +287,10 @@ export async function createRunbookEnvironment(
   _previousState: RunbookEnvironmentFormState,
   formData: FormData,
 ): Promise<RunbookEnvironmentFormState> {
-  const session = await ensureAdminSession();
+  const session = await getAdminSession();
 
-  if (isSessionError(session)) {
-    return session;
+  if (!session) {
+    return sessionExpiredError;
   }
 
   const parsedEnvironment = parseRunbookEnvironmentFormData(formData);
@@ -383,10 +358,10 @@ export async function updateRunbookEnvironment(
   _previousState: RunbookEnvironmentFormState,
   formData: FormData,
 ): Promise<RunbookEnvironmentFormState> {
-  const session = await ensureAdminSession();
+  const session = await getAdminSession();
 
-  if (isSessionError(session)) {
-    return session;
+  if (!session) {
+    return sessionExpiredError;
   }
 
   const parsedEnvironment = parseRunbookEnvironmentFormData(formData);
@@ -467,10 +442,10 @@ export async function deleteRunbookEnvironment(
   void _previousState;
   void _formData;
 
-  const session = await ensureAdminSession();
+  const session = await getAdminSession();
 
-  if (isSessionError(session)) {
-    return session;
+  if (!session) {
+    return sessionExpiredError;
   }
 
   const environment = await prisma.runbookEnvironment.findUnique({
@@ -523,10 +498,10 @@ export async function createRunbookStep(
   _previousState: RunbookStepFormState,
   formData: FormData,
 ): Promise<RunbookStepFormState> {
-  const session = await ensureAdminSession();
+  const session = await getAdminSession();
 
-  if (isSessionError(session)) {
-    return session;
+  if (!session) {
+    return sessionExpiredError;
   }
 
   const parsedStep = parseRunbookStepFormData(formData);
@@ -599,10 +574,10 @@ export async function updateRunbookStep(
   _previousState: RunbookStepFormState,
   formData: FormData,
 ): Promise<RunbookStepFormState> {
-  const session = await ensureAdminSession();
+  const session = await getAdminSession();
 
-  if (isSessionError(session)) {
-    return session;
+  if (!session) {
+    return sessionExpiredError;
   }
 
   const parsedStep = parseRunbookStepFormData(formData);
@@ -689,10 +664,10 @@ export async function deleteRunbookStep(
   void _previousState;
   void _formData;
 
-  const session = await ensureAdminSession();
+  const session = await getAdminSession();
 
-  if (isSessionError(session)) {
-    return session;
+  if (!session) {
+    return sessionExpiredError;
   }
 
   const step = await prisma.runbookStep.findUnique({

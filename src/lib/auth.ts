@@ -17,27 +17,15 @@ const adminLoginRateLimit = {
   windowMs: 10 * 60 * 1000,
 } as const;
 
-const optionalCredential = z.string().trim().optional();
-
 const adminCredentialsSchema = z
   .object({
-    identifier: optionalCredential,
-    pseudo: optionalCredential,
-    email: optionalCredential,
+    identifier: z.string().trim().min(1),
     password: z.string().min(1),
   })
-  .transform(({ email, identifier, password, pseudo }) => {
-    const login = identifier || email || pseudo || "";
-
-    return {
-      login: login.includes("@") ? login.toLowerCase() : login,
-      password,
-    };
-  })
-  .refine(({ login }) => login.length > 0, {
-    message: "Pseudo or email is required.",
-    path: ["identifier"],
-  });
+  .transform(({ identifier, password }) => ({
+    login: identifier.includes("@") ? identifier.toLowerCase() : identifier,
+    password,
+  }));
 
 type AuthUserRecord = {
   id: string;
@@ -54,13 +42,8 @@ export type AuthenticatedAdmin = User & {
   role: UserRole;
 };
 
-type AuthDependencies = {
-  findUserByLogin: (login: string) => Promise<AuthUserRecord | null>;
-  comparePassword: (password: string, hash: string) => Promise<boolean>;
-};
-
 type AuthRequestLike = {
-  headers?: Headers | Record<string, string | string[] | undefined>;
+  headers?: Record<string, string | string[] | undefined>;
   socket?: {
     remoteAddress?: string;
   };
@@ -81,41 +64,32 @@ const authUserSelect = {
   role: true,
 } as const;
 
-const defaultAuthDependencies: AuthDependencies = {
-  async findUserByLogin(login) {
-    const findByEmail = () =>
-      prisma.user.findFirst({
-        where: {
-          email: {
-            equals: login,
-            mode: "insensitive",
-          },
+async function findUserByLogin(login: string): Promise<AuthUserRecord | null> {
+  const findByEmail = () =>
+    prisma.user.findFirst({
+      where: {
+        email: {
+          equals: login,
+          mode: "insensitive",
         },
-        select: authUserSelect,
-      });
+      },
+      select: authUserSelect,
+    });
 
-    const findByPseudo = () =>
-      prisma.user.findFirst({
-        where: {
-          pseudo: {
-            equals: login,
-            mode: "insensitive",
-          },
+  const findByPseudo = () =>
+    prisma.user.findFirst({
+      where: {
+        pseudo: {
+          equals: login,
+          mode: "insensitive",
         },
-        select: authUserSelect,
-      });
+      },
+      select: authUserSelect,
+    });
 
-    return login.includes("@")
-      ? ((await findByEmail()) ?? findByPseudo())
-      : ((await findByPseudo()) ?? findByEmail());
-  },
-  comparePassword: (password, hash) => bcrypt.compare(password, hash),
-};
-
-function isHeadersInstance(
-  headers: AuthRequestLike["headers"],
-): headers is Headers {
-  return typeof Headers !== "undefined" && headers instanceof Headers;
+  return login.includes("@")
+    ? ((await findByEmail()) ?? findByPseudo())
+    : ((await findByPseudo()) ?? findByEmail());
 }
 
 function getRequestHeader(request: AuthRequestLike | undefined, name: string) {
@@ -123,10 +97,6 @@ function getRequestHeader(request: AuthRequestLike | undefined, name: string) {
 
   if (!headers) {
     return null;
-  }
-
-  if (isHeadersInstance(headers)) {
-    return headers.get(name);
   }
 
   const value = headers[name.toLowerCase()] ?? headers[name];
@@ -163,11 +133,7 @@ function getLoginIdentifier(credentials: unknown) {
   }
 
   const credentialRecord = credentials as Record<string, unknown>;
-  const rawIdentifier =
-    credentialRecord.identifier ??
-    credentialRecord.email ??
-    credentialRecord.pseudo ??
-    "unknown";
+  const rawIdentifier = credentialRecord.identifier ?? "unknown";
 
   return String(rawIdentifier).trim().toLowerCase() || "unknown";
 }
@@ -243,7 +209,6 @@ export function resetAdminLoginRateLimit() {
 
 export async function verifyAdminCredentials(
   credentials: unknown,
-  dependencies: AuthDependencies = defaultAuthDependencies,
 ): Promise<AuthenticatedAdmin | null> {
   const parsedCredentials = adminCredentialsSchema.safeParse(credentials);
 
@@ -252,16 +217,13 @@ export async function verifyAdminCredentials(
   }
 
   const { login, password } = parsedCredentials.data;
-  const user = await dependencies.findUserByLogin(login);
+  const user = await findUserByLogin(login);
 
   if (!user) {
     return null;
   }
 
-  const isValidPassword = await dependencies.comparePassword(
-    password,
-    user.passwordHash,
-  );
+  const isValidPassword = await bcrypt.compare(password, user.passwordHash);
 
   if (!isValidPassword) {
     return null;
@@ -279,7 +241,6 @@ export async function verifyAdminCredentials(
 export async function authorizeAdminCredentials(
   credentials: unknown,
   request?: AuthRequestLike,
-  dependencies: AuthDependencies = defaultAuthDependencies,
 ) {
   const rateLimitKey = getRateLimitKey(credentials, request);
   const identifier = getLoginIdentifier(credentials);
@@ -303,7 +264,7 @@ export async function authorizeAdminCredentials(
     throw new Error(adminLoginRateLimitErrorCode);
   }
 
-  const user = await verifyAdminCredentials(credentials, dependencies);
+  const user = await verifyAdminCredentials(credentials);
 
   if (!user) {
     const isBlocked = registerFailedLoginAttempt(rateLimitKey);

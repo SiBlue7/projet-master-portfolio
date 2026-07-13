@@ -87,76 +87,74 @@ export default async function AdminLogsPage() {
       <AdminNavigation activeItem="logs" />
 
       <section className={styles.main} aria-labelledby="admin-logs-title">
-        <Link className={styles.backLink} href="/admin">
-          Retour à l&apos;administration
-        </Link>
+        <div className={styles.header}>
+          <div>
+            <Link className={styles.backLink} href="/admin">
+              ← retour au dashboard
+            </Link>
 
-        <p className={styles.eyebrow}>Traçabilité</p>
-        <h1 id="admin-logs-title" className={styles.title}>
-          Logs d&apos;activité
-        </h1>
-        <p className={styles.description}>
-          Suivez les dernières actions réalisées dans l&apos;administration du
-          portfolio.
-        </p>
+            <p className={styles.eyebrow}>~/admin/logs — tail -f audit.log</p>
+            <h1 id="admin-logs-title" className={styles.title}>
+              Logs d&apos;activité<span className={styles.titleDot}>.</span>
+            </h1>
+            <p className={styles.description}>
+              Suivez les dernières actions réalisées dans l&apos;administration
+              du portfolio.
+            </p>
+          </div>
 
-        <dl className={styles.statsGrid} aria-label="Synthèse des logs">
-          <div className={styles.statCard}>
-            <dt>Total</dt>
-            <dd>{logs.length}</dd>
-          </div>
-          <div className={styles.statCard}>
-            <dt>Succès</dt>
-            <dd>{successCount}</dd>
-          </div>
-          <div className={styles.statCard}>
-            <dt>Échecs</dt>
-            <dd>{failureCount}</dd>
-          </div>
-        </dl>
+          <dl className={styles.summaryPills} aria-label="Synthèse des logs">
+            <div className={styles.summaryPill}>
+              <dt>total</dt>
+              <dd>{logs.length}</dd>
+            </div>
+            <div className={styles.summaryPill} data-tone="success">
+              <dt>succès</dt>
+              <dd>{successCount}</dd>
+            </div>
+            <div className={styles.summaryPill} data-tone="danger">
+              <dt>échecs</dt>
+              <dd>{failureCount}</dd>
+            </div>
+          </dl>
+        </div>
 
         <section className={styles.panel} aria-labelledby="recent-logs-title">
-          <div className={styles.panelHeader}>
-            <div>
-              <h2 id="recent-logs-title" className={styles.panelTitle}>
-                Activité récente
-              </h2>
-              <p className={styles.panelDescription}>
-                Les 100 derniers événements enregistrés sont affichés ici.
-              </p>
-            </div>
-          </div>
+          <h2 id="recent-logs-title" className={styles.panelTitle}>
+            01 — activité récente / audit trail
+          </h2>
 
           {logs.length > 0 ? (
-            <div className={styles.logList}>
+            <div className={styles.logTable}>
+              <div className={styles.logHeadRow} aria-hidden="true">
+                <span>date</span>
+                <span>statut</span>
+                <span>événement</span>
+                <span>entité</span>
+                <span>acteur</span>
+              </div>
               {logs.map((log) => (
-                <article className={styles.logItem} key={log.id}>
-                  <div className={styles.logMain}>
-                    <div className={styles.logBadges}>
-                      <span className={styles.actionBadge}>
-                        {actionLabels[log.action]}
-                      </span>
-                      <span
-                        className={
-                          log.status === "SUCCESS"
-                            ? styles.successBadge
-                            : styles.failureBadge
-                        }
-                      >
-                        {statusLabels[log.status]}
-                      </span>
-                    </div>
-                    <h3 className={styles.logSummary}>{log.summary}</h3>
-                    <p className={styles.logMeta}>
-                      {getEntityLabel(log.entityType)}
-                      {log.entityId ? ` · ${log.entityId}` : ""}
-                    </p>
-                  </div>
-
-                  <div className={styles.logAside}>
-                    <span>{formatLogDate(log.createdAt)}</span>
-                    <span>{getActorLabel(log)}</span>
-                  </div>
+                <article className={styles.logRow} key={log.id}>
+                  <span className={styles.logDate}>
+                    {formatLogDate(log.createdAt)}
+                  </span>
+                  <span
+                    className={styles.logStatus}
+                    data-status={log.status}
+                  >
+                    {statusLabels[log.status]}
+                  </span>
+                  <span className={styles.logSummary}>
+                    {log.summary}{" "}
+                    <span className={styles.actionBadge}>
+                      {actionLabels[log.action]}
+                    </span>
+                  </span>
+                  <span className={styles.logEntity}>
+                    {getEntityLabel(log.entityType)}
+                    {log.entityId ? ` · ${log.entityId}` : ""}
+                  </span>
+                  <span className={styles.logActor}>{getActorLabel(log)}</span>
                 </article>
               ))}
             </div>

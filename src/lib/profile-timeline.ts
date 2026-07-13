@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { emptyToNull, optionalText, requiredText } from "@/lib/form-fields";
 
 export const PROFILE_TIMELINE_ITEM_TYPES = [
   "FORMATION",
@@ -17,41 +18,9 @@ export type ProfileTimelineItemType =
 
 const monthPattern = /^\d{4}-\d{2}$/;
 
-const requiredText = (label: string, maxLength: number) =>
-  z
-    .string()
-    .trim()
-    .min(1, `${label} est obligatoire.`)
-    .max(maxLength, `${label} doit contenir ${maxLength} caractères maximum.`);
-
-const optionalText = (label: string, maxLength: number) =>
-  z.preprocess(
-    (value) => {
-      if (typeof value !== "string") {
-        return null;
-      }
-
-      const trimmedValue = value.trim();
-
-      return trimmedValue.length > 0 ? trimmedValue : null;
-    },
-    z
-      .string()
-      .max(maxLength, `${label} doit contenir ${maxLength} caractères maximum.`)
-      .nullable(),
-  );
-
 const optionalMonth = (label: string) =>
   z.preprocess(
-    (value) => {
-      if (typeof value !== "string") {
-        return null;
-      }
-
-      const trimmedValue = value.trim();
-
-      return trimmedValue.length > 0 ? trimmedValue : null;
-    },
+    emptyToNull,
     z
       .string()
       .regex(monthPattern, `${label} doit respecter le format AAAA-MM.`)

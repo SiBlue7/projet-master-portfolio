@@ -65,12 +65,15 @@ export default async function AdminProjectsListPage() {
 
       <section className={styles.main} aria-labelledby="projects-list-title">
         <Link className={styles.backLink} href="/admin">
-          Retour au dashboard admin
+          ← retour au dashboard
         </Link>
 
-        <p className={styles.eyebrow}>Projets existants</p>
+        <p className={styles.eyebrow}>
+          ~/admin/projects — {projects.length} projet
+          {projects.length > 1 ? "s" : ""}
+        </p>
         <h1 id="projects-list-title" className={styles.title}>
-          Liste des projets
+          Liste des projets<span className={styles.titleDot}>.</span>
         </h1>
         <p className={styles.description}>
           Retrouvez rapidement un projet, son statut, sa visibilité et accédez à
@@ -79,24 +82,27 @@ export default async function AdminProjectsListPage() {
 
         <div className={styles.pageActions}>
           <Link className={styles.secondaryLink} href="/admin/projects">
-            Créer un projet
+            + Créer un projet
           </Link>
         </div>
 
-        <section className={styles.panel} aria-labelledby="existing-title">
+        <section aria-labelledby="existing-title">
           <h2 id="existing-title" className={styles.panelTitle}>
-            Projets renseignés
+            01 — projets / projects
           </h2>
 
           {projects.length > 0 ? (
             <div className={styles.projectList}>
-              {projects.map((project) => {
+              {projects.map((project, index) => {
                 const tags = project.tags
                   .map(({ tag }) => tag)
                   .filter(isDefinedProjectTag);
 
                 return (
                   <article className={styles.projectListItem} key={project.id}>
+                    <span className={styles.projectIndex} aria-hidden="true">
+                      /{String(index + 1).padStart(2, "0")}
+                    </span>
                     <div className={styles.projectSummaryMain}>
                       <span className={styles.projectSlug}>{project.slug}</span>
                       <h3 className={styles.projectTitle}>{project.title}</h3>
@@ -108,16 +114,12 @@ export default async function AdminProjectsListPage() {
                         {project._count.stacks > 1 ? "s" : ""} ·{" "}
                         {project._count.media} capture
                         {project._count.media > 1 ? "s" : ""}
+                        {tags.length > 0
+                          ? ` · tag : ${tags
+                              .map((tag) => tag.label.toLowerCase())
+                              .join(", ")}`
+                          : ""}
                       </span>
-                      {tags.length > 0 ? (
-                        <span className={styles.tagList}>
-                          {tags.map((tag) => (
-                            <span className={styles.tagBadge} key={tag.slug}>
-                              {tag.label}
-                            </span>
-                          ))}
-                        </span>
-                      ) : null}
                     </div>
 
                     <div className={styles.projectSummaryAside}>
@@ -131,7 +133,7 @@ export default async function AdminProjectsListPage() {
                         className={styles.detailLink}
                         href={`/admin/projects/${project.id}`}
                       >
-                        Détails
+                        détails →
                       </Link>
                     </div>
                   </article>

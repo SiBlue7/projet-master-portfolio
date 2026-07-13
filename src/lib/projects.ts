@@ -1,4 +1,10 @@
 import { z } from "zod";
+import {
+  checkboxField,
+  emptyToNull,
+  optionalUrl,
+  requiredText,
+} from "@/lib/form-fields";
 
 export const PROJECT_STATUSES = [
   "DRAFT",
@@ -42,49 +48,14 @@ export type ProjectVisibility = (typeof PROJECT_VISIBILITIES)[number];
 
 const slugPattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
-const requiredText = (label: string, maxLength: number) =>
-  z
-    .string()
-    .trim()
-    .min(1, `${label} est obligatoire.`)
-    .max(maxLength, `${label} doit contenir ${maxLength} caractères maximum.`);
-
-const optionalUrl = (label: string) =>
-  z.preprocess(
-    (value) => {
-      if (typeof value !== "string") {
-        return null;
-      }
-
-      const trimmedValue = value.trim();
-
-      return trimmedValue.length > 0 ? trimmedValue : null;
-    },
-    z
-      .string()
-      .url(`${label} doit être une URL valide.`)
-      .max(300, `${label} doit contenir 300 caractères maximum.`)
-      .nullable(),
-  );
-
 const optionalDate = (label: string) =>
   z.preprocess(
-    (value) => {
-      if (typeof value !== "string") {
-        return null;
-      }
-
-      const trimmedValue = value.trim();
-
-      return trimmedValue.length > 0 ? trimmedValue : null;
-    },
+    emptyToNull,
     z
       .string()
       .regex(/^\d{4}-\d{2}-\d{2}$/, `${label} doit être une date valide.`)
       .nullable(),
   );
-
-const checkboxField = z.preprocess((value) => value === "on", z.boolean());
 
 function dateInputToDate(dateValue: string | null) {
   if (!dateValue) {

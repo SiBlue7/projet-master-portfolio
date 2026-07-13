@@ -64,15 +64,15 @@ describe("AdminProjectsListPage", () => {
     render(await AdminProjectsListPage());
 
     expect(
-      screen.getByRole("heading", { name: "Liste des projets" }),
+      screen.getByRole("heading", { name: /Liste des projets/ }),
     ).toBeInTheDocument();
     expect(screen.getByText("Portfolio master")).toBeInTheDocument();
     expect(screen.getByText("portfolio-master")).toBeInTheDocument();
     expect(screen.getByText("Portfolio administrable.")).toBeInTheDocument();
-    expect(screen.getByText("3 technologies · 2 captures")).toBeInTheDocument();
+    expect(screen.getByText(/3 technologies · 2 captures/)).toBeInTheDocument();
     expect(screen.getAllByText("En cours").length).toBeGreaterThan(0);
     expect(screen.getByText("Public")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Détails" })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: "détails →" })).toHaveAttribute(
       "href",
       "/admin/projects/project-id",
     );

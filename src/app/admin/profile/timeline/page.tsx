@@ -77,16 +77,18 @@ export default async function AdminProfileTimelinePage() {
       <section className={styles.main} aria-labelledby="timeline-title">
         <div className={styles.navLinks}>
           <Link className={styles.backLink} href="/admin">
-            Retour au tableau de bord admin
+            ← retour au dashboard
           </Link>
           <Link className={styles.backLink} href="/admin/profile">
-            Retour au profil public
+            ← retour au profil
           </Link>
         </div>
 
-        <p className={styles.eyebrow}>Profil public</p>
+        <p className={styles.eyebrow}>
+          ~/admin/timeline — cat timeline.log
+        </p>
         <h1 id="timeline-title" className={styles.title}>
-          Parcours
+          Parcours<span className={styles.titleDot}>.</span>
         </h1>
         <p className={styles.description}>
           Gérez les formations, expériences et certifications qui composeront le

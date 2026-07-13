@@ -55,7 +55,7 @@ describe("AdminProfileTimelinePage", () => {
     render(await AdminProfileTimelinePage());
 
     expect(
-      screen.getByRole("heading", { name: "Parcours" }),
+      screen.getByRole("heading", { level: 1, name: /Parcours/ }),
     ).toBeInTheDocument();
     expect(
       screen.getByRole("heading", { name: "Ajouter un élément" }),

@@ -214,9 +214,9 @@ export default async function AdminPage() {
       <section className={styles.main} aria-labelledby="admin-title">
         <div className={styles.header}>
           <div>
-            <p className={styles.eyebrow}>Portfolio technique</p>
+            <p className={styles.eyebrow}>~/admin — dashboard</p>
             <h1 id="admin-title" className={styles.title}>
-              Administration
+              Administration<span className={styles.titleDot}>.</span>
             </h1>
             <p className={styles.description}>
               Connecté en tant que {session.user.pseudo}.
@@ -224,6 +224,7 @@ export default async function AdminPage() {
           </div>
         </div>
 
+        <p className={styles.sectionLabel}>01 — indicateurs / overview</p>
         <section className={styles.statsGrid} aria-label="Indicateurs rapides">
           {quickStats.map((stat) => (
             <article className={styles.statCard} key={stat.label}>
@@ -238,7 +239,9 @@ export default async function AdminPage() {
           <section className={styles.panel} aria-labelledby="shortcuts-title">
             <div className={styles.panelHeader}>
               <div>
-                <p className={styles.panelKicker}>Actions</p>
+                <p className={styles.panelKicker}>
+                  02 — raccourcis / shortcuts
+                </p>
                 <h2 id="shortcuts-title" className={styles.panelTitle}>
                   Raccourcis
                 </h2>
@@ -265,7 +268,9 @@ export default async function AdminPage() {
           <section className={styles.panel} aria-labelledby="attention-title">
             <div className={styles.panelHeader}>
               <div>
-                <p className={styles.panelKicker}>Qualité</p>
+                <p className={styles.panelKicker}>
+                  03 — à surveiller / quality
+                </p>
                 <h2 id="attention-title" className={styles.panelTitle}>
                   À surveiller
                 </h2>
@@ -292,7 +297,9 @@ export default async function AdminPage() {
           <section className={styles.panel} aria-labelledby="recent-projects">
             <div className={styles.panelHeader}>
               <div>
-                <p className={styles.panelKicker}>Contenu</p>
+                <p className={styles.panelKicker}>
+                  04 — projets récents / content
+                </p>
                 <h2 id="recent-projects" className={styles.panelTitle}>
                   Projets récents
                 </h2>
@@ -315,12 +322,14 @@ export default async function AdminPage() {
                     <span>
                       <strong>{project.title}</strong>
                       <small>
-                        Mis à jour le {formatAdminDate(project.updatedAt)}
+                        maj {formatAdminDate(project.updatedAt)}
                       </small>
                     </span>
                     <span className={styles.badgeGroup}>
-                      <span>{PROJECT_STATUS_LABELS[project.status]}</span>
-                      <span>
+                      <span data-badge={project.status}>
+                        {PROJECT_STATUS_LABELS[project.status]}
+                      </span>
+                      <span data-badge={project.visibility}>
                         {PROJECT_VISIBILITY_LABELS[project.visibility]}
                       </span>
                     </span>
@@ -337,7 +346,9 @@ export default async function AdminPage() {
           <section className={styles.panel} aria-labelledby="recent-activity">
             <div className={styles.panelHeader}>
               <div>
-                <p className={styles.panelKicker}>Audit</p>
+                <p className={styles.panelKicker}>
+                  05 — activité récente / audit
+                </p>
                 <h2 id="recent-activity" className={styles.panelTitle}>
                   Activité récente
                 </h2>
@@ -373,21 +384,32 @@ export default async function AdminPage() {
           </section>
 
           <section className={styles.panel} aria-labelledby="account-title">
-            <h2 id="account-title" className={styles.panelTitle}>
-              Compte administrateur
-            </h2>
+            <div className={styles.panelHeader}>
+              <div>
+                <p className={styles.panelKicker}>
+                  06 — compte administrateur / session
+                </p>
+                <h2 id="account-title" className={styles.panelTitle}>
+                  Compte administrateur
+                </h2>
+              </div>
+            </div>
             <dl className={styles.sessionList}>
               <div className={styles.sessionItem}>
-                <dt>Pseudo</dt>
+                <dt>pseudo</dt>
                 <dd>{session.user.pseudo}</dd>
               </div>
               <div className={styles.sessionItem}>
-                <dt>E-mail</dt>
+                <dt>e-mail</dt>
                 <dd>{adminEmail}</dd>
               </div>
               <div className={styles.sessionItem}>
-                <dt>Rôle</dt>
-                <dd>{session.user.role}</dd>
+                <dt>rôle</dt>
+                <dd className={styles.sessionRole}>{session.user.role}</dd>
+              </div>
+              <div className={styles.sessionItem}>
+                <dt>session</dt>
+                <dd className={styles.sessionActive}>● active</dd>
               </div>
             </dl>
           </section>
