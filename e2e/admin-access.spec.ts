@@ -35,7 +35,7 @@ test.describe("admin access control", () => {
       page.getByRole("link", { name: "Liste des projets" }),
     ).toBeVisible();
 
-    await page.getByRole("button", { name: /connecter/i }).click();
+    await page.getByRole("button", { name: "exit" }).click();
 
     await expect(page).toHaveURL(/\/admin\/login/);
     await expect(
