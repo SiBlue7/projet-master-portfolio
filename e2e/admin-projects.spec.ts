@@ -17,11 +17,11 @@ test.describe("admin project management", () => {
       "Ce projet sert a verifier le parcours de creation, la liste admin et la page publique.";
 
     await signInAsAdmin(page);
-    await page.getByRole("link", { name: "Nouveau projet" }).click();
+    await page.getByRole("link", { name: "Créer un projet" }).click();
 
     await expect(page).toHaveURL(/\/admin\/projects$/);
     await expect(
-      page.getByRole("heading", { name: "Gestion des projets" }),
+      page.getByRole("heading", { name: /Nouveau projet/ }),
     ).toBeVisible();
 
     const createForm = page.locator("form", {
@@ -44,9 +44,7 @@ test.describe("admin project management", () => {
 
     await expect(page.getByRole("status")).toBeVisible();
 
-    await page
-      .getByRole("link", { name: "Voir les projets existants" })
-      .click();
+    await page.getByRole("link", { name: /voir les projets/i }).click();
     await expect(page).toHaveURL(/\/admin\/projects\/list$/);
 
     const createdProject = page.locator("article", { hasText: title });

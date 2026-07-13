@@ -7,7 +7,7 @@ test.describe("admin login", () => {
     await page.goto("/admin/login");
 
     await expect(
-      page.getByRole("heading", { name: "Connexion administrateur" }),
+      page.getByRole("heading", { name: /Espace\s+administrateur\./ }),
     ).toBeVisible();
 
     const identifierInput = page.getByLabel("Pseudo ou adresse e-mail");

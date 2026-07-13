@@ -19,7 +19,7 @@ test.describe("admin access control", () => {
 
       await expect(page).toHaveURL(/\/admin\/login/);
       await expect(
-        page.getByRole("heading", { name: "Connexion administrateur" }),
+        page.getByRole("heading", { name: /Espace\s+administrateur\./ }),
       ).toBeVisible();
     });
   }
@@ -29,17 +29,17 @@ test.describe("admin access control", () => {
 
     await signInAsAdmin(page);
     await expect(
-      page.getByRole("link", { name: "Nouveau projet" }),
+      page.getByRole("link", { name: "Créer un projet" }),
     ).toBeVisible();
     await expect(
-      page.getByRole("link", { name: "Tous les projets" }),
+      page.getByRole("link", { name: "Liste des projets" }),
     ).toBeVisible();
 
     await page.getByRole("button", { name: /connecter/i }).click();
 
     await expect(page).toHaveURL(/\/admin\/login/);
     await expect(
-      page.getByRole("heading", { name: "Connexion administrateur" }),
+      page.getByRole("heading", { name: /Espace\s+administrateur\./ }),
     ).toBeVisible();
   });
 });
