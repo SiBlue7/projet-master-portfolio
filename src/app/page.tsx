@@ -256,7 +256,11 @@ export default async function Home() {
                       </a>
                     ) : null}
                     {project.showExternalLinks && project.demoUrl ? (
-                      <a href={project.demoUrl} rel="noreferrer" target="_blank">
+                      <a
+                        href={project.demoUrl}
+                        rel="noreferrer"
+                        target="_blank"
+                      >
                         démo ↗
                       </a>
                     ) : null}
@@ -347,7 +351,11 @@ export default async function Home() {
               → {publicProfile.contactEmail}
             </a>
             {publicProfile.githubUrl ? (
-              <a href={publicProfile.githubUrl} rel="noreferrer" target="_blank">
+              <a
+                href={publicProfile.githubUrl}
+                rel="noreferrer"
+                target="_blank"
+              >
                 → {publicProfile.githubUrl.replace("https://", "")}
               </a>
             ) : null}

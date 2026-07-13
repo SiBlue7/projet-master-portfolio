@@ -138,10 +138,7 @@ export default async function AdminLogsPage() {
                   <span className={styles.logDate}>
                     {formatLogDate(log.createdAt)}
                   </span>
-                  <span
-                    className={styles.logStatus}
-                    data-status={log.status}
-                  >
+                  <span className={styles.logStatus} data-status={log.status}>
                     {statusLabels[log.status]}
                   </span>
                   <span className={styles.logSummary}>

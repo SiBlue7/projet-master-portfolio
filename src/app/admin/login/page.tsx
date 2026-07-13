@@ -36,8 +36,8 @@ export default function AdminLoginPage() {
           <span className={styles.titleAccent}>administrateur.</span>
         </h1>
         <p className={styles.description}>
-          Espace réservé à la gestion du portfolio technique, des projets et
-          des données d&apos;exploitation.
+          Espace réservé à la gestion du portfolio technique, des projets et des
+          données d&apos;exploitation.
         </p>
 
         <div className={styles.panel}>

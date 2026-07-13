@@ -321,9 +321,7 @@ export default async function AdminPage() {
                   >
                     <span>
                       <strong>{project.title}</strong>
-                      <small>
-                        maj {formatAdminDate(project.updatedAt)}
-                      </small>
+                      <small>maj {formatAdminDate(project.updatedAt)}</small>
                     </span>
                     <span className={styles.badgeGroup}>
                       <span data-badge={project.status}>

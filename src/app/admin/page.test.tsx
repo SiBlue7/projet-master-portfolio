@@ -143,9 +143,7 @@ describe("AdminPage", () => {
     expect(screen.getByText("procédures actives")).toBeInTheDocument();
     expect(screen.getByText("admin@example.com")).toBeInTheDocument();
     expect(screen.getByText("ADMIN")).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: "exit" }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "exit" })).toBeInTheDocument();
     expect(
       screen
         .getAllByRole("link", { name: /Profil public/ })

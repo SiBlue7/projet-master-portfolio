@@ -84,9 +84,7 @@ export default async function AdminProfileTimelinePage() {
           </Link>
         </div>
 
-        <p className={styles.eyebrow}>
-          ~/admin/timeline — cat timeline.log
-        </p>
+        <p className={styles.eyebrow}>~/admin/timeline — cat timeline.log</p>
         <h1 id="timeline-title" className={styles.title}>
           Parcours<span className={styles.titleDot}>.</span>
         </h1>
