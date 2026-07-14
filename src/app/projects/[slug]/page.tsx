@@ -11,6 +11,8 @@ import {
   RUNBOOK_ENVIRONMENT_KIND_LABELS,
   RUNBOOK_STEP_TYPE_LABELS,
 } from "@/lib/runbooks";
+import { ScrollReveal } from "@/app/scroll-reveal";
+import { ThemeToggle } from "@/app/theme-toggle";
 import { ProjectMediaCarousel } from "./project-media-carousel";
 import styles from "./page.module.css";
 
@@ -223,12 +225,29 @@ export default async function ProjectDetailsPage({
 
   return (
     <main className={styles.page}>
+      <ScrollReveal />
+      <nav className={styles.nav} aria-label="Navigation principale">
+        <Link className={styles.brand} href="/">
+          enzo<span>@portfolio:~$</span>
+        </Link>
+        <div className={styles.navLinks}>
+          <Link href="/#projets">./projets</Link>
+          <Link href="/#parcours">./parcours</Link>
+          <Link href="/statistics">./stats</Link>
+          <Link href="/#contact">./contact</Link>
+          <ThemeToggle
+            buttonClassName={styles.themeToggleButton}
+            className={styles.themeToggle}
+          />
+        </div>
+      </nav>
+
       <section className={styles.hero} aria-labelledby="project-title">
         <div className={styles.content}>
           <Link className={styles.backLink} href="/">
-            Retour au portfolio
+            ← retour au portfolio
           </Link>
-          <p className={styles.eyebrow}>Projet public</p>
+          <p className={styles.eyebrow}>01 — projet / public</p>
           <h1 id="project-title" className={styles.title}>
             {project.title}
           </h1>
@@ -298,7 +317,11 @@ export default async function ProjectDetailsPage({
       </section>
 
       {hasDetailSections ? (
-        <section className={styles.details} aria-label="Détails du projet">
+        <section
+          className={styles.details}
+          data-reveal=""
+          aria-label="Détails du projet"
+        >
           {project.showMetadata ? (
             <div className={styles.metaGrid}>
               <div className={styles.metaItem}>
@@ -461,6 +484,11 @@ export default async function ProjectDetailsPage({
           ) : null}
         </section>
       ) : null}
+
+      <footer className={styles.footer}>
+        <span>© 2026 — {project.title} · portfolio</span>
+        <span>next.js · typescript · prisma · docker</span>
+      </footer>
     </main>
   );
 }
